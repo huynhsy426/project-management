@@ -6,7 +6,7 @@ const {
     searchProjects,
     deleteById,
     updateById
-} = require('../controller/project-controller');
+} = require('../controller/projectController');
 
 // getListPage
 router.get("/projectList", listProject)

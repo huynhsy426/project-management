@@ -1,42 +1,33 @@
 const UserModel = require('../models/userModel');
 
 
-const loginByUserService = (user_name, user_password, results) => {
+const loginByUserService = (username, userPassword, callback) => {
     UserModel.checkUserLogin(
-        user_name,
-        user_password,
-        function (err, result) {
-            console.log(result)
+        username,
+        userPassword,
+        function (err, isLogin, result) {
             if (err) {
-                return results(err, null)
+                return callback(err)
             }
-            return results(null, result)
+            if (isLogin) {
+                return callback(null, isLogin, result)
+            } else {
+                return callback(null, isLogin)
+            }
         }
     )
 }
 
 
-const createUserService = (users, results) => {
-    UserModel.isUserNameExist(
-        users.user_name,
+const createUserService = (user, callback) => {
+    console.log('createUserService', user)
+    UserModel.createUser(
+        user,
         function (err, result) {
             if (err) {
-                return results(err, null)
+                return callback(err);
             }
-
-            if (!result) {
-                UserModel.createUser(
-                    users,
-                    function (err, isRegister) {
-                        if (err) {
-                            return results(err, null)
-                        }
-                        return results(null, !isRegister)
-                    }
-                )
-            } else {
-                return results(null, result)
-            }
+            return callback(null, result);
         }
     )
 }

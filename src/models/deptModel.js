@@ -42,7 +42,7 @@ class DeptModel {
 
     // Check dept_Id is exists
     static isExistDept(dept_id, results) {
-        const sql = "SELECT 1 FROM dept WHERE dept_id = ? "
+        const sql = "SELECT 1 FROM dept WHERE deptId = ? "
         connect.query(
             sql,
             dept_id,
@@ -65,7 +65,7 @@ class DeptModel {
 
     // Check DeptName is existing 
     static isExistDeptName(dept_name, results) {
-        const sql = "SELECT 1 FROM dept WHERE dept_name = ? "
+        const sql = "SELECT 1 FROM dept WHERE deptName = ? "
         connect.query(
             sql,
             dept_name,
@@ -87,7 +87,7 @@ class DeptModel {
 
     // Search dept by dept_name
     static searchDeptByName(inputName, results) {
-        sql = "SELECT * FROM dept WHERE dept_name = ?"
+        sql = "SELECT * FROM dept WHERE deptName = ?"
         connect.query(
             sql,
             '%' + inputName + '%',
@@ -103,7 +103,7 @@ class DeptModel {
 
     // Delete dept by Id
     static deleteById(dept_id, results) {
-        const sql = "DELETE FROM dept WHERE dept_id = ?"
+        const sql = "DELETE FROM dept WHERE deptId = ?"
         connect.query(
             sql,
             dept_id,
@@ -120,7 +120,7 @@ class DeptModel {
 
     // Update dept by Id
     static updateById(project, results) {
-        const sql = "UPDATE dept SET dept_name = ? WHERE dept_id = ?"
+        const sql = "UPDATE dept SET deptName = ? WHERE deptId = ?"
         connect.query(
             sql,
             [dept.dept_name, dept.dept_id],

@@ -6,7 +6,7 @@ const {
     searchDept,
     deleteById,
     updateById
-} = require('../controller/dept-controller')
+} = require('../controller/deptController')
 
 
 // getDeptPage

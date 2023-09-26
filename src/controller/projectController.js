@@ -44,24 +44,24 @@ const createProject = (req, res) => {
         projectModel,
         (err, result) => {
             if (err) {
-                return res.status(400).json({
+                return res.status(500).json({
                     errorMessage: err
                 })
             }
             if (result === "isExistName") {
-                return res.status(200).json({
+                return res.status(400).json({
                     CreateMessage: "Project Name is exist"
                 })
             }
 
             if (result === "isDeptExist") {
-                return res.status(200).json({
+                return res.status(400).json({
                     CreateMessage: "Dept_id is not exist"
                 })
             }
 
             if (result) {
-                return res.status(200).json({
+                return res.status(400).json({
                     CreateMessage: "Duplicate Project"
                 })
             } else {

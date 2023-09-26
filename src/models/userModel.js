@@ -4,67 +4,83 @@ class UserModel {
 
     constructor(UserModel) {
         this.userId = UserModel.UserId;
-        this.full_name = UserModel.full_name;
-        this.user_name = UserModel.user_name;
-        this.user_password = UserModel.user_password;
-        this.email = UserModel.email;
-        this.phone = UserModel.phone;
+        this.username = UserModel.username;
+        this.age = UserModel.age;
+        this.roles = UserModel.roles;
+        this.userPassword = UserModel.userPassword;
+        this.gmail = UserModel.gmail;
+        this.isBlocked = UserModel.isBlocked;
     }
 
 
     // Check user login
-    static checkUserLogin(user_name, user_password, results) {
-        const sql = 'SELECT * FROM users WHERE user_name = ? AND user_password = ?'
+    static checkUserLogin(username, userPassword, callback) {
+        const sql = `SELECT * 
+                     FROM users 
+                     WHERE username = ? AND userPassword = ?`;
         connect.query(
             sql,
-            [user_name, user_password],
+            [username, userPassword],
             (err, result) => {
                 if (err) {
-                    console.log("error: ", err);
-                    return results(err, null);
+                    return callback(new Error(err.message));
                 }
-                return results(null, true, result);
+                if (isEmpty(result)) {
+                    return callback(null, false);
+                } else {
+                    return callback(null, true, result);
+                }
             }
         )
     };
 
-    static createUser(user, results) {
-        const sql = "INSERT INTO users (full_name,user_name,user_password,EMAIL,PHONE) values(?,?,?,?,?)";
+
+    // Create a new user
+    static createUser(user, callback) {
+        const sql = `INSERT INTO users (username, age, roles, userPassword, gmail) 
+                     VALUES (?, ?, ?, ?, ?)`;
         connect.query(
             sql,
-            [user.full_name, user.user_name, user.user_password, user.email, user.phone],
+            [user.username, user.age, user.roles, user.userPassword, user.gmail],
             (err) => {
                 if (err) {
-                    console.log("error: ", err);
-                    return results(err, null);
+                    return callback(new Error(err.message));
                 }
-                return results(null, true, { ...user });
+                return callback(null, true);
             }
         )
+
     }
 
 
-    // Check user_name
-    static isUserNameExist(user_name, results) {
-        const sql = "select user_name from users where user_name = ?"
+    // Check user_name and gmail are exists
+    static isUserNameAndGmailExist({ user }, callback) {
+        const sql = `select username, gmail 
+                     FROM users 
+                     WHERE username = ? or gmail = ?`
         connect.query(
             sql,
-            user_name,
+            [user.username, user.gmail],
             function (err, result) {
                 if (err) {
-                    return results(err, null);
+                    return callback(err);
                 }
                 if (isEmpty(result)) {
-                    console.log("user_name not exists");
-                    return results(null, false);
-                } else {
-                    console.log("user_name is exists");
-                    return results(null, true);
+                    return callback(err, false);
+                }
+                if (result.length === 2) {
+                    return callback(new Error("USERNAME_GMAIL_UNIQUE"));
+                } else if (result.length === 1) {
+                    for (let index = 0; index < result.length; index++) {
+                        if (result[index].username === user.username) {
+                            return callback(new Error("USERNAME_UNIQUE"))
+                        }
+                        return callback(new Error("GMAIL_UNIQUE"))
+                    }
                 }
             }
         )
     }
-
 
 
 }
