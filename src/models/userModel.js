@@ -14,7 +14,7 @@ class UserModel {
 
 
     // Check user login
-    static checkUserLogin(username, userPassword, callback) {
+    static checkUserLogin({ username, userPassword }, callback) {
         const sql = `SELECT * 
                      FROM users 
                      WHERE username = ? AND userPassword = ?`;
@@ -23,12 +23,16 @@ class UserModel {
             [username, userPassword],
             (err, result) => {
                 if (err) {
-                    return callback(new Error(err.message));
+                    return callback(err);
                 }
+
                 if (isEmpty(result)) {
-                    return callback(null, false);
+                    return callback(null, { isLogin: false });
                 } else {
-                    return callback(null, true, result);
+                    if (result[0].isBlocked === 1) {
+                        return callback(null, { hasLogin: true, isBlocked: true, result: result });
+                    }
+                    return callback(null, { hasLogin: true, isBlocked: false, result: result });
                 }
             }
         )
@@ -44,7 +48,7 @@ class UserModel {
             [user.username, user.age, user.roles, user.userPassword, user.gmail],
             (err) => {
                 if (err) {
-                    return callback(new Error(err.message));
+                    return callback(err);
                 }
                 return callback(null, true);
             }
@@ -100,35 +104,12 @@ class UserModel {
             roles,
             (err, result) => {
                 if (err) {
-                    return callback(new Error(err));
+                    return callback(err);
                 }
                 return callback(null, result);
             }
         )
     }
-
-
-    // Check isblocked 
-    static checkIsBlocked(userId, callback) {
-        const sql = 'SELECT isBlocked FROM users WHERE userId = ?';
-        connect.query(
-            sql,
-            userId,
-            (err, result) => {
-                if (err) {
-                    return callback(new Error(err.message));
-                };
-                (result[0].isBlocked === 1) ?
-                    callback(null, true) :
-                    callback(null, false);
-
-                return callback;
-
-            }
-        )
-    }
-
-
 }
 
 

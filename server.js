@@ -59,9 +59,9 @@ app.use((error, req, res, next) => {
     // Error when client input wrong
     if (error.args && error.args.length !== 0) {
         return res.status(400).json({
-            messageCode: error.Error.message,
-            message: error[error.Error.message],
-            errorMessage: error.args
+            messageCode: error.error.message,
+            message: error[error.error.message],
+            args: error.args
         })
     }
 

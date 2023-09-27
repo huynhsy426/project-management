@@ -1,4 +1,3 @@
-const { StatusCodes } = require('http-status-codes');
 // Midleware: verify token, validate data vao tu FE
 const validateUser = (req, res, next) => {
     const user = {
@@ -20,7 +19,7 @@ const validateUser = (req, res, next) => {
     }
 
     return next({
-        Error: new Error("INVALID_USER_INPUT_BY_CLIENT"),
+        error: new Error("INVALID_USER_INPUT_BY_CLIENT"),
         args: errorMessage
     });
 }

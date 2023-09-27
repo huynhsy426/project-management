@@ -36,13 +36,12 @@ const listUsers = (req, res) => {
 const loginByUser = (req, res, next) => {
     const { username, userPassword } = req.body;
     loginByUserService(
-        username,
-        userPassword,
-        function (err, isLogin, isBlocked, result) {
+        { username, userPassword },
+        function (err, { hasLogin, isBlocked, result }) {
             if (err) {
                 next(err);
             }
-            if (isLogin) {
+            if (hasLogin) {
                 const user = {
                     username: result[0].username,
                     roles: result[0].roles,
