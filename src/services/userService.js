@@ -10,7 +10,15 @@ const loginByUserService = (username, userPassword, callback) => {
                 return callback(err)
             }
             if (isLogin) {
-                return callback(null, isLogin, result)
+                UserModel.checkIsBlocked(
+                    result[0].userId,
+                    function (error, isBlocked) {
+                        if (error) {
+                            return callback(err)
+                        }
+                        return callback(null, isLogin, isBlocked, result)
+                    }
+                )
             } else {
                 return callback(null, isLogin)
             }

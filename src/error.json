@@ -14,5 +14,13 @@
     "DEFAULT_ERROR": {
         "message": "Something went wrong",
         "statusCode": 400
+    },
+    "UNAUTHORlIZED": {
+        "message": "Unauthorized",
+        "statusCode": 401
+    },
+    "BLOCK_USER": {
+        "message": "User has been blocked",
+        "statusCode": 403
     }
 }

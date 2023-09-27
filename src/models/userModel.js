@@ -56,7 +56,6 @@ class UserModel {
     // Check user_name and gmail are exists
     static isUserNameAndGmailExist(user, callback) {
         console.log("here", user);
-        console.log(user.username, user.gmail);
         const sql = `select username, gmail 
                      FROM users 
                      WHERE username = ? or gmail = ?`
@@ -104,6 +103,27 @@ class UserModel {
                     return callback(new Error(err));
                 }
                 return callback(null, result);
+            }
+        )
+    }
+
+
+    // Check isblocked 
+    static checkIsBlocked(userId, callback) {
+        const sql = 'SELECT isBlocked FROM users WHERE userId = ?';
+        connect.query(
+            sql,
+            userId,
+            (err, result) => {
+                if (err) {
+                    return callback(new Error(err.message));
+                };
+                (result[0].isBlocked === 1) ?
+                    callback(null, true) :
+                    callback(null, false);
+
+                return callback;
+
             }
         )
     }

@@ -9,9 +9,10 @@ class JWTMiddleware {
             const authorization = req.headers['authorization'] || '';
             const token = authorization.split('Bearer ')[1];
             JwtService.verify(token);
+            console.log(JwtService.verify(token), "true verify")
             return next();
         } catch (err) {
-            return next(new Error('UNAUTHORIZED'));
+            return next(new Error('UNAUTHORlIZED'));
         }
 
     }

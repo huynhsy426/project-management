@@ -44,8 +44,10 @@ app.use((req, res) => {
 
 app.use((error, req, res, next) => {
     // KHi next co tham so thi req chay ve day
+    console.log(error);
     const errorCode = error.message;
     const definedCode = errors[errorCode]?.message;
+    // Error when take Error
     if (definedCode) {
         const statusCode = errors[errorCode].statusCode;
         return res.status(statusCode).json({
@@ -53,7 +55,17 @@ app.use((error, req, res, next) => {
             message: error[definedCode],
         });
     }
-    console.log(error);
+
+    // Error when client input wrong
+    if (error.args && error.args.length !== 0) {
+        return res.status(400).json({
+            messageCode: error.Error.message,
+            message: error[error.Error.message],
+            errorMessage: error.args
+        })
+    }
+
+    // Default error
     return res.status(500).json({
         messageCode: 'DEFAULT_ERROR',
         message: 'Something went wrong'
@@ -62,4 +74,4 @@ app.use((error, req, res, next) => {
 
 
 app.listen(8082);
-console.log('Listening on port 8081');
+console.log('Listening on port 8082');

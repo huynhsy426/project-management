@@ -21,11 +21,7 @@ class JwtService {
     // Verify token
     verify(token) {
         let secretKey = process.env.JWT_SECRET;
-        try {
-            return jwt.verify(token, secretKey);
-        } catch (error) {
-            return false;
-        }
+        return jwt.verify(token, secretKey);
     }
 
 

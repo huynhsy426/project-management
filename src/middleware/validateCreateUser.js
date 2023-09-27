@@ -1,7 +1,6 @@
 const { StatusCodes } = require('http-status-codes');
 // Midleware: verify token, validate data vao tu FE
 const validateUser = (req, res, next) => {
-    console.log("here is")
     const user = {
         username: req.body.username,
         age: req.body.age,
@@ -9,31 +8,21 @@ const validateUser = (req, res, next) => {
         gmail: req.body.gmail,
         isBlocked: false
     }
-    let count = 0;
 
-    const errorMessage = {
-        usernameMessage: "",
-        ageMessage: "",
-        passwordMessage: "",
-        gmailMessage: ""
+    const errorMessage = []
+
+    !validateJustString(user.username) && errorMessage.push("username is valid");
+    !validateNumber(user.age) && errorMessage.push("age is not a number");
+    !validatePassword(user.userPassword) && errorMessage.push(`password must At least one digit, one lowercase letter, one uppercase letter, one special character and between 3 and 20 characters`);
+    !validateGmail(user.gmail) && errorMessage.push("Invalid email address");
+    if (errorMessage.length === 0) {
+        return next();
     }
 
-    validateJustString(user.username) ? count++ : errorMessage.usernameMessage = "username is valid";
-    validateNumber(user.age) ? count++ : errorMessage.ageMessage = "age is not a number";
-    validatePassword(user.userPassword) ?
-        count++ :
-        errorMessage.passwordMessage = `password must At least one digit, one lowercase letter, one uppercase letter, one special character and between 3 and 20 characters`;
-    validateGmail(user.gmail) ? count++ : errorMessage.gmailMessage = "Invalid email address";
-    console.log(count);
-    if (count === 4) {
-        next();
-    } else {
-        res.status(StatusCodes.BAD_REQUEST).json({
-            errorMessage: errorMessage
-        })
-    }
-
-
+    return next({
+        Error: new Error("INVALID_USER_INPUT_BY_CLIENT"),
+        args: errorMessage
+    });
 }
 
 const validateJustString = (name) => {
@@ -59,19 +48,6 @@ const validatePassword = (password) => {
     const valid = regex.test(password);
     return valid;
 };
-
-
-// UserModels.isUserNameAndGmailExist(
-//     { user },
-//     function (error, result) {
-//         if (error) {
-//             console.log("error here")
-//             return next(error);
-//         }
-
-//         console.log("Exist here")
-//         return next();
-//     });
 
 module.exports = {
     validateUser

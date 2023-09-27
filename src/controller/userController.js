@@ -14,8 +14,9 @@ const listUsers = (req, res) => {
     const authorization = req.headers['authorization'] || '';
 
     const token = authorization.split('Bearer ')[1];
+    console.log(token);
     const user = JwtService.decode(token);
-    console.log(JwtService.decode(token), "askdjhkj");
+    console.log(user, "askdjhkj");
     console.log(user.username)
     if (user && user.roles === "Admin") {
 
@@ -37,7 +38,7 @@ const loginByUser = (req, res, next) => {
     loginByUserService(
         username,
         userPassword,
-        function (err, isLogin, result) {
+        function (err, isLogin, isBlocked, result) {
             if (err) {
                 next(err);
             }
@@ -48,11 +49,16 @@ const loginByUser = (req, res, next) => {
                     gmail: result[0].gmail,
                     isBlocked: result[0].isBlocked
                 }
-                const token = JwtService.createJWT(user)
-                return res.status(StatusCodes.OK).json({
-                    loginMessage: "Login successful",
-                    accessToken: token
-                })
+
+                if (!isBlocked) {
+                    const token = JwtService.createJWT(user)
+                    return res.status(StatusCodes.OK).json({
+                        loginMessage: "Login successful",
+                        accessToken: token
+                    })
+                }
+                next(new Error("BLOCK_USER"))
+
             } else {
                 return res.status(StatusCodes.BAD_REQUEST).json({
                     aaa: "Wrong account"
@@ -75,7 +81,7 @@ const createUser = (req, res, next) => {
         roles: 'User',
         userPassword: req.body.userPassword,
         gmail: req.body.gmail,
-        isBlocked: false
+        isBlocked: 0
     }
 
 
@@ -83,11 +89,9 @@ const createUser = (req, res, next) => {
         user,
         function (error, result) {
             if (error) {
-                console.log("error here")
                 return next(error);
             }
 
-            console.log("Exist here")
             if (!result) {
                 createUserService(
                     user,
