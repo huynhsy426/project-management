@@ -119,10 +119,7 @@ const createUser = (req, res, next) => {
                 return res.status(StatusCodes.OK).json({
                     registerMessage: "Register successfully"
                 })
-            } else {
-
             }
-
         }
     )
 
