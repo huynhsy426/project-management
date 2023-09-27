@@ -18,11 +18,11 @@ const createUserService = (user, callback) => {
     console.log('createUserService', user)
     UserModel.createUser(
         user,
-        function (err, result) {
+        function (err, { hasCreateUser }) {
             if (err) {
                 return callback(err);
             }
-            return callback(null, result);
+            return callback(null, hasCreateUser);
         }
     )
 }

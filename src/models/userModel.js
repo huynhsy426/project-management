@@ -50,7 +50,7 @@ class UserModel {
                 if (err) {
                     return callback(err);
                 }
-                return callback(null, true);
+                return callback(null, { hasCreateUser: true });
             }
         )
 
