@@ -6,14 +6,20 @@ const {
     searchDept,
     deleteById,
     updateById
-} = require('../controller/deptController')
+} = require('../controller/deptController');
+
+const { validateDept } = require('../middleware/validateCreateDept');
+
+const JWTMiddleware = require('../middleware/JWTMiddleware');
 
 
 // getDeptPage
 router.get("/deptList", listDepts)
 
 // Create Dept
-router.post("/createDept", createDept)
+router.route("/createDept")
+    .get()
+    .post([JWTMiddleware.verify, JWTMiddleware.hasRole, validateDept], createDept)
 
 // Search dept by dept_name
 router.get("/searchDept", searchDept)

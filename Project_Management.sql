@@ -100,4 +100,8 @@ SELECT * FROM dept;
 
 SELECT users.userId, users.username, users.age, users.roles, users.gmail, dept.deptName, dept.authorId as 'Manager', members.exp
 FROM users JOIN members ON users.userId = members.memberId
-		   JOIN dept ON members.memberId = dept.deptId
+		   JOIN dept ON members.deptId = dept.deptId;
+           
+           
+SELECT deptId FROM dept 
+ORDER BY deptId;

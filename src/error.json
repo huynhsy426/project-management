@@ -22,5 +22,13 @@
     "BLOCK_USER": {
         "message": "User has been blocked",
         "statusCode": 403
+    },
+    "DEPTNAME_UNIQUE": {
+        "message": "Deptname has been existed",
+        "statusCode": 400
+    },
+    "FORBIDDEN": {
+        "message": "403 Forbidden",
+        "statusCode": 403
     }
 }

@@ -15,43 +15,37 @@ const listDeptsService = (results) => {
 
 
 // Create new Dept
-const createDeptService = (dept, results) => {
-    DeptModel.isExistDept(
-        dept.dept_id,
-        function (err, isDeptExist) {
+const createDeptService = (dept, callback) => {
+    console.log(dept, 'create dept');
+    const deptEntity = {
+        deptId: dept.deptId,
+        deptName: dept.deptName,
+        authorId: dept.authorId
+    }
+
+    DeptModel.listDeptsSortId(
+        function (err, listDeptSort) {
             if (err) {
-                return results(err, null)
+                return callback(err);
             }
-
-            if (!isDeptExist) {
-                DeptModel.isExistDeptName(
-                    dept.dept_name,
-                    function (err, isExistDeptName) {
-                        if (err) {
-                            return results(err, null)
-                        }
-
-                        if (isExistDeptName) {
-                            return results(null, "isExistName")
-                        } else {
-                            DeptModel.createDept(
-                                dept,
-                                function (err, isCreateDept) {
-                                    if (err) {
-                                        return results(err, null)
-                                    }
-
-                                    return results(null, !isCreateDept)
-                                }
-                            )
-                        }
+            const deptIdSplit = listDeptSort[0].deptId.split("D");
+            console.log(deptIdSplit);
+            const deptIdAutoChange = +deptIdSplit[1] + 1;
+            deptEntity.deptId = "D000" + deptIdAutoChange;
+            console.log(deptEntity, "deptEntity")
+            DeptModel.createDept(
+                deptEntity,
+                function (error, hasCreateDept) {
+                    if (error) {
+                        callback(error);
                     }
-                )
-            } else {
-                return results(null, isDeptExist)
-            }
+                    return callback(null, hasCreateDept);
+                }
+            )
         }
     )
+
+
 }
 
 

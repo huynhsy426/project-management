@@ -6,6 +6,7 @@ const {
     updateByIdService
 } = require('../services/deptService')
 
+const DeptModel = require("../models/deptModel")
 
 // list depts
 const listDepts = (req, res) => {
@@ -25,37 +26,38 @@ const listDepts = (req, res) => {
 }
 
 
-const createDept = (req, res) => {
+const createDept = (req, res, next) => {
 
-    const deptModel = {
-        dept_id: req.body.dept_id,
-        dept_name: req.body.dept_name
+    const deptEntity = {
+        deptId: req.body.deptId,
+        deptName: req.body.deptName,
+        authorId: req.body.authorId
     }
 
-    createDeptService(
-        deptModel,
-        (err, result) => {
+    DeptModel.isExistDeptName(
+        deptEntity.deptName,
+        function (err, isDeptNameExist) {
             if (err) {
-                return res.status(400).json({
-                    errorMessage: err
-                })
+                return next(err);
+            }
+            console.log("dept here", isDeptNameExist);
+            if (!isDeptNameExist) {
+                console.log("dept not exists")
+                createDeptService(
+                    deptEntity,
+                    (error, hasCreateDept) => {
+                        if (error) {
+                            next(error);
+                        }
+                        if (hasCreateDept) {
+                            return res.status(StatusCodes.OK).json({
+                                registerMessage: "Register successfully"
+                            })
+                        }
+                    }
+                )
             }
 
-            if (result === 'isExistName') {
-                return res.status(400).json({
-                    CreateMessage: "dept Name is exist"
-                })
-            }
-
-            if (result) {
-                return res.status(200).json({
-                    CreateMessage: "Duplicate dept"
-                })
-            } else {
-                return res.status(200).json({
-                    CreateMessage: "Dept is created successfully"
-                })
-            }
         }
     )
 }

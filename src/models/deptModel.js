@@ -3,106 +3,115 @@ const connect = require('./connection')
 class DeptModel {
 
     constructor(DeptModel) {
-        this.dept_id = DeptModel.dept_id;
-        this.dept_name = DeptModel.dept_name;
-    }
-
-
-    // List of Depts
-    static listDepts(results) {
-        const sql = "SELECT * FROM dept"
-        connect.query(
-            sql,
-            function (err, result) {
-                if (err) {
-                    return results(err, null)
-                }
-                return results(null, result)
-            }
-        )
+        this.deptId = DeptModel.deptId;
+        this.deptName = DeptModel.deptName;
+        this.authorId = DeptModel.authorId;
     }
 
 
     // Create Dept
-    static createDept(dept, results) {
+    static createDept(dept, callback) {
+        console.log(dept);
         const sql = 'INSERT INTO dept SET ?'
         connect.query(
             sql,
             dept,
             (err) => {
                 if (err) {
-                    return results(err, null)
+                    return callback(err);
                 }
+                return callback(null, { hasCreateDept: true });
+            }
+        )
+    }
 
-                return results(null, true);
+
+    // List of Depts
+    static listDeptsByRole(callback) {
+        const sql = "SELECT * FROM dept"
+        connect.query(
+            sql,
+            function (err, result) {
+                if (err) {
+                    return callback(err, null)
+                }
+                return callback(null, result)
+            }
+        )
+    }
+
+
+    // List Dept sorts by deptId
+    static listDeptsSortId(callback) {
+        const sql = "SELECT deptId FROM dept ORDER BY deptId";
+        connect.query(
+            sql,
+            function (err, result) {
+                if (err) {
+                    return callback(new Error(err.message));
+                }
+                return callback(null, result);
             }
         )
     }
 
 
     // Check dept_Id is exists
-    static isExistDept(dept_id, results) {
+    static isExistDept(dept_id, callback) {
         const sql = "SELECT 1 FROM dept WHERE deptId = ? "
         connect.query(
             sql,
             dept_id,
             (err, result) => {
                 if (err) {
-                    return results(err, false);
+                    return callback(err);
                 }
 
-                if (isEmpty(result)) {
-                    console.log("dept_id not exists");
-                    return results(null, false);
-                } else {
-                    console.log("dept_id is exists");
-                    return results(null, true);
-                }
+                return isEmpty(result) ?
+                    callback(null, { isdeptExist: false }) :
+                    callback(null, { isdeptExist: true })
             }
         )
     }
 
 
     // Check DeptName is existing 
-    static isExistDeptName(dept_name, results) {
+    static isExistDeptName(deptName, callback) {
         const sql = "SELECT 1 FROM dept WHERE deptName = ? "
         connect.query(
             sql,
-            dept_name,
+            deptName,
             (err, result) => {
                 if (err) {
-                    return results(err, false);
+                    return callback(err);
                 }
 
-                if (isEmpty(result)) {
-                    console.log("dept_name not exists");
-                    return results(null, false);
-                } else {
-                    console.log("dept_name is exists");
-                    return results(null, true);
-                }
+                return isEmpty(result) ?
+                    callback(null, { isDeptNameExist: false }) :
+                    callback(new Error("DEPTNAME_UNIQUE"))
             }
         )
     }
 
-    // Search dept by dept_name
-    static searchDeptByName(inputName, results) {
+
+    // Search dept by deptName
+    static searchDeptByName(inputName, callback) {
         sql = "SELECT * FROM dept WHERE deptName = ?"
         connect.query(
             sql,
-            '%' + inputName + '%',
+            ['%' + inputName + '%'],
             (err, result) => {
                 if (err) {
-                    return results(err, null);
+                    return callback(err);
                 }
-                return results(null, result);
+                return callback(null, result);
             }
         )
     }
 
 
     // Delete dept by Id
-    static deleteById(dept_id, results) {
+    static deleteById(dept_id, callback) {
         const sql = "DELETE FROM dept WHERE deptId = ?"
         connect.query(
             sql,
@@ -110,26 +119,26 @@ class DeptModel {
             (err) => {
                 if (err) {
                     console.log("error: ", err);
-                    return results(err, null);
+                    return callback(err, null);
                 }
-                return results(null, true);
+                return callback(null, true);
             }
         )
     }
 
 
     // Update dept by Id
-    static updateById(project, results) {
+    static updateById(project, callback) {
         const sql = "UPDATE dept SET deptName = ? WHERE deptId = ?"
         connect.query(
             sql,
-            [dept.dept_name, dept.dept_id],
+            [dept.deptName, dept.dept_id],
             (err) => {
                 if (err) {
                     console.log("error: ", err);
-                    return results(err, null);
+                    return callback(err, null);
                 }
-                return results(null, true);
+                return callback(null, true);
             }
         )
     }

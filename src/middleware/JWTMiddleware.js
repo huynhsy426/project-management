@@ -18,17 +18,20 @@ class JWTMiddleware {
     }
 
 
-    hasRole() {
-        return (req, res, next) => {
-            const authorization = req.headers['authorization'] || '';
-            const token = authorization.split('Bearer ')[1];
-            console.log(token);
-            const decoded = JwtService.decode(token);
-            const foundRole = decoded.payload.roles.find(e => e.role === "Admin");
-            return foundRole ?
-                next() :
-                res.status(403).send({ error: 'Access Denied' });
-        }
+    hasRole(req, res, next) {
+        console.log("here 1")
+
+        console.log("here 2")
+        const authorization = req.headers['authorization'] || '';
+        const token = authorization.split('Bearer ')[1];
+        console.log(token);
+        const decoded = JwtService.decode(token);
+        console.log(decoded.roles, "decoded token");
+        console.log(typeof decoded)
+        const foundRole = decoded.roles === "Admin";
+        return foundRole ?
+            next() :
+            next(new Error("FORBIDDEN"))
     }
 
 }

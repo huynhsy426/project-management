@@ -75,7 +75,7 @@ class UserModel {
                 }
                 if (isEmpty(result)) {
                     console.log("2")
-                    return callback(err, false);
+                    return callback(null, false);
                 }
                 if (result.length === 2) {
                     console.log("3")
