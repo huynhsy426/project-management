@@ -1,23 +1,19 @@
 const JwtService = require("../services/JWTService");
-
-const { StatusCodes } = require('http-status-codes');
-
 class JWTMiddleware {
 
     constructor() { }
 
 
     verify(req, res, next) {
-        const authorization = req.headers['authorization'] || '';
+        try {
+            const authorization = req.headers['authorization'] || '';
+            const token = authorization.split('Bearer ')[1];
+            JwtService.verify(token);
+            return next();
+        } catch (err) {
+            return next(new Error('UNAUTHORIZED'));
+        }
 
-        const token = authorization.split('Bearer ')[1];
-        console.log({ token })
-        const valid = JwtService.verify(token);
-        return valid ?
-            next() :
-            res.status(StatusCodes.UNAUTHORIZED).json({
-                error: 'Unauthorized'
-            })
     }
 
 

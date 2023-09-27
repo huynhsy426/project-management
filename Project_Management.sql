@@ -95,3 +95,9 @@ INSERT INTO project VALUES
 
 
 SELECT * FROM users;
+SELECT * FROM members;
+SELECT * FROM dept;
+
+SELECT users.userId, users.username, users.age, users.roles, users.gmail, dept.deptName, dept.authorId as 'Manager', members.exp
+FROM users JOIN members ON users.userId = members.memberId
+		   JOIN dept ON members.memberId = dept.deptId

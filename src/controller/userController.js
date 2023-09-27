@@ -5,6 +5,7 @@ const {
 
 const { StatusCodes } = require('http-status-codes');
 
+const UserModel = require('../models/userModel');
 
 const JwtService = require('../services/JWTService')
 
@@ -13,7 +14,15 @@ const listUsers = (req, res) => {
     const authorization = req.headers['authorization'] || '';
 
     const token = authorization.split('Bearer ')[1];
+    const user = JwtService.decode(token);
     console.log(JwtService.decode(token), "askdjhkj");
+    console.log(user.username)
+    if (user && user.roles === "Admin") {
+
+    } else if (user && user.roles !== "Admin") {
+
+    }
+
 
 
     res.json({
@@ -33,8 +42,13 @@ const loginByUser = (req, res, next) => {
                 next(err);
             }
             if (isLogin) {
-                console.log(result[0])
-                const token = JwtService.createJWT(result[0])
+                const user = {
+                    username: result[0].username,
+                    roles: result[0].roles,
+                    gmail: result[0].gmail,
+                    isBlocked: result[0].isBlocked
+                }
+                const token = JwtService.createJWT(user)
                 return res.status(StatusCodes.OK).json({
                     loginMessage: "Login successful",
                     accessToken: token
@@ -51,15 +65,45 @@ const loginByUser = (req, res, next) => {
 
 
 // create Project
+// Controller 
+// Check user da ton tai chua
+// Tao user -> 
 const createUser = (req, res, next) => {
     const user = {
         username: req.body.username,
         age: req.body.age,
-        roles: 4,
+        roles: 'User',
         userPassword: req.body.userPassword,
         gmail: req.body.gmail,
         isBlocked: false
     }
+
+
+    UserModel.isUserNameAndGmailExist(
+        user,
+        function (error, result) {
+            if (error) {
+                console.log("error here")
+                return next(error);
+            }
+
+            console.log("Exist here")
+            if (!result) {
+                createUserService(
+                    user,
+                    function (err, isCreate) {
+                        if (err) {
+                            next(err);
+                        }
+                        if (isCreate) {
+                            return res.status(StatusCodes.OK).json({
+                                registerMessage: "Register successfully"
+                            })
+                        }
+                    }
+                )
+            }
+        });
 
 
     createUserService(
@@ -72,6 +116,8 @@ const createUser = (req, res, next) => {
                 return res.status(StatusCodes.OK).json({
                     registerMessage: "Register successfully"
                 })
+            } else {
+
             }
 
         }

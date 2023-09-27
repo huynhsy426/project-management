@@ -54,23 +54,31 @@ class UserModel {
 
 
     // Check user_name and gmail are exists
-    static isUserNameAndGmailExist({ user }, callback) {
+    static isUserNameAndGmailExist(user, callback) {
+        console.log("here", user);
+        console.log(user.username, user.gmail);
         const sql = `select username, gmail 
                      FROM users 
                      WHERE username = ? or gmail = ?`
         connect.query(
             sql,
             [user.username, user.gmail],
-            function (err, result) {
+            (err, result) => {
+                console.log("alskjdlaksjdlkasj")
+                console.log(err, result);
                 if (err) {
+                    console.log("1")
                     return callback(err);
                 }
                 if (isEmpty(result)) {
+                    console.log("2")
                     return callback(err, false);
                 }
                 if (result.length === 2) {
+                    console.log("3")
                     return callback(new Error("USERNAME_GMAIL_UNIQUE"));
                 } else if (result.length === 1) {
+                    console.log("4")
                     for (let index = 0; index < result.length; index++) {
                         if (result[index].username === user.username) {
                             return callback(new Error("USERNAME_UNIQUE"))
@@ -78,6 +86,24 @@ class UserModel {
                         return callback(new Error("GMAIL_UNIQUE"))
                     }
                 }
+            }
+        )
+    }
+
+
+    // List by roles
+    static selectListUserByRole(roles, callback) {
+        const sql = `SELECT * 
+                     FROM users 
+                     WHERE roles = ?`;
+        connect.query(
+            sql,
+            roles,
+            (err, result) => {
+                if (err) {
+                    return callback(new Error(err));
+                }
+                return callback(null, result);
             }
         )
     }

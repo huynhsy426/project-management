@@ -44,16 +44,17 @@ app.use((req, res) => {
 
 app.use((error, req, res, next) => {
     // KHi next co tham so thi req chay ve day
-    const messageCode = error.message;
-    const definedCode = errors[messageCode];
-    console.log(error)
+    const errorCode = error.message;
+    const definedCode = errors[errorCode]?.message;
     if (definedCode) {
-        return res.json({
+        const statusCode = errors[errorCode].statusCode;
+        return res.status(statusCode).json({
             messageCode: definedCode,
             message: error[definedCode],
-        })
+        });
     }
-    return res.json({
+    console.log(error);
+    return res.status(500).json({
         messageCode: 'DEFAULT_ERROR',
         message: 'Something went wrong'
     });
