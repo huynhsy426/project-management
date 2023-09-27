@@ -129,7 +129,7 @@ const createUser = (req, res, next) => {
 // Logout
 const logOutUser = (req, res) => {
     console.log(req);
-    req.session.destroy();
+    // req.session.destroy();
     return res.status(200).json({
         loginMessage: "Logout successful"
     })
