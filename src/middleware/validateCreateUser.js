@@ -5,6 +5,7 @@ const validateUser = (req, res, next) => {
         age: req.body.age,
         userPassword: req.body.userPassword,
         gmail: req.body.gmail,
+        exp: req.body.exp,
         isBlocked: false
     }
 
@@ -14,6 +15,7 @@ const validateUser = (req, res, next) => {
     !validateNumber(user.age) && errorMessage.push("age is not a number");
     !validatePassword(user.userPassword) && errorMessage.push(`password must At least one digit, one lowercase letter, one uppercase letter, one special character and between 3 and 20 characters`);
     !validateGmail(user.gmail) && errorMessage.push("Invalid email address");
+    !validateNumber(user.exp) && errorMessage.push("exp is not number");
     if (errorMessage.length === 0) {
         return next();
     }

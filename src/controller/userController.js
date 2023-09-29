@@ -43,6 +43,7 @@ const loginByUser = (req, res, next) => {
             }
             if (hasLogin) {
                 const user = {
+                    userId: result[0].userId,
                     username: result[0].username,
                     roles: result[0].roles,
                     gmail: result[0].gmail,
@@ -80,6 +81,7 @@ const createUser = (req, res, next) => {
         roles: 'User',
         userPassword: req.body.userPassword,
         gmail: req.body.gmail,
+        exp: req.body.exp,
         isBlocked: 0
     }
 

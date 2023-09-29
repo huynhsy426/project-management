@@ -9,6 +9,7 @@ class UserModel {
         this.roles = UserModel.roles;
         this.userPassword = UserModel.userPassword;
         this.gmail = UserModel.gmail;
+        this.exp = UserModel.exp;
         this.isBlocked = UserModel.isBlocked;
     }
 
@@ -41,11 +42,11 @@ class UserModel {
 
     // Create a new user
     static createUser(user, callback) {
-        const sql = `INSERT INTO users (username, age, roles, userPassword, gmail) 
-                     VALUES (?, ?, ?, ?, ?)`;
+        const sql = `INSERT INTO users (username, age, roles, userPassword, gmail, exp) 
+                     VALUES (?, ?, ?, ?, ? , ?)`;
         connect.query(
             sql,
-            [user.username, user.age, user.roles, user.userPassword, user.gmail],
+            [user.username, user.age, user.roles, user.userPassword, user.gmail, user.exp],
             (err) => {
                 if (err) {
                     return callback(err);
@@ -67,8 +68,6 @@ class UserModel {
             sql,
             [user.username, user.gmail],
             (err, result) => {
-                console.log("alskjdlaksjdlkasj")
-                console.log(err, result);
                 if (err) {
                     console.log("1")
                     return callback(err);
