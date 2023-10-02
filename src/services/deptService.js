@@ -1,16 +1,29 @@
-const DeptModel = require("../models/deptModel")
+const DeptModel = require("../models/deptModel");
+const MemberModel = require("../models/memberModel")
 
 
-const listDeptsService = (results) => {
-    DeptModel.listDepts(
-        function (err, result) {
+const listDeptsService = (member, callback) => {
+    DeptModel.listDeptsByRole(
+        member,
+        function (err, listDeptByUser) {
             if (err) {
-                return results(err, null)
+                return callback(err);
             }
-
-            return results(null, result)
+            return callback(null, listDeptByUser);
         }
     )
+}
+
+
+const createDeptViewService = (deptId, callback) => {
+    DeptModel.selectMemberForDept(
+        deptId,
+        function (err, result) {
+            if (err) {
+                return callback(err)
+            }
+            return callback(null, result)
+        })
 }
 
 
@@ -28,18 +41,43 @@ const createDeptService = (dept, callback) => {
             if (err) {
                 return callback(err);
             }
-            const deptIdSplit = listDeptSort[0].deptId.split("D");
-            console.log(deptIdSplit);
+            const deptIdSplit = listDeptSort[listDeptSort.length - 1].deptId.split("D");
             const deptIdAutoChange = +deptIdSplit[1] + 1;
             deptEntity.deptId = "D000" + deptIdAutoChange;
-            console.log(deptEntity, "deptEntity")
+            const memberList = [
+                {
+                    memberId: deptEntity.authorId,
+                    deptId: deptEntity.deptId,
+                    position: "pm"
+                }
+
+            ]
+            for (let index = 0; index < dept.selectMembers.length; index++) {
+                let member = {
+                    memberId: dept.selectMembers[index].memberId,
+                    deptId: deptEntity.deptId,
+                    position: dept.selectMembers[index].position
+                }
+                memberList.push(member)
+            }
+            console.log(memberList, "mmembers list");
             DeptModel.createDept(
                 deptEntity,
-                function (error, hasCreateDept) {
+                function (error, { hasCreateDept }) {
                     if (error) {
                         callback(error);
                     }
-                    return callback(null, hasCreateDept);
+                    MemberModel.insertSelectMember(
+                        memberList,
+                        function (error, hasAddMembers) {
+                            if (error) {
+                                return callback(error);
+                            }
+                            console.log(hasAddMembers, "asdkjh")
+                            return callback(null, { hasCreateDept, hasAddMembers });
+                        }
+                    )
+
                 }
             )
         }
@@ -93,27 +131,26 @@ const deleteByIdService = (dept_id, results) => {
 
 
 // Update dept by Id
-const updateByIdService = (dept, results) => {
+const updateByIdService = (dept, callback) => {
     DeptModel.isExistDept(
-        dept.dept_id,
-        function (err, result) {
+        dept.deptId,
+        function (err, isExistDept) {
             if (err) {
-                return results(err, null)
+                return callback(err)
             }
-
-            if (result) {
-                DeptModel.updateById(
-                    dept,
-                    function (err, updateResult) {
-                        if (err) {
-                            return results(err, null)
-                        }
-                        return results(null, updateResult)
+            console.log(isExistDept)
+            if (!isExistDept) {
+                return callback(null, { isExistDept: false })
+            }
+            DeptModel.updateById(
+                dept,
+                function (error, hasUpdate) {
+                    if (error) {
+                        return callback(error)
                     }
-                )
-            } else {
-                return results(null, result)
-            }
+                    return callback(null, { isExistDept: true, hasUpdate })
+                }
+            )
         }
     )
 }
@@ -121,6 +158,7 @@ const updateByIdService = (dept, results) => {
 
 module.exports = {
     listDeptsService,
+    createDeptViewService,
     createDeptService,
     searchDeptService,
     deleteByIdService,

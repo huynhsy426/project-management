@@ -2,13 +2,13 @@ const validateDept = (req, res, next) => {
     const deptEntity = {
         deptId: req.body.deptId,
         deptName: req.body.deptName,
-        authorId: req.body.authorId
+        selectMembers: req.body.selectMembers
     }
 
     const errMessage = []
 
     !validateDeptName(deptEntity.deptName) && errMessage.push("dept name is valid");
-    !validateNumber(deptEntity.authorId) && errMessage.push("authorId is not a number");
+    !validateDeptName(deptEntity.selectMembers.position) && errMessage.push("position is not valid");
 
     if (errMessage.length === 0) {
         return next();
@@ -24,7 +24,7 @@ const validateDept = (req, res, next) => {
 
 
 const validateDeptName = (name) => {
-    const regex = /^[a-zA-Z0=9_ ]{3,50}$/;
+    const regex = /^[a-zA-Z0-9_ ]{3,50}$/;
     const valid = regex.test(name)
     return valid;
 };

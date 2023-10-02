@@ -27,15 +27,23 @@ class DeptModel {
 
 
     // List of Depts
-    static listDeptsByRole(callback) {
-        const sql = "SELECT * FROM dept"
+    static listDeptsByRole(member, callback) {
+        let sql = "";
+        member.roles === "Admin" ?
+            sql = `SELECT * FROM dept` :
+            sql = `SELECT memberId, position, dept.deptId, deptName, authorId FROM members
+        JOIN dept ON members.deptId = dept.deptId
+        WHERE memberId = ?`;
+
+        console.log(sql);
         connect.query(
             sql,
-            function (err, result) {
+            member.memberId,
+            function (err, listDeptByUser) {
                 if (err) {
-                    return callback(err, null)
+                    return callback(err);
                 }
-                return callback(null, result)
+                return callback(null, listDeptByUser);
             }
         )
     }
@@ -57,11 +65,11 @@ class DeptModel {
 
 
     // Check dept_Id is exists
-    static isExistDept(dept_id, callback) {
-        const sql = "SELECT 1 FROM dept WHERE deptId = ? "
+    static isExistDept(deptId, callback) {
+        const sql = "SELECT 1 FROM dept WHERE deptId = ?"
         connect.query(
             sql,
-            dept_id,
+            deptId,
             (err, result) => {
                 if (err) {
                     return callback(err);
@@ -111,11 +119,11 @@ class DeptModel {
 
 
     // Delete dept by Id
-    static deleteById(dept_id, callback) {
+    static deleteById(deptId, callback) {
         const sql = "DELETE FROM dept WHERE deptId = ?"
         connect.query(
             sql,
-            dept_id,
+            deptId,
             (err) => {
                 if (err) {
                     console.log("error: ", err);
@@ -128,20 +136,44 @@ class DeptModel {
 
 
     // Update dept by Id
-    static updateById(project, callback) {
+    static updateById(dept, callback) {
         const sql = "UPDATE dept SET deptName = ? WHERE deptId = ?"
         connect.query(
             sql,
-            [dept.deptName, dept.dept_id],
+            [dept.deptName, dept.deptId],
             (err) => {
                 if (err) {
                     console.log("error: ", err);
-                    return callback(err, null);
+                    return callback(err);
                 }
-                return callback(null, true);
+                return callback(null, { hasUpdate: true });
             }
         )
     }
+
+    static selectMemberForDept(deptId, callback) {
+        const sql = `SELECT userId, userName, age, roles, gmail, exp, deptId, position
+                     FROM users
+                     LEFT JOIN members ON users.userId = members.memberId
+                     WHERE roles = "User" and isBlocked = 0 and 
+                     users.userId NOT IN 
+                        (SELECT memberId 
+                        from members 
+                        where deptId = ?)`
+        connect.query(
+            sql,
+            deptId,
+            function (err, result) {
+                if (err) {
+                    return callback(err);
+                }
+                return callback(null, result);
+            }
+        )
+    }
+
+
+
 
 
 }

@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const {
-    listDepts,
+    listDeptsByRoles,
+    createDeptView,
     createDept,
     searchDept,
     deleteById,
@@ -14,11 +15,11 @@ const JWTMiddleware = require('../middleware/JWTMiddleware');
 
 
 // getDeptPage
-router.get("/deptList", listDepts)
+router.get("/list", listDeptsByRoles)
 
 // Create Dept
 router.route("/createDept")
-    .get()
+    .get([JWTMiddleware.verify, JWTMiddleware.hasRole], createDeptView)
     .post([JWTMiddleware.verify, JWTMiddleware.hasRole, validateDept], createDept)
 
 // Search dept by dept_name
@@ -28,7 +29,7 @@ router.get("/searchDept", searchDept)
 router.delete("/deleteDept/:dept_id", deleteById)
 
 // Update dept by Id
-router.put("/updateDept", updateById)
+router.put("/updateDept", [JWTMiddleware.verify, JWTMiddleware.hasRole], updateById)
 
 
 

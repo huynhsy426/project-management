@@ -19,9 +19,6 @@ class JWTMiddleware {
 
 
     hasRole(req, res, next) {
-        console.log("here 1")
-
-        console.log("here 2")
         const authorization = req.headers['authorization'] || '';
         const token = authorization.split('Bearer ')[1];
         console.log(token);

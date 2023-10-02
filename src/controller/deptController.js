@@ -3,40 +3,73 @@ const {
     createDeptService,
     searchDeptService,
     deleteByIdService,
-    updateByIdService
+    updateByIdService,
+    createDeptViewService
 } = require('../services/deptService')
 
 const DeptModel = require("../models/deptModel")
+const { StatusCodes } = require('http-status-codes')
+const JwtService = require("../services/JWTService");
 
 // list depts
-const listDepts = (req, res) => {
+const listDeptsByRoles = (req, res, next) => {
+    const authorization = req.headers['authorization'] || '';
+    const token = authorization.split('Bearer ')[1];
+    const decoded = JwtService.decode(token);
+
+    const member = {
+        memberId: decoded.userId,
+        roles: decoded.roles
+    }
+
     listDeptsService(
+        member,
         function (err, result) {
             if (err) {
-                return res.status(400).json({
-                    errorMessage: err
-                })
+                next(err);
             }
-
-            return res.status(200).json({
-                deptList: result
+            return res.status(StatusCodes.OK).json({
+                listDept: result
             })
         }
     )
 }
 
 
+const createDeptView = (req, res, next) => {
+    console.log(req.query.deptId)
+    const deptId = req.query.deptId;
+    createDeptViewService(
+        deptId,
+        function (err, result) {
+            if (err) {
+                return next(err)
+            }
+            return res.status(StatusCodes.OK).json({
+                selectUser: result
+            })
+        }
+    )
+};
+
+
 const createDept = (req, res, next) => {
+    const authorization = req.headers['authorization'] || '';
+    const token = authorization.split('Bearer ')[1];
+
+    const decoded = JwtService.decode(token);
 
     const deptEntity = {
-        deptId: req.body.deptId,
         deptName: req.body.deptName,
-        authorId: req.body.authorId
+        authorId: decoded.userId,
+        authorExp: decoded.exps,
+        selectMembers: req.body.selectMembers
     }
 
+    console.log(deptEntity, "deptEntity");
     DeptModel.isExistDeptName(
         deptEntity.deptName,
-        function (err, isDeptNameExist) {
+        function (err, { isDeptNameExist }) {
             if (err) {
                 return next(err);
             }
@@ -45,13 +78,14 @@ const createDept = (req, res, next) => {
                 console.log("dept not exists")
                 createDeptService(
                     deptEntity,
-                    (error, hasCreateDept) => {
+                    (error, { hasCreateDept, hasAddMembers }) => {
                         if (error) {
                             next(error);
                         }
                         if (hasCreateDept) {
                             return res.status(StatusCodes.OK).json({
-                                registerMessage: "Register successfully"
+                                registerMessage: "Register successfully",
+                                hasAddMembers: hasAddMembers
                             })
                         }
                     }
@@ -105,36 +139,37 @@ const deleteById = (req, res) => {
 }
 
 
-const updateById = (req, res) => {
+const updateById = (req, res, next) => {
     const deptModel = {
-        dept_id: req.body.dept_id,
-        dept_name: req.body.dept_name
+        deptId: req.body.deptId,
+        deptName: req.body.deptName
     }
 
     updateByIdService(
         deptModel,
-        function (err, result) {
+        function (err, { isExistDept, hasUpdate }) {
             if (err) {
-                return res.status(400).json({
-                    errorMessage: err
+                return next(err);
+            }
+
+            console.log(isExistDept, hasUpdate, hasUpdate.hasUpdate);
+            if (!isExistDept) {
+                return res.status(StatusCodes.BAD_REQUEST).json({
+                    errorMessage: "Dept not found"
+                })
+            } if (hasUpdate.hasUpdate) {
+                return res.status(StatusCodes.OK).json({
+                    successMessage: "Update dept successfully"
                 })
             }
 
-            if (!result) {
-                return res.status(200).json({
-                    errorMessage: "Dept not found"
-                })
-            }
-            return res.status(200).json({
-                deptList: result,
-                successMessage: "Delete dept successfully"
-            })
         }
     )
 }
 
 module.exports = {
-    listDepts,
+    listDeptsByRoles,
+    createDeptView,
     createDept,
     searchDept,
     deleteById,

@@ -47,7 +47,7 @@ const loginByUser = (req, res, next) => {
                     username: result[0].username,
                     roles: result[0].roles,
                     gmail: result[0].gmail,
-                    exp: result[0].exp,
+                    exps: result[0].exp,
                     isBlocked: result[0].isBlocked
                 }
 

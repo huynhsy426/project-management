@@ -21,6 +21,7 @@ CREATE TABLE users(
     roles NVARCHAR(100), 
     userPassword NVARCHAR(200),
     gmail NVARCHAR(200),
+    exp INT,
     isBlocked BOOLEAN 
 );
 
@@ -50,7 +51,7 @@ FOREIGN KEY (deptId) REFERENCES dept (deptId);
 CREATE TABLE members(
 	memberId INT,
     deptId CHAR(10) ,
-    exp int,
+    position NVARCHAR(200),
     PRIMARY KEY (memberId,deptId)
 );
 
@@ -74,10 +75,10 @@ DROP FOREIGN KEY fk_dept_users;
 -- 
 
 
-INSERT INTO users(username,age, roles, userPassword,gmail) VALUES
-("huynhsy", 23, "Admin","asd","huynhsy@gmail.com"),
-("asd", 18, "Admin","asd","asd@gmail.com"),
-("qwe", 23, "User","qwe","qwe@gmail.com");
+INSERT INTO users(username,age, roles, userPassword,gmail, exp) VALUES
+("huynhsy", 23, "Admin","asd","huynhsy@gmail.com", 2),
+("asd", 18, "Admin","asd","asd@gmail.com",3),
+("qwe", 23, "User","qwe","qwe@gmail.com",1);
 
 
 INSERT INTO dept VALUES
@@ -85,9 +86,9 @@ INSERT INTO dept VALUES
 
 
 INSERT INTO members VALUES
-(1, "D0001",3),
-(2, "D0001",3),
-(3, "D0001",2);
+(1, "D0001","pm"),
+(2, "D0001","dev"),
+(3, "D0001","tester");
 
 
 INSERT INTO project VALUES
@@ -98,10 +99,20 @@ SELECT * FROM users;
 SELECT * FROM members;
 SELECT * FROM dept;
 
-SELECT users.userId, users.username, users.age, users.roles, users.gmail, dept.deptName, dept.authorId as 'Manager', members.exp
-FROM users JOIN members ON users.userId = members.memberId
-		   JOIN dept ON members.deptId = dept.deptId;
-           
+-- SELECT users.userId, users.username, users.age, users.roles, users.gmail, dept.deptName, dept.authorId as 'Manager', members.exp
+-- FROM users JOIN members ON users.userId = members.memberId
+-- 		   JOIN dept ON members.deptId = dept.deptId;
+
+SELECT userId, userName, age, roles, gmail, exp, deptId, position 
+FROM users
+LEFT JOIN members ON users.userId = members.memberId
+WHERE roles = "User" and isBlocked = 0 and users.userId NOT IN (SELECT memberId from members where deptId = "D0001");
+
+SELECT userId 
+FROM users
+-- LEFT JOIN members ON users.userId = members.memberId
+WHERE roles = "User" and isBlocked = 0
+GROUP BY userId;
            
 SELECT deptId FROM dept 
 ORDER BY deptId;
