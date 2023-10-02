@@ -35,7 +35,6 @@ class DeptModel {
         JOIN dept ON members.deptId = dept.deptId
         WHERE memberId = ?`;
 
-        console.log(sql);
         connect.query(
             sql,
             member.memberId,
