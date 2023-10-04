@@ -62,6 +62,7 @@ class DeptController {
         }
         console.log(deptEntity)
 
+        // Check name is exist ?
         DeptModel.isExistDeptName(
             deptEntity.deptName,
             function (err, isDeptNameExist) {
@@ -70,6 +71,8 @@ class DeptController {
                 }
                 if (!isDeptNameExist.isDeptNameExist) {
                     console.log("dept not exists")
+
+                    // Check member who can join dept before created dept
                     memberService.checkMembersToDeptService(
                         { memberSelect: members },
                         (error, hasInsert) => {
@@ -79,6 +82,8 @@ class DeptController {
                             if (!hasInsert.hasInsert) {
                                 return next(new Error('MEMBER_ID_CANNOT_JOIN_DEPT'));
                             }
+
+                            // After validation all create dept and add members to dept
                             DeptService.createDeptService(
                                 deptEntity,
                                 function (err, { hasCreateDept, hasAddMembers }) {

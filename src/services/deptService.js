@@ -36,30 +36,13 @@ class DeptService {
     createDeptService = (deptEntity, callback) => {
         console.log(deptEntity, 'create dept');
 
-        DeptModel.listDeptsSortId(
+        // Create auto Id by sort the list 
+        DeptModel.sortDeptById(
             function (err, listDeptSort) {
                 if (err) {
                     return callback(err);
                 }
-                const deptIdSplit = listDeptSort[listDeptSort.length - 1].deptId.split("D");
-                const deptIdAutoChange = +deptIdSplit[1] + 1;
-                deptEntity.deptId = "D000" + deptIdAutoChange;
-                const memberList = [
-                    {
-                        memberId: deptEntity.authorId,
-                        deptId: deptEntity.deptId,
-                        position: "pm"
-                    }
-                ]
-
-                for (let member of deptEntity.members) {
-                    member = {
-                        memberId: member.memberId,
-                        deptId: deptEntity.deptId,
-                        position: member.position
-                    }
-                    memberList.push(member)
-                }
+                const memberList = createAutoDeptId(deptEntity, listDeptSort);
                 console.log(memberList, "members list");
                 DeptModel.createDept(
                     deptEntity,
@@ -74,7 +57,6 @@ class DeptService {
                                     if (error) {
                                         return callback(error);
                                     }
-                                    console.log(hasAddMembers, "asdkjh")
                                     return callback(null, { hasCreateDept, hasAddMembers });
                                 }
                             )
@@ -156,6 +138,30 @@ class DeptService {
             }
         )
     }
+}
+
+
+const createAutoDeptId = (deptEntity, listDeptSort) => {
+    const deptIdSplit = listDeptSort[listDeptSort.length - 1].deptId.split("D");
+    const deptIdAutoChange = +deptIdSplit[1] + 1;
+    deptEntity.deptId = "D000" + deptIdAutoChange;
+    const memberList = [
+        {
+            memberId: deptEntity.authorId,
+            deptId: deptEntity.deptId,
+            position: "pm"
+        }
+    ]
+
+    for (let member of deptEntity.members) {
+        member = {
+            memberId: member.memberId,
+            deptId: deptEntity.deptId,
+            position: member.position
+        }
+        memberList.push(member)
+    }
+    return memberList;
 }
 
 

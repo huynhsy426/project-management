@@ -54,7 +54,7 @@ class DeptModel {
 
 
     // List Dept sorts by deptId
-    static listDeptsSortId(callback) {
+    static sortDeptById(callback) {
         const sql = "SELECT deptId FROM dept ORDER BY deptId";
         connect.query(
             sql,
