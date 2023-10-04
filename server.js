@@ -10,6 +10,7 @@ const errors = require('./src/error.json')
 const loginRouter = require('./src/routes/projectRouter');
 const userRouter = require('./src/routes/userRouter');
 const deptRouter = require('./src/routes/deptRouter');
+const memberRouter = require('./src/routes/memberRouter');
 
 
 
@@ -26,12 +27,11 @@ const deptRouter = require('./src/routes/deptRouter');
 var dirName = __dirname;
 configViewEngine(app, session, dirName);
 
-
+// Router
 app.use("/project", loginRouter);
-
 app.use('/user', userRouter)
-
 app.use('/dept', deptRouter);
+app.use('/member', memberRouter);
 
 
 app.use((req, res) => {

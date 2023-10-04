@@ -15,7 +15,7 @@
         "message": "Something went wrong",
         "statusCode": 400
     },
-    "UNAUTHORlIZED": {
+    "UNAUTHORIZED": {
         "message": "Unauthorized",
         "statusCode": 401
     },
@@ -29,6 +29,14 @@
     },
     "FORBIDDEN": {
         "message": "403 Forbidden",
+        "statusCode": 403
+    },
+    "MEMBER_ID_CANNOT_JOIN_DEPT": {
+        "message": "User can't join dept",
+        "statusCode": 400
+    },
+    "ACCOUNT_HAS_BLOCKED": {
+        "message": "Account has been blocked",
         "statusCode": 403
     }
 }

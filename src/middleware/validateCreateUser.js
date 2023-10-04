@@ -1,31 +1,3 @@
-// Midleware: verify token, validate data vao tu FE
-const validateUser = (req, res, next) => {
-    const user = {
-        username: req.body.username,
-        age: req.body.age,
-        userPassword: req.body.userPassword,
-        gmail: req.body.gmail,
-        exp: req.body.exp,
-        isBlocked: false
-    }
-
-    const errorMessage = []
-
-    !validateJustString(user.username) && errorMessage.push("username is valid");
-    !validateNumber(user.age) && errorMessage.push("age is not a number");
-    !validatePassword(user.userPassword) && errorMessage.push(`password must At least one digit, one lowercase letter, one uppercase letter, one special character and between 3 and 20 characters`);
-    !validateGmail(user.gmail) && errorMessage.push("Invalid email address");
-    !validateNumber(user.exp) && errorMessage.push("exp is not number");
-    if (errorMessage.length === 0) {
-        return next();
-    }
-
-    return next({
-        error: new Error("INVALID_USER_INPUT_BY_CLIENT"),
-        args: errorMessage
-    });
-}
-
 const validateJustString = (name) => {
     const regex = /^[a-zA-Z ]{3,50}$/;
     const valid = regex.test(name)
@@ -51,5 +23,31 @@ const validatePassword = (password) => {
 };
 
 module.exports = {
-    validateUser
+    // Midleware: verify token, validate data vao tu FE
+    validateUser: (req, res, next) => {
+        const user = {
+            username: req.body.username,
+            age: req.body.age,
+            userPassword: req.body.userPassword,
+            gmail: req.body.gmail,
+            exp: req.body.exp,
+            isBlocked: false
+        }
+
+        const errorMessage = []
+
+        !validateJustString(user.username) && errorMessage.push("username is valid");
+        !validateNumber(user.age) && errorMessage.push("age is not a number");
+        !validatePassword(user.userPassword) && errorMessage.push(`password must At least one digit, one lowercase letter, one uppercase letter, one special character and between 3 and 20 characters`);
+        !validateGmail(user.gmail) && errorMessage.push("Invalid email address");
+        !validateNumber(user.exp) && errorMessage.push("exp is not number");
+        if (errorMessage.length === 0) {
+            return next();
+        }
+
+        return next({
+            error: new Error("INVALID_USER_INPUT_BY_CLIENT"),
+            args: errorMessage
+        });
+    }
 }

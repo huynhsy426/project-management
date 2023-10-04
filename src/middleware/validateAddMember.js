@@ -19,13 +19,11 @@ const validateMemberId = (members, errMessage) => {
     duplicateMembers.length > 0 && errMessage.push(`memberId ${duplicateMembers[0].memberId} is already exists`)
 };
 
-
 const validateMemberIdFormat = (members, errMessage) => {
     members.map((member) => {
         !validateNumber(member.memberId) && errMessage.push(`memberId ${member.memberId} not valid`);
     })
 };
-
 
 const validatePosition = (members, errMessage) => {
     members.map((member) => {
@@ -35,28 +33,22 @@ const validatePosition = (members, errMessage) => {
 
 
 module.exports = {
-    validateDept: (req, res, next) => {
-        const deptEntity = {
-            deptId: req.body.deptId,
-            deptName: req.body.deptName,
-            members: req.body.members
-        }
+    validateMembers: (req, res, next) => {
+        const members = req.body.members;
+        console.log(members)
 
         const errMessage = []
 
-        console.log(deptEntity, "Dept Entity")
-
-        !validateString(deptEntity.deptName) && errMessage.push("dept name is valid");
-        validateMemberIdFormat(deptEntity.members, errMessage);
-        validateMemberId(deptEntity.members, errMessage);
-        validatePosition(deptEntity.members, errMessage);
+        validateMemberIdFormat(members, errMessage);
+        validateMemberId(members, errMessage);
+        validatePosition(members, errMessage);
 
         if (errMessage.length === 0) {
             return next();
         }
 
         return next({
-            error: new Error("INVALID_DEPT_INPUT_BY_CLIENT"),
+            error: new Error("INVALID_MEMBER_INPUT_BY_CLIENT"),
             args: errMessage
         });
     }

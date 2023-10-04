@@ -1,35 +1,80 @@
 const JwtService = require("../services/JWTService");
+const UserModel = require("../models/userModel");
 class JWTMiddleware {
+
 
     constructor() { }
 
 
-    verify(req, res, next) {
-        try {
-            const authorization = req.headers['authorization'] || '';
-            const token = authorization.split('Bearer ')[1];
-            JwtService.verify(token);
-            console.log(JwtService.verify(token), "true verify")
-            return next();
-        } catch (err) {
-            return next(new Error('UNAUTHORlIZED'));
+    // Check Token
+    verify(roles) {
+        return (req, res, next) => {
+            try {
+                const authorization = req.headers['authorization'] || '';
+                const token = authorization.split('Bearer ')[1];
+                const data = JwtService.verify(token);
+                this.hasBlocked(
+                    data,
+                    (err, isBlocked) => {
+                        if (err) {
+                            return next(err);
+                        }
+                        if (!isBlocked.isBlocked) {
+                            if (Array.isArray(roles) && roles.length === 0) {
+                                return next();
+                            }
+                            this.hasRole(
+                                { data, roles },
+                                (err, hasRoles) => {
+                                    if (err) {
+                                        return next(err);
+                                    }
+                                    if (hasRoles.hasRoles) {
+                                        return next();
+                                    }
+                                }
+                            )
+                        }
+                    }
+                );
+
+                req.user = data;
+            } catch (err) {
+                console.error(err);
+                return next(new Error('UNAUTHORIZED'));
+            }
         }
-
     }
 
 
-    hasRole(req, res, next) {
-        const authorization = req.headers['authorization'] || '';
-        const token = authorization.split('Bearer ')[1];
-        console.log(token);
-        const decoded = JwtService.decode(token);
-        console.log(decoded.roles, "decoded token");
-        console.log(typeof decoded)
-        const foundRole = decoded.roles === "Admin";
-        return foundRole ?
-            next() :
-            next(new Error("FORBIDDEN"))
+    // Check role of user is Admin
+    hasRole({ data, roles }, callback) {
+        // check vao db
+        UserModel.checkRole(
+            { data, roles },
+            function (err, hasRoles) {
+                if (err) {
+                    return callback(err);
+                }
+                return callback(null, hasRoles);
+            }
+        )
     }
+
+
+    // Check user isBlocked
+    hasBlocked(user, callback) {
+        // check vao db
+        UserModel.checkIslocked(
+            user.userId,
+            function (err, isBlocked) {
+                if (err) {
+                    return callback(err);
+                }
+                return callback(null, isBlocked);
+            }
+        );
+    };
 
 }
 

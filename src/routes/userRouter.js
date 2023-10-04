@@ -1,32 +1,25 @@
 const express = require('express');
 const router = express.Router();
 
-const {
-    loginByUser,
-    logOutUser,
-    createUser,
-    listUsers
-} = require('../controller/userController');
-
-const { validateUser } = require('../middleware/validateCreateUser');
-
+const userController = require('../controller/userController');
+const validateCreateUser = require('../middleware/validateCreateUser');
 const JWTMiddleware = require('../middleware/JWTMiddleware');
 
 
 // Login by user
-router.post('/login', loginByUser)
+router.post('/login', userController.loginByUser)
 
 
 // logout
-router.get('/logout', logOutUser)
+router.get('/logout', userController.logOutUser)
 
 
 // Register user
-router.post('/register', [validateUser], createUser)
+router.post('/register', [validateCreateUser.validateUser], userController.createUser)
 
 
 // List all users
-router.get('/listUsers', [JWTMiddleware.verify], listUsers)
+router.get('/list', [JWTMiddleware.verify, JWTMiddleware.hasBlocked], userController.listUsers)
 
 
 module.exports = router

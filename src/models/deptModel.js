@@ -11,11 +11,16 @@ class DeptModel {
 
     // Create Dept
     static createDept(dept, callback) {
-        console.log(dept);
+        const deptEntity = {
+            deptId: dept.deptId,
+            deptName: dept.deptName,
+            authorId: dept.authorId
+        }
+
         const sql = 'INSERT INTO dept SET ?'
         connect.query(
             sql,
-            dept,
+            deptEntity,
             (err) => {
                 if (err) {
                     return callback(err);
@@ -85,6 +90,7 @@ class DeptModel {
     // Check DeptName is existing 
     static isExistDeptName(deptName, callback) {
         const sql = "SELECT 1 FROM dept WHERE deptName = ? "
+        console.log(deptName)
         connect.query(
             sql,
             deptName,
@@ -149,31 +155,6 @@ class DeptModel {
             }
         )
     }
-
-    static selectMemberForDept(deptId, callback) {
-        const sql = `SELECT userId, userName, age, roles, gmail, exp, deptId, position
-                     FROM users
-                     LEFT JOIN members ON users.userId = members.memberId
-                     WHERE roles = "User" and isBlocked = 0 and 
-                     users.userId NOT IN 
-                        (SELECT memberId 
-                        from members 
-                        where deptId = ?)`
-        connect.query(
-            sql,
-            deptId,
-            function (err, result) {
-                if (err) {
-                    return callback(err);
-                }
-                return callback(null, result);
-            }
-        )
-    }
-
-
-
-
 
 }
 

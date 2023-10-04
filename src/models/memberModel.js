@@ -11,38 +11,28 @@ class MemberModel {
 
 
     // Get all users
-    static listMember(results) {
-        const sql = "SELECT * FROM members ";
+    static listMember(callback) {
+        const sql = "SELECT * FROM members";
         connect.query(
             sql,
             function (err, result) {
                 if (err) {
-                    return results(err, null);
+                    return callback(err, null);
                 }
-                return results(null, result);
+                return callback(null, result);
             }
         )
     }
 
-    static insertSelectMember = (listMembers, callback) => {
+
+    // Insert member by select
+    static insertSelectMember = ({ deptId, membersSelect }, callback) => {
         let sql = "INSERT INTO members VALUES "
 
-        for (let index = 0; index < listMembers.length; index++) {
-            sql += `(${listMembers[index].memberId}, '${listMembers[index].deptId}', '${listMembers[index].position}')`
-            console.log()
-            if (index < listMembers.length - 1) {
-                sql += ','
-            }
+        for (let index = 0; index < membersSelect.length; index++) {
+            sql += `(${membersSelect[index].memberId}, '${deptId}', '${membersSelect[index].position}')`;
+            (index < membersSelect.length - 1) ? sql += ',' : '';
         }
-
-        // listMembers.map((member, index) => {
-        //     sql += `(${member.memberId}, '${member.deptId}', '${member.position}')`
-        //     if (index < listMembers.length - 1) {
-        //         sql += ','
-        //     }
-        // return sql;
-        // })
-        console.log(sql)
 
         connect.query(
             sql,
@@ -51,6 +41,42 @@ class MemberModel {
                     return callback(err)
                 }
                 return callback(null, { hasAddMembers: true })
+            }
+        )
+    }
+
+
+    // Check member in dept or blocked
+    static checkMemberInDeptOrIsBlock({ memberSelect, deptId }, callback) {
+        let listMemberId = "";
+        memberSelect.map((value, index) => {
+            listMemberId += value.memberId;
+            (index < memberSelect.length - 1) ? listMemberId += ',' : '';
+        })
+
+        let sql = `SELECT userId, userName, age, roles, gmail, exp, isBlocked
+                   FROM users
+                   LEFT JOIN members ON users.userId = members.memberId
+                   WHERE userId IN (${listMemberId})
+                        AND roles = "User" 
+                        AND (isBlocked = 0 OR isBlocked IS NULL) `;
+
+        const hasDeptId = deptId && deptId !== undefined;
+
+        hasDeptId ?
+            sql += `AND users.userId NOT IN 
+                    (SELECT memberId from members WHERE deptId = '${deptId}')
+                    GROUP BY userId`
+            :
+            sql += `GROUP BY userId`;
+
+        connect.query(
+            sql,
+            function (err, result) {
+                if (err) {
+                    return callback(err);
+                }
+                return callback(null, result);
             }
         )
     }

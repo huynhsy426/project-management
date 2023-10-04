@@ -99,20 +99,94 @@ SELECT * FROM users;
 SELECT * FROM members;
 SELECT * FROM dept;
 
+SELECT * FROM members
+WHERE memberId =  1;
+SELECT * FROM members
+JOIN dept ON members.deptId = dept.deptId
+WHERE memberId = 1;
+
+SELECT * FROM dept;
+
+SELECT memberId, position, dept.deptId, deptName,authorId
+FROM members 
+JOIN dept ON members.deptId = dept.deptId
+WHERE memberId = 3
+;
+
+
+SELECT * 
+FROM members
+WHERE memberId = 2 AND deptId = 'D0001'
+;
+
+
 -- SELECT users.userId, users.username, users.age, users.roles, users.gmail, dept.deptName, dept.authorId as 'Manager', members.exp
 -- FROM users JOIN members ON users.userId = members.memberId
 -- 		   JOIN dept ON members.deptId = dept.deptId;
+SELECT * FROM users;
+SELECT * FROM members;
+SELECT * FROM dept;
 
-SELECT userId, userName, age, roles, gmail, exp, deptId, position 
+
+SELECT userId, userName, age, roles, gmail, exp, deptId, position , isBlocked
 FROM users
 LEFT JOIN members ON users.userId = members.memberId
-WHERE roles = "User" and isBlocked = 0 and users.userId NOT IN (SELECT memberId from members where deptId = "D0001");
+WHERE roles = "User" and (isBlocked = 0 OR isBlocked IS NULL) AND users.userId NOT IN (SELECT memberId from members where deptId = "D0004");
+
+SELECT userId, userName, age, roles, gmail, exp, isBlocked
+FROM users
+LEFT JOIN members ON users.userId = members.memberId
+WHERE userId IN (3,15) 
+AND roles = "User" 
+and (isBlocked = 0 OR isBlocked IS NULL)--  AND users.userId NOT IN (SELECT memberId from members where deptId = "D0004")
+GROUP BY userId;
+
+SELECT userId, userName, age, roles, gmail, exp, isBlocked
+FROM users
+LEFT JOIN members ON users.userId = members.memberId
+WHERE userId IN ('3','15')
+AND roles = "User"
+AND (isBlocked = 0 OR isBlocked IS NULL) GROUP BY userId
+;
+
+SELECT * FROM users WHERE userId = '2' and isBlocked = 0;
+
+SELECT 1 
+FROM users
+WHERE userId = 1 AND roles IN ("User");
 
 SELECT userId 
 FROM users
 -- LEFT JOIN members ON users.userId = members.memberId
 WHERE roles = "User" and isBlocked = 0
 GROUP BY userId;
-           
-SELECT deptId FROM dept 
-ORDER BY deptId;
+
+SELECT * 
+FROM members JOIN dept ON members.deptId = dept.deptId
+WHERE deptName = "dev"
+;
+
+
+SELECT * 
+FROM members JOIN users ON members.memberId = users.userId
+WHERE memberId in (1,3,15) AND deptId = 'D0001' AND isBlocked = 0;
+
+SELECT * 
+FROM members RIGHT JOIN users ON members.memberId = users.userId
+WHERE memberId IN (1,3,4,15) AND deptId = 'D0001'
+;
+
+
+SELECT * FROM users;
+SELECT * FROM members;
+SELECT * FROM dept;
+
+SELECT * 
+FROM users LEFT JOIN members ON users.userId = members.memberId
+WHERE members.deptId = 'D0001'
+;
+
+SELECT * 
+FROM members
+WHERE deptId <> 'D0001' 
+;
