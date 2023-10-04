@@ -55,7 +55,9 @@ class DeptModel {
 
     // List Dept sorts by deptId
     static sortDeptById(callback) {
-        const sql = "SELECT deptId FROM dept ORDER BY deptId";
+        const sql = `SELECT deptId, deptName 
+                     FROM dept 
+                     ORDER BY deptId`;
         connect.query(
             sql,
             function (err, result) {
@@ -89,7 +91,7 @@ class DeptModel {
 
     // Check DeptName is existing 
     static isExistDeptName(deptName, callback) {
-        const sql = "SELECT 1 FROM dept WHERE deptName = ? "
+        const sql = "SELECT 1 FROM dept WHERE deptName = ?"
         console.log(deptName)
         connect.query(
             sql,
@@ -146,12 +148,12 @@ class DeptModel {
         connect.query(
             sql,
             [dept.deptName, dept.deptId],
-            (err) => {
+            (err, result) => {
                 if (err) {
                     console.log("error: ", err);
                     return callback(err);
                 }
-                return callback(null, { hasUpdate: true });
+                return callback(null, result);
             }
         )
     }

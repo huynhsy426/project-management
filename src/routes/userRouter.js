@@ -19,7 +19,7 @@ router.post('/register', [validateCreateUser.validateUser], userController.creat
 
 
 // List all users
-router.get('/list', [JWTMiddleware.verify, JWTMiddleware.hasBlocked], userController.listUsers)
+router.get('/list', [JWTMiddleware.verify([])], userController.listUsers)
 
 
 module.exports = router

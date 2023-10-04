@@ -47,9 +47,13 @@ module.exports = {
         console.log(deptEntity, "Dept Entity")
 
         !validateString(deptEntity.deptName) && errMessage.push("dept name is valid");
-        validateMemberIdFormat(deptEntity.members, errMessage);
-        validateMemberId(deptEntity.members, errMessage);
-        validatePosition(deptEntity.members, errMessage);
+
+        if (deptEntity.members && deptEntity.members.length !== 0) {
+            validateMemberIdFormat(deptEntity.members, errMessage);
+            validateMemberId(deptEntity.members, errMessage);
+            validatePosition(deptEntity.members, errMessage);
+        }
+        console.log(errMessage, "Error")
 
         if (errMessage.length === 0) {
             return next();

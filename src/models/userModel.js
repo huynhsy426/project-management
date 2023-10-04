@@ -117,10 +117,10 @@ class UserModel {
     }
 
 
-    static checkIslocked(userId, callback) {
-        const sql = `SELECT 1 
+    static getUser(userId, callback) {
+        const sql = `SELECT userId, roles, username, age, gmail, exp, isBlocked
                 FROM users
-                WHERE userId = ? AND isblocked = 0`;
+                WHERE userId = ?`;
         connect.query(
             sql,
             userId,
@@ -128,38 +128,8 @@ class UserModel {
                 if (err) {
                     return callback(err);
                 }
-                if (result.length === 0) {
-                    return callback(new Error('ACCOUNT_HAS_BLOCKED'));
-                }
-                return callback(null, { isBlocked: false });
-            }
-        )
-    }
 
-    static checkRole({ data, roles }, callback) {
-        let roleValues = "";
-        roles.forEach((value, index, array) => {
-            roleValues += `"${value}"`;
-            (index < array.length - 1) ? roleValues += ',' : '';
-        });
-
-        let sql = `SELECT 1 
-                FROM users
-                WHERE userId = ? AND roles IN `;
-        sql += '(' + roleValues + ')';
-
-        connect.query(
-            sql,
-            [data.userId],
-            (err, result) => {
-                console.log(result);
-                if (err) {
-                    return callback(err);
-                }
-                if (result.length === 0) {
-                    return callback(new Error('FORBIDDEN'));
-                }
-                return callback(null, { hasRoles: true });
+                return callback(null, result);
             }
         )
     }

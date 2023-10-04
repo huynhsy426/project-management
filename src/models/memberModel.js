@@ -36,10 +36,11 @@ class MemberModel {
 
         connect.query(
             sql,
-            function (err) {
+            function (err, result) {
                 if (err) {
                     return callback(err)
                 }
+                console.log(result);
                 return callback(null, { hasAddMembers: true })
             }
         )
@@ -54,7 +55,7 @@ class MemberModel {
             (index < memberSelect.length - 1) ? listMemberId += ',' : '';
         })
 
-        let sql = `SELECT userId, userName, age, roles, gmail, exp, isBlocked
+        let sql = `SELECT 1
                    FROM users
                    LEFT JOIN members ON users.userId = members.memberId
                    WHERE userId IN (${listMemberId})

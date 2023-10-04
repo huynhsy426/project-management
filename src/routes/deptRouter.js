@@ -8,25 +8,6 @@ const validateCreateDept = require('../middleware/validateCreateDept');
 const JWTMiddleware = require('../middleware/JWTMiddleware');
 
 
-const checkDataWithRoleAndIsBlock = [
-    validateCreateDept.validateDept,
-    JWTMiddleware.verify,
-    JWTMiddleware.hasRole,
-    JWTMiddleware.hasBlocked,
-]
-
-const checkRolesAndIsBlock = [
-    JWTMiddleware.verify,
-    JWTMiddleware.hasRole,
-    JWTMiddleware.hasBlocked
-]
-
-const checkIsBlock = [
-    JWTMiddleware.verify,
-    JWTMiddleware.hasBlocked
-]
-
-
 // getDeptPage
 router.get("/list", deptController.listDeptsByRoles)
 
@@ -41,7 +22,7 @@ router.get("/search", deptController.searchDept)
 // router.delete("/:id/delete", deleteById)
 
 // Update dept by Id
-router.put("/admin/:deptId/update", [JWTMiddleware.verify(["Admin"])], deptController.updateById)
+router.put("/admin/:deptId/update", [validateCreateDept.validateDept, JWTMiddleware.verify(["Admin"])], deptController.updateById)
 
 
 module.exports = router

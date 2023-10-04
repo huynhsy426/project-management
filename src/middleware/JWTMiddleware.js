@@ -13,69 +13,30 @@ class JWTMiddleware {
                 const authorization = req.headers['authorization'] || '';
                 const token = authorization.split('Bearer ')[1];
                 const data = JwtService.verify(token);
-                this.hasBlocked(
-                    data,
-                    (err, isBlocked) => {
+
+                UserModel.getUser(
+                    data.userId,
+                    (err, user) => {
+                        console.log(user);
                         if (err) {
                             return next(err);
                         }
-                        if (!isBlocked.isBlocked) {
-                            if (Array.isArray(roles) && roles.length === 0) {
-                                return next();
+                        if (user[0].isBlocked === 1) {
+                            return next(new Error('USER_HAS_BLOCKED'));
+                        } else {
+                            if (roles.length !== 0 && !roles.includes(user[0].roles)) {
+                                return next(new Error('INVALID_ROLE'));
                             }
-                            this.hasRole(
-                                { data, roles },
-                                (err, hasRoles) => {
-                                    if (err) {
-                                        return next(err);
-                                    }
-                                    if (hasRoles.hasRoles) {
-                                        return next();
-                                    }
-                                }
-                            )
+                            req.user = user;
+                            return next();
                         }
-                    }
-                );
-
-                req.user = data;
+                    })
             } catch (err) {
                 console.error(err);
                 return next(new Error('UNAUTHORIZED'));
             }
         }
     }
-
-
-    // Check role of user is Admin
-    hasRole({ data, roles }, callback) {
-        // check vao db
-        UserModel.checkRole(
-            { data, roles },
-            function (err, hasRoles) {
-                if (err) {
-                    return callback(err);
-                }
-                return callback(null, hasRoles);
-            }
-        )
-    }
-
-
-    // Check user isBlocked
-    hasBlocked(user, callback) {
-        // check vao db
-        UserModel.checkIslocked(
-            user.userId,
-            function (err, isBlocked) {
-                if (err) {
-                    return callback(err);
-                }
-                return callback(null, isBlocked);
-            }
-        );
-    };
-
 }
 
 module.exports = new JWTMiddleware();

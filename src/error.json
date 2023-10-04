@@ -35,8 +35,12 @@
         "message": "User can't join dept",
         "statusCode": 400
     },
-    "ACCOUNT_HAS_BLOCKED": {
+    "USER_HAS_BLOCKED": {
         "message": "Account has been blocked",
+        "statusCode": 403
+    },
+    "INVALID_ROLE": {
+        "message": "403 Forbidden",
         "statusCode": 403
     }
 }

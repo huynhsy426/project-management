@@ -104,11 +104,6 @@ class UserController {
                 if (result.length !== 0) {
                     const user = {
                         userId: result[0].userId,
-                        username: result[0].username,
-                        roles: result[0].roles,
-                        gmail: result[0].gmail,
-                        exps: result[0].exp,
-                        isBlocked: result[0].isBlocked
                     }
 
                     if (!isBlocked) {

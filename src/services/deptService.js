@@ -20,18 +20,6 @@ class DeptService {
     }
 
 
-    createDeptViewService = (deptId, callback) => {
-        DeptModel.selectMemberForDept(
-            deptId,
-            function (err, result) {
-                if (err) {
-                    return callback(err)
-                }
-                return callback(null, result)
-            })
-    }
-
-
     // Create new Dept
     createDeptService = (deptEntity, callback) => {
         console.log(deptEntity, 'create dept');
@@ -42,28 +30,37 @@ class DeptService {
                 if (err) {
                     return callback(err);
                 }
-                const memberList = createAutoDeptId(deptEntity, listDeptSort);
-                console.log(memberList, "members list");
-                DeptModel.createDept(
-                    deptEntity,
-                    function (error, hasCreateDept) {
-                        if (error) {
-                            callback(error);
-                        }
-                        if (hasCreateDept.hasCreateDept) {
-                            MemberService.addMembersToDeptService(
-                                { deptId: deptEntity.deptId, membersSelect: memberList },
-                                function (error, hasAddMembers) {
-                                    if (error) {
-                                        return callback(error);
-                                    }
-                                    return callback(null, { hasCreateDept, hasAddMembers });
-                                }
-                            )
-                        }
+                const listDepName = listDeptSort.map((item, index) => {
+                    return (item.deptName);
+                })
 
-                    }
-                )
+                const isExistDeptName = listDepName.includes(deptEntity.deptName);
+
+                if (!isExistDeptName) {
+                    const memberList = createAutoDeptId(deptEntity, listDeptSort);
+                    DeptModel.createDept(
+                        deptEntity,
+                        function (error, hasCreateDept) {
+                            if (error) {
+                                callback(error);
+                            }
+                            if (hasCreateDept.hasCreateDept) {
+                                MemberService.addMembersToDeptService(
+                                    { deptId: deptEntity.deptId, membersSelect: memberList },
+                                    function (error, hasAddMembers) {
+                                        if (error) {
+                                            return callback(error);
+                                        }
+                                        return callback(null, { hasCreateDept, hasAddMembers });
+                                    }
+                                )
+                            }
+
+                        }
+                    )
+                } else {
+                    return callback(new Error('DEPTNAME_UNIQUE'), { hasCreateDept: false, hasAddMembers: false })
+                }
             }
         )
 
@@ -116,25 +113,14 @@ class DeptService {
 
     // Update dept by Id
     updateByIdService = (dept, callback) => {
-        DeptModel.isExistDept(
-            dept.deptId,
-            function (err, isExistDept) {
+        DeptModel.updateById(
+            dept,
+            function (err, result) {
                 if (err) {
-                    return callback(err)
+                    return callback(err);
                 }
-                console.log(isExistDept)
-                if (!isExistDept) {
-                    return callback(null, { isExistDept: false })
-                }
-                DeptModel.updateById(
-                    dept,
-                    function (error, hasUpdate) {
-                        if (error) {
-                            return callback(error)
-                        }
-                        return callback(null, { isExistDept: true, hasUpdate })
-                    }
-                )
+                const isUpdate = result.affectedRows !== 0;
+                return callback(null, isUpdate);
             }
         )
     }
