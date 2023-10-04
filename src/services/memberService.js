@@ -4,31 +4,31 @@ class MemberService {
 
     constructor() { }
 
-    checkMembersToDeptService = ({ memberSelect, deptId }, callback) => {
-        MemberModel.checkMemberInDeptOrIsBlock(
-            { memberSelect, deptId },
-            (err, memberResult) => {
-                if (err) {
-                    return callback(err);
-                }
-                return memberResult.length === memberSelect.length ?
-                    callback(null, { hasInsert: true }) :
-                    callback(null, { hasInsert: false });
-            }
-        )
+
+    // Check member block
+    // Check member already in dept
+    checkMemberInDeptOrIsBlock = ({ memberSelect, deptId }, callback) => {
+        MemberModel.checkMemberInDeptOrIsBlock({ memberSelect, deptId }, callback);
     };
 
-    addMembersToDeptService = ({ deptId, membersSelect }, callback) => {
-        MemberModel.insertSelectMember(
-            { deptId, membersSelect },
-            function (error, hasAddMembers) {
-                if (error) {
-                    return callback(error);
-                }
-                console.log(hasAddMembers, "asdkjh")
-                return callback(null, { hasAddMembers });
+    addMembersToDeptService = ({ deptId, members, deptAuthorId }, callback) => {
+        const addMembers = members.map(item => {
+            return {
+                memberId: item.memberId,
+                position: item.position,
+                deptId,
             }
-        )
+        });
+        addMembers.push({
+            memberId: deptAuthorId,
+            deptId,
+            position: "pm"
+        });
+
+        MemberModel.insertMember(
+            members,
+            callback
+        );
     }
 }
 

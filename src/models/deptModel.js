@@ -32,39 +32,47 @@ class DeptModel {
 
 
     // List of Depts
-    static listDeptsByRole(member, callback) {
+    static getDepts({ userId, roles }, callback) {
         let sql = "";
-        member.roles === "Admin" ?
-            sql = `SELECT * FROM dept` :
+        if (roles === 'Admin') {
+            sql = `SELECT * FROM dept`
+        } else {
             sql = `SELECT memberId, position, dept.deptId, deptName, authorId FROM members
-        JOIN dept ON members.deptId = dept.deptId
-        WHERE memberId = ?`;
+                JOIN dept ON members.deptId = dept.deptId
+                WHERE memberId = ?`;
+        }
 
         connect.query(
             sql,
-            member.memberId,
-            function (err, listDeptByUser) {
+            userId,
+            function (err, result) {
                 if (err) {
                     return callback(err);
                 }
-                return callback(null, listDeptByUser);
+                return callback(null, result);
             }
         )
     }
 
 
     // List Dept sorts by deptId
-    static sortDeptById(callback) {
+    static getNewDeptId(callback) {
         const sql = `SELECT deptId, deptName 
                      FROM dept 
-                     ORDER BY deptId`;
+                     ORDER BY deptId LIMIT 1`;
         connect.query(
             sql,
             function (err, result) {
                 if (err) {
                     return callback(new Error(err.message));
                 }
-                return callback(null, result);
+                let newDeptId;
+                if (result.length === 0) {
+                    newDeptId = 'D0001';
+                } else {
+                    newDeptId = +result[result.length - 1].deptId.split("D")[1] + 1
+                }
+                return callback(null, newDeptId);
             }
         )
     }
@@ -90,9 +98,8 @@ class DeptModel {
 
 
     // Check DeptName is existing 
-    static isExistDeptName(deptName, callback) {
+    static getDeptByName(deptName, callback) {
         const sql = "SELECT 1 FROM dept WHERE deptName = ?"
-        console.log(deptName)
         connect.query(
             sql,
             deptName,
@@ -101,9 +108,7 @@ class DeptModel {
                     return callback(err);
                 }
 
-                return isEmpty(result) ?
-                    callback(null, { isDeptNameExist: false }) :
-                    callback(new Error("DEPTNAME_UNIQUE"))
+                return callback(null, result);
             }
         )
     }

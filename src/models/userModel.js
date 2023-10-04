@@ -120,7 +120,7 @@ class UserModel {
     static getUser(userId, callback) {
         const sql = `SELECT userId, roles, username, age, gmail, exp, isBlocked
                 FROM users
-                WHERE userId = ?`;
+                WHERE userId = ? LIMIT 1`;
         connect.query(
             sql,
             userId,

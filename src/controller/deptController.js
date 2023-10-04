@@ -10,13 +10,8 @@ class DeptController {
 
     listDeptsByRoles = (req, res, next) => {
         const { userId, roles } = req.user
-        const member = {
-            memberId: userId,
-            roles: roles
-        }
-
-        DeptService.listDeptsService(
-            member,
+        DeptService.listDepts(
+            { userId, roles },
             function (err, result) {
                 if (err) {
                     return next(err);
@@ -34,42 +29,27 @@ class DeptController {
         // Check member block thi khong cho phep add vao phong ban
         // Check member da trung thi khong cho add them vao
         const { members, deptName } = req.body;
-        const { userId, exp } = req.user[0];
-
-        const deptEntity = {
-            deptId: '',
-            deptName: deptName,
-            authorId: userId,
+        const { userId: authorId, exp } = req.user;
+        const newDept = {
+            deptName,
+            authorId,
             authorExp: exp,
-            members: members
         }
-        console.log(deptEntity)
 
-        // Check members of listSelect
-        memberService.checkMembersToDeptService(
+        memberService.checkMemberInDeptOrIsBlock(
             { memberSelect: members },
-            (error, hasInsert) => {
+            (error) => {
                 if (error) {
                     return next(error);
                 }
-                if (!hasInsert.hasInsert) {
-                    return next(new Error('MEMBER_ID_CANNOT_JOIN_DEPT'));
-                }
 
-                // After validation all create dept and add members to dept
-                DeptService.createDeptService(
-                    deptEntity,
-                    function (err, { hasCreateDept, hasAddMembers }) {
+                DeptService.createDept(
+                    { newDept, members },
+                    function (err, result) {
                         if (err) {
                             return next(err);
                         }
-                        if (hasAddMembers.hasAddMembers) {
-                            return res.status(StatusCodes.CREATED).json({
-                                hasCreateDept: hasCreateDept,
-                                hasAddMembers: "Add members successfully",
-                                createMessage: "Create Dept successfully"
-                            })
-                        }
+                        return res.status(200).json(result);
                     }
                 )
 
