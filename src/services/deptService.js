@@ -30,12 +30,15 @@ class DeptService {
                 if (err) {
                     return callback(err);
                 }
+
+                // Check name is exist 
                 const listDepName = listDeptSort.map((item, index) => {
                     return (item.deptName);
                 })
 
                 const isExistDeptName = listDepName.includes(deptEntity.deptName);
 
+                // if not exists create auto Id for create dept
                 if (!isExistDeptName) {
                     const memberList = createAutoDeptId(deptEntity, listDeptSort);
                     DeptModel.createDept(
@@ -45,6 +48,7 @@ class DeptService {
                                 callback(error);
                             }
                             if (hasCreateDept.hasCreateDept) {
+                                // add member to dept
                                 MemberService.addMembersToDeptService(
                                     { deptId: deptEntity.deptId, membersSelect: memberList },
                                     function (error, hasAddMembers) {
@@ -63,8 +67,6 @@ class DeptService {
                 }
             }
         )
-
-
     }
 
 
