@@ -31,16 +31,24 @@
         "message": "403 Forbidden",
         "statusCode": 403
     },
-    "MEMBER_ID_CANNOT_JOIN_DEPT": {
-        "message": "User can't join dept",
-        "statusCode": 400
-    },
     "USER_HAS_BLOCKED": {
         "message": "Account has been blocked",
         "statusCode": 403
     },
     "INVALID_ROLE": {
         "message": "403 Forbidden",
+        "statusCode": 403
+    },
+    "ADD_MEMBER_BLOCK": {
+        "message": "Can't add member blocked",
+        "statusCode": 403
+    },
+    "MEMBER_ALREADY_IN_DEPT": {
+        "message": "Members already in dept",
+        "statusCode": 403
+    },
+    "CREAT_DEPT_FAILED": {
+        "message": "Can't create dept",
         "statusCode": 403
     }
 }

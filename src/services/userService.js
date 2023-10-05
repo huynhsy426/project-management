@@ -4,29 +4,13 @@ class UserService {
 
     constructor() { }
 
-    loginByUserService = ({ username, userPassword }, callback) => {
+    loginByUser = ({ username, userPassword }, callback) => {
         UserModel.checkUserLogin(
-            { username, userPassword },
-            function (err, { isBlocked, result }) {
-                if (err) {
-                    return callback(err)
-                }
-                return callback(null, { isBlocked, result });
-            }
-        )
+            { username, userPassword }, callback)
     }
 
-    createUserService = (user, callback) => {
-        console.log('createUserService', user)
-        UserModel.createUser(
-            user,
-            function (err, hasCreateUser) {
-                if (err) {
-                    return callback(err);
-                }
-                return callback(null, hasCreateUser);
-            }
-        )
+    createUser = (user, callback) => {
+        UserModel.createUser(user, callback)
     }
 }
 

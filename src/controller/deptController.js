@@ -2,21 +2,18 @@ const DeptModel = require("../models/deptModel");
 const DeptService = require("../services/deptService");
 const { StatusCodes } = require('http-status-codes');
 const JwtService = require("../services/JWTService");
-const memberService = require("../services/memberService");
+const MemberService = require("../services/memberService");
 
 class DeptController {
 
     constructor() { }
 
+    // List dept by roles of user
     listDeptsByRoles = (req, res, next) => {
         const { userId, roles } = req.user
-        const member = {
-            memberId: userId,
-            roles: roles
-        }
 
-        DeptService.listDeptsService(
-            member,
+        DeptService.listDeptsByRoles(
+            { memberId: userId, roles: roles },
             function (err, result) {
                 if (err) {
                     return next(err);
@@ -28,48 +25,47 @@ class DeptController {
         )
     };
 
-
+    // Validate du lieu
+    // Check member block thi khong cho phep add vao phong ban
+    // Check member da trung thi khong cho add them vao
     createDept = (req, res, next) => {
-        // Validate du lieu
-        // Check member block thi khong cho phep add vao phong ban
-        // Check member da trung thi khong cho add them vao
         const { members, deptName } = req.body;
-        const { userId, exp } = req.user[0];
+        const { userId, exp } = req.user;
 
+        console.log(members, "asdlkj members");
         const deptEntity = {
             deptId: '',
             deptName: deptName,
             authorId: userId,
             authorExp: exp,
-            members: members
         }
         console.log(deptEntity)
 
         // Check members of listSelect
-        memberService.checkMembersToDeptService(
+        MemberService.checkMemberInDeptOrIsBlock(
             { memberSelect: members },
-            (error, hasInsert) => {
+            (error) => {
                 if (error) {
                     return next(error);
                 }
-                if (!hasInsert.hasInsert) {
-                    return next(new Error('MEMBER_ID_CANNOT_JOIN_DEPT'));
-                }
 
-                // After validation all create dept and add members to dept
-                DeptService.createDeptService(
-                    deptEntity,
-                    function (err, { hasCreateDept, hasAddMembers }) {
+                DeptService.createDept(
+                    { deptEntity, members },
+                    function (err, result) {
                         if (err) {
                             return next(err);
                         }
-                        if (hasAddMembers.hasAddMembers) {
+
+                        if (result.affectedRows === 0) {
                             return res.status(StatusCodes.CREATED).json({
-                                hasCreateDept: hasCreateDept,
-                                hasAddMembers: "Add members successfully",
-                                createMessage: "Create Dept successfully"
+                                createMessage: "Create unsuccessful"
                             })
                         }
+
+                        return res.status(StatusCodes.CREATED).json({
+                            createMessage: "Create Dept successfully"
+                        })
+
                     }
                 )
 
@@ -79,7 +75,7 @@ class DeptController {
 
 
     searchDept = (req, res) => {
-        DeptService.searchDeptService(
+        DeptService.searchDept(
             req.query.inputName,
             function (err, searchResult) {
                 if (err) {
@@ -88,7 +84,7 @@ class DeptController {
                     })
                 }
 
-                return res.status(200).json({
+                return res.status(StatusCodes.OK).json({
                     deptList: searchResult
                 })
             }
@@ -97,7 +93,7 @@ class DeptController {
 
 
     deleteById = (req, res) => {
-        DeptService.deleteByIdService(
+        DeptService.deleteById(
             req.params.dept_id,
             function (err, result) {
                 if (err) {
@@ -120,13 +116,15 @@ class DeptController {
     };
 
 
+    // Update by dept Id 
+    // Just update name
     updateById = (req, res, next) => {
         const deptModel = {
             deptId: req.params.deptId,
             deptName: req.body.deptName
         }
 
-        DeptService.updateByIdService(
+        DeptService.updateById(
             deptModel,
             function (err, isUpdate) {
                 if (err) {
@@ -137,18 +135,12 @@ class DeptController {
                         errMessage: "Dept Id not found."
                     })
                 }
-                return isUpdate ?
-                    res.status(StatusCodes.OK).json({
-                        errMessage: "Update successfully."
-                    }) :
-                    res.status(StatusCodes.BAD_REQUEST).json({
-                        errMessage: "Dept Id not found."
-                    })
-
-
+                return res.status(StatusCodes.OK).json({
+                    errMessage: "Update successfully."
+                })
             }
         )
-    }
+    };
 
 
 }

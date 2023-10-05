@@ -11,26 +11,7 @@ class UserController {
     constructor() { }
 
     // List users
-    listUsers = (req, res) => {
-        const authorization = req.headers['authorization'] || '';
-
-        const token = authorization.split('Bearer ')[1];
-        console.log(token);
-        const user = JwtService.decode(token);
-        console.log(user, "askdjhkj");
-        console.log(user.username)
-        if (user && user.roles === "Admin") {
-
-        } else if (user && user.roles !== "Admin") {
-
-        }
-
-
-
-        res.json({
-            err: "asjhasjdhbjhb"
-        })
-    };
+    listUsers = (req, res) => { };
 
 
     // create Project
@@ -50,26 +31,23 @@ class UserController {
 
         UserModel.isUserNameAndGmailExist(
             user,
-            function (error, isUserExist) {
+            function (error) {
                 if (error) {
                     return next(error);
                 }
-                console.log('isUserExist', isUserExist)
-                if (!isUserExist.isUserExist) {
-                    UserService.createUserService(
-                        user,
-                        function (err, isCreate) {
-                            if (err) {
-                                return next(err);
-                            }
-                            if (isCreate) {
-                                return res.status(StatusCodes.OK).json({
-                                    registerMessage: "Register successfully"
-                                })
-                            }
+                UserService.createUser(
+                    user,
+                    function (err, isCreate) {
+                        if (err) {
+                            return next(err);
                         }
-                    )
-                }
+                        if (isCreate) {
+                            return res.status(StatusCodes.OK).json({
+                                registerMessage: "Register successfully"
+                            })
+                        }
+                    }
+                )
             });
     };
 
@@ -95,31 +73,30 @@ class UserController {
     // login
     loginByUser = (req, res, next) => {
         const { username, userPassword } = req.body;
-        UserService.loginByUserService(
+        UserService.loginByUser(
             { username, userPassword },
             function (err, { isBlocked, result }) {
+                console.log({ isBlocked, result })
                 if (err) {
                     return next(err);
                 }
-                if (result.length !== 0) {
-                    const user = {
-                        userId: result[0].userId,
-                    }
-
-                    if (!isBlocked) {
-                        const token = JwtService.createJWT(user)
-                        return res.status(StatusCodes.OK).json({
-                            loginMessage: "Login successful",
-                            accessToken: token
-                        })
-                    }
-                    return next(new Error("BLOCK_USER"))
-
-                } else {
+                if (!result) {
                     return res.status(StatusCodes.BAD_REQUEST).json({
                         aaa: "Wrong account"
                     })
                 }
+                const user = {
+                    userId: result[0].userId,
+                }
+
+                if (!isBlocked) {
+                    const token = JwtService.createJWT(user)
+                    return res.status(StatusCodes.OK).json({
+                        loginMessage: "Login successful",
+                        accessToken: token
+                    })
+                }
+                return next(new Error("BLOCK_USER"))
             }
         )
     };

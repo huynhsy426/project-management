@@ -11,6 +11,7 @@ class DeptModel {
 
     // Create Dept
     static createDept(dept, callback) {
+        console.log("createDept")
         const deptEntity = {
             deptId: dept.deptId,
             deptName: dept.deptName,
@@ -21,28 +22,32 @@ class DeptModel {
         connect.query(
             sql,
             deptEntity,
-            (err) => {
+            (err, result) => {
                 if (err) {
                     return callback(err);
                 }
-                return callback(null, { hasCreateDept: true });
+
+                return callback(null, result);
             }
         )
     }
 
 
     // List of Depts
-    static listDeptsByRole(member, callback) {
+    static listDeptsByRole({ memberId, roles }, callback) {
         let sql = "";
-        member.roles === "Admin" ?
-            sql = `SELECT * FROM dept` :
-            sql = `SELECT memberId, position, dept.deptId, deptName, authorId FROM members
-        JOIN dept ON members.deptId = dept.deptId
-        WHERE memberId = ?`;
+        if (roles === "Admin") {
+            sql = `SELECT * FROM dept`
+        }
+        sql = `SELECT memberId, position, dept.deptId, deptName, authorId 
+               FROM members
+               JOIN dept ON members.deptId = dept.deptId
+               WHERE memberId = ?`;
+
 
         connect.query(
             sql,
-            member.memberId,
+            memberId,
             function (err, listDeptByUser) {
                 if (err) {
                     return callback(err);
@@ -54,17 +59,23 @@ class DeptModel {
 
 
     // List Dept sorts by deptId
-    static sortDeptById(callback) {
-        const sql = `SELECT deptId, deptName 
-                     FROM dept 
-                     ORDER BY deptId`;
+    static createAutoDeptId(callback) {
+        const sql = `SELECT deptId 
+                     FROM dept
+                     ORDER BY deptId DESC LIMIT 1`;
         connect.query(
             sql,
             function (err, result) {
                 if (err) {
-                    return callback(new Error(err.message));
+                    return callback(err);
                 }
-                return callback(null, result);
+                if (result.length !== 0) {
+                    const deptIdSplit = result[0].deptId.split("D");
+                    const deptIdAutoChange = +deptIdSplit[1] + 1;
+                    return callback(null, "D000" + deptIdAutoChange);
+                }
+                return callback(null, "D0001");
+
             }
         )
     }
@@ -72,7 +83,7 @@ class DeptModel {
 
     // Check dept_Id is exists
     static isExistDept(deptId, callback) {
-        const sql = "SELECT 1 FROM dept WHERE deptId = ?"
+        const sql = "SELECT 1 FROM dept WHERE deptId = ? LIMIT 1";
         connect.query(
             sql,
             deptId,
@@ -88,22 +99,20 @@ class DeptModel {
         )
     }
 
-
-    // Check DeptName is existing 
     static isExistDeptName(deptName, callback) {
-        const sql = "SELECT 1 FROM dept WHERE deptName = ?"
-        console.log(deptName)
+        const sql = "SELECT 1 FROM dept WHERE deptName = ? LIMIT 1";
         connect.query(
             sql,
             deptName,
-            (err, result) => {
+            (err, resultDeptName) => {
                 if (err) {
                     return callback(err);
                 }
 
-                return isEmpty(result) ?
-                    callback(null, { isDeptNameExist: false }) :
-                    callback(new Error("DEPTNAME_UNIQUE"))
+                if (!isEmpty(resultDeptName)) {
+                    return callback(new Error("DEPTNAME_UNIQUE"));
+                }
+                return callback();
             }
         )
     }
@@ -111,7 +120,7 @@ class DeptModel {
 
     // Search dept by deptName
     static searchDeptByName(inputName, callback) {
-        sql = "SELECT * FROM dept WHERE deptName = ?"
+        sql = "SELECT * FROM dept WHERE deptName = ? LIMIT 1"
         connect.query(
             sql,
             ['%' + inputName + '%'],
@@ -153,7 +162,8 @@ class DeptModel {
                     console.log("error: ", err);
                     return callback(err);
                 }
-                return callback(null, result);
+                const isUpdate = result.affectedRows !== 0;
+                return callback(null, isUpdate);
             }
         )
     }

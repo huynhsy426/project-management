@@ -12,7 +12,7 @@ class JwtService {
     createJWT = (payload) => {
         let secretKey = process.env.JWT_SECRET;
         let expiresIn = {
-            expiresIn: "1d"
+            expiresIn: process.env.JWT_EXPIRES_IN
         }
         return jwt.sign(payload, secretKey, expiresIn);
     }

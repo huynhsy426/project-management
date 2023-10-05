@@ -4,31 +4,37 @@ class MemberService {
 
     constructor() { }
 
-    checkMembersToDeptService = ({ memberSelect, deptId }, callback) => {
+    // Kiem tra isBlock Or co ton tai trong Dept 
+    checkMemberInDeptOrIsBlock = ({ memberSelect, deptId }, callback) => {
         MemberModel.checkMemberInDeptOrIsBlock(
-            { memberSelect, deptId },
-            (err, memberResult) => {
-                if (err) {
-                    return callback(err);
-                }
-                return memberResult.length === memberSelect.length ?
-                    callback(null, { hasInsert: true }) :
-                    callback(null, { hasInsert: false });
-            }
-        )
+            { memberSelect, deptId }, callback)
     };
 
-    addMembersToDeptService = ({ deptId, membersSelect }, callback) => {
-        MemberModel.insertSelectMember(
-            { deptId, membersSelect },
-            function (error, hasAddMembers) {
-                if (error) {
-                    return callback(error);
-                }
-                console.log(hasAddMembers, "asdkjh")
-                return callback(null, { hasAddMembers });
+
+    // Create memberList by members for insert
+    // if has authorId add author to dept
+    // Else not add
+    // add memberList To Dept
+    addMembersToDept = ({ deptId, members, authorId }, callback) => {
+        console.log({ deptId, members, authorId })
+        const memberList = members.map(member => {
+            return {
+                memberId: member.memberId,
+                deptId: deptId,
+                position: member.position
             }
-        )
+        })
+
+        if (authorId) {
+            memberList.push({
+                memberId: authorId,
+                deptId: deptId,
+                position: "pm"
+            })
+        }
+
+        MemberModel.insertMembers(
+            { deptId, memberList }, callback)
     }
 }
 

@@ -11,7 +11,7 @@ class MemberModel {
 
 
     // Get all users
-    static listMember(callback) {
+    static listMembers(callback) {
         const sql = "SELECT * FROM members";
         connect.query(
             sql,
@@ -26,13 +26,14 @@ class MemberModel {
 
 
     // Insert member by select
-    static insertSelectMember = ({ deptId, membersSelect }, callback) => {
+    static insertMembers = ({ deptId, memberList }, callback) => {
         let sql = "INSERT INTO members VALUES "
 
-        for (let index = 0; index < membersSelect.length; index++) {
-            sql += `(${membersSelect[index].memberId}, '${deptId}', '${membersSelect[index].position}')`;
-            (index < membersSelect.length - 1) ? sql += ',' : '';
+        for (let index = 0; index < memberList.length; index++) {
+            sql += `(${memberList[index].memberId}, '${deptId}', '${memberList[index].position}')`;
+            (index < memberList.length - 1) ? sql += ',' : '';
         }
+        console.log(sql);
 
         connect.query(
             sql,
@@ -41,7 +42,7 @@ class MemberModel {
                     return callback(err)
                 }
                 console.log(result);
-                return callback(null, { hasAddMembers: true })
+                return callback(null, result)
             }
         )
     }
@@ -49,35 +50,50 @@ class MemberModel {
 
     // Check member in dept or blocked
     static checkMemberInDeptOrIsBlock({ memberSelect, deptId }, callback) {
-        let listMemberId = "";
-        memberSelect.map((value, index) => {
-            listMemberId += value.memberId;
-            (index < memberSelect.length - 1) ? listMemberId += ',' : '';
-        })
+        let listMemberId = memberSelect.map((value) => value.memberId).join(",");
 
-        let sql = `SELECT 1
+        let sqlCheckIsBlock = `SELECT username
                    FROM users
-                   LEFT JOIN members ON users.userId = members.memberId
                    WHERE userId IN (${listMemberId})
-                        AND roles = "User" 
-                        AND (isBlocked = 0 OR isBlocked IS NULL) `;
-
-        const hasDeptId = deptId && deptId !== undefined;
-
-        hasDeptId ?
-            sql += `AND users.userId NOT IN 
-                    (SELECT memberId from members WHERE deptId = '${deptId}')
-                    GROUP BY userId`
-            :
-            sql += `GROUP BY userId`;
+                         AND roles = "User"
+                         AND (isBlocked = 1)`;
 
         connect.query(
-            sql,
+            sqlCheckIsBlock,
             function (err, result) {
                 if (err) {
                     return callback(err);
                 }
-                return callback(null, result);
+
+                if (result.length > 0) {
+                    return callback(new Error("ADD_MEMBER_BLOCK"))
+                }
+
+                if (!deptId) {
+                    return callback();
+                }
+
+                let sqlCheckAlreadyInDept = `SELECT memberId
+                                             FROM members
+                                             WHERE memberId IN 
+                                                   (SELECT userId 
+                                                    FROM users 
+                                                    WHERE userId IN (3,15)
+                                                    AND roles = "User") 
+                                             AND deptId = ${deptId}`;
+                connect.query(
+                    sqlCheckAlreadyInDept,
+                    function (err, result) {
+                        if (err) {
+                            return callback(err);
+                        }
+
+                        if (result.length > 0) {
+                            return callback(new Error("MEMBER_ALREADY_IN_DEPT"))
+                        }
+                        return callback();
+                    }
+                )
             }
         )
     }

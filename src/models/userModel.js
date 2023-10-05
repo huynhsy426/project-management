@@ -26,9 +26,9 @@ class UserModel {
                 if (err) {
                     return callback(err);
                 }
-
+                console.log(result);
                 if (isEmpty(result)) {
-                    return callback(null, { hasLogin: false });
+                    return callback(null, result);
                 } else {
                     if (result[0].isBlocked === 1) {
                         // xoa hasLogin, only use result is enough
@@ -75,7 +75,7 @@ class UserModel {
                 }
                 if (isEmpty(result)) {
                     console.log("2")
-                    return callback(null, { isUserExist: false });
+                    return callback(null);
                 }
                 if (result.length === 2) {
                     console.log("3")
@@ -99,28 +99,10 @@ class UserModel {
     }
 
 
-    // List by roles
-    static selectListUserByRole(roles, callback) {
-        const sql = `SELECT * 
-                     FROM users 
-                     WHERE roles = ?`;
-        connect.query(
-            sql,
-            roles,
-            (err, result) => {
-                if (err) {
-                    return callback(err);
-                }
-                return callback(null, result);
-            }
-        )
-    }
-
-
     static getUser(userId, callback) {
         const sql = `SELECT userId, roles, username, age, gmail, exp, isBlocked
                 FROM users
-                WHERE userId = ?`;
+                WHERE userId = ? LIMIT 1`;
         connect.query(
             sql,
             userId,

@@ -27,7 +27,7 @@ class JWTMiddleware {
                             if (roles.length !== 0 && !roles.includes(user[0].roles)) {
                                 return next(new Error('INVALID_ROLE'));
                             }
-                            req.user = user;
+                            req.user = user[0];
                             return next();
                         }
                     })

@@ -7,10 +7,10 @@ const JWTMiddleware = require('../middleware/JWTMiddleware');
 
 
 // Get user for dept
-// router.get("/list/:deptId", [JWTMiddleware.verify([])], MemberController.checkMemberForDept)
+router.get("/list/:deptId", [JWTMiddleware.verify([])], MemberController.listMembersToJoin)
 
 // Add user for dept
-router.post("/:deptId/add", [validateAddMember.validateMembers, JWTMiddleware.verify(["Admin"])], MemberController.addMembersToDept)
+router.post("/:deptId/add", [validateAddMember.validateMembers, JWTMiddleware.verify(["Admin"])], MemberController.addMembers)
 
 
 module.exports = router;

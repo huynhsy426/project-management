@@ -145,7 +145,7 @@ AND roles = "User"
 and (isBlocked = 0 OR isBlocked IS NULL)--  AND users.userId NOT IN (SELECT memberId from members where deptId = "D0004")
 GROUP BY userId;
 
-SELECT userId, username, age, roles, gmail, exp, isBlocked
+SELECT 1
 FROM users
 LEFT JOIN members ON users.userId = members.memberId
 WHERE userId IN ('3','15')
@@ -194,3 +194,29 @@ SELECT *
 FROM members
 WHERE deptId <> 'D0001' 
 ;
+
+SELECT (deptId)
+FROM dept
+ORDER BY deptId  DESC LIMIT 1
+;
+
+SELECT deptName 
+FROM dept
+WHERE deptName = "develop1er2" LIMIT 1
+;
+
+SELECT username 
+FROM users
+WHERE 
+userId IN (3,18,15) AND roles = "User" AND (isBlocked != 1)
+;
+
+
+SELECT memberId
+FROM members
+WHERE memberId IN (SELECT userId FROM users WHERE userId IN (3,18)  AND roles = "User")
+AND deptId = 'D0001'
+;
+
+
+SELECT * FROM members;

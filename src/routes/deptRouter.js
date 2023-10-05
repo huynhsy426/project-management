@@ -9,7 +9,7 @@ const JWTMiddleware = require('../middleware/JWTMiddleware');
 
 
 // getDeptPage
-router.get("/list", deptController.listDeptsByRoles)
+router.get("/list", [JWTMiddleware.verify([])], deptController.listDeptsByRoles)
 
 // Create Dept
 router.route("/admin/create")
