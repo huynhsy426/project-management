@@ -14,19 +14,19 @@ class ProjectModel {
 
 
     // List of project
-    static listProject(results) {
-        const sql = "SELECT * FROM project";
-        connect.query(
-            sql,
-            (err, result) => {
-                if (err) {
-                    console.log("error: ", err);
-                    return results(err, null);
+    static listProject() {
+        return new Promise((resolve, reject) => {
+            const sql = "SELECT * FROM project";
+            connect.query(
+                sql,
+                (err, result) => {
+                    if (err) {
+                        return reject(err);
+                    }
+                    return resolve(result);
                 }
-                console.log(typeof result, "type of result : " + result)
-                return results(null, result);
-            }
-        )
+            )
+        })
     }
 
 

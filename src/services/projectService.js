@@ -6,16 +6,8 @@ class ProjectService {
     constructor() { }
 
     // List all projects
-    listProjectService = (results) => {
-        ProjectModel.listProject(
-            function (err, result) {
-                if (err) {
-                    return results(err, null)
-                }
-                console.log(typeof result, "service")
-                return results(null, result)
-            }
-        )
+    listProject = () => {
+        return ProjectModel.listProject()
     }
 
 
@@ -24,8 +16,6 @@ class ProjectService {
         ProjectModel.isExistProject(
             project.project_id,
             function (err, result) {
-                console.log(result, 'result')
-
 
                 if (err) {
                     return results(err, null)
@@ -39,10 +29,8 @@ class ProjectService {
                             if (err) {
                                 return results(err, null)
                             }
-                            console.log(isExistName, "isExistNameaaaa")
                             if (isExistName) {
                                 countError++;
-                                console.log(countError, "name already exists")
                                 return results(null, "isExistName")
                             }
                             else {
@@ -53,15 +41,11 @@ class ProjectService {
                                             return results(err, null)
                                         }
 
-                                        console.log(isDeptExist, "deptasdasd")
                                         if (!isDeptExist) {
                                             countError++;
-                                            console.log(countError, "dept not exists")
                                             return results(null, "isDeptExist")
                                         } else {
-                                            console.log(countError, "count error: ")
                                             if (countError === 0) {
-                                                console.log(countError, "count error in create")
                                                 ProjectModel.createProject(
                                                     project,
                                                     function (err, createResult) {
@@ -88,14 +72,12 @@ class ProjectService {
 
     // Search project by project_id, project_name, difficulty, dept_id
     searchProjectService = (inputSearch, results) => {
-        console.log(typeof inputSearch, "input search")
         ProjectModel.searchProject(
             inputSearch,
             function (err, result) {
                 if (err) {
                     return results(err, null)
                 }
-                console.log(result)
                 return results(null, result)
             }
         )
@@ -119,7 +101,6 @@ class ProjectService {
                             if (err) {
                                 return results(err, null)
                             }
-                            console.log(deleteResult)
                             return results(null, deleteResult)
                         }
                     )
@@ -152,15 +133,12 @@ class ProjectService {
                         version: projectEntity['0'].version - 0 + 1
                     }
 
-                    console.log(projectDB)
-
                     ProjectModel.updateByID(
                         projectDB,
                         function (err, updateResult) {
                             if (err) {
                                 return results(err, null)
                             }
-                            console.log(updateResult)
                             return results(null, updateResult)
                         }
                     )

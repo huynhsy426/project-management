@@ -7,7 +7,7 @@ require('dotenv').config();
 const configViewEngine = require('./src/config/viewEngine');
 const errors = require('./src/error.json')
 
-const loginRouter = require('./src/routes/projectRouter');
+const projectRouter = require('./src/routes/projectRouter');
 const userRouter = require('./src/routes/userRouter');
 const deptRouter = require('./src/routes/deptRouter');
 const memberRouter = require('./src/routes/memberRouter');
@@ -28,7 +28,7 @@ var dirName = __dirname;
 configViewEngine(app, session, dirName);
 
 // Router
-app.use("/project", loginRouter);
+app.use("/project", projectRouter);
 app.use('/user', userRouter)
 app.use('/dept', deptRouter);
 app.use('/member', memberRouter);

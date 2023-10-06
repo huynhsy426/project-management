@@ -15,107 +15,119 @@ class UserModel {
 
 
     // Check user login
-    static checkUserLogin({ username, userPassword }, callback) {
-        const sql = `SELECT * 
-                     FROM users 
-                     WHERE username = ? AND userPassword = ?`;
-        connect.query(
-            sql,
-            [username, userPassword],
-            (err, result) => {
-                if (err) {
-                    return callback(err);
-                }
-                console.log(result);
-                if (isEmpty(result)) {
-                    return callback(null, result);
-                } else {
-                    if (result[0].isBlocked === 1) {
-                        // xoa hasLogin, only use result is enough
-                        return callback(null, { isBlocked: true, result: result });
+    static checkUserLogin(username, userPassword) {
+        return new Promise((resolve, reject) => {
+            const sql = `SELECT * 
+            FROM users 
+            WHERE username = ? AND userPassword = ?`;
+
+            connect.query(
+                sql,
+                [username, userPassword],
+                (err, result) => {
+                    if (err) {
+                        return reject(err);
                     }
-                    return callback(null, { isBlocked: false, result: result });
+                    if (isEmpty(result)) {
+                        return resolve();
+                    } else {
+                        if (result[0].isBlocked === 1) {
+                            // xoa hasLogin, only use result is enough
+                            return resolve({ isBlocked: true, result });
+                        }
+                        return resolve({ isBlocked: false, result });
+                    }
                 }
-            }
-        )
+            )
+        })
     };
 
 
     // Create a new user
-    static createUser(user, callback) {
-        const sql = `INSERT INTO users (username, age, roles, userPassword, gmail, exp, isBlocked) 
-                     VALUES (?, ?, ?, ?, ? , ?, ?)`;
-        connect.query(
-            sql,
-            [user.username, user.age, user.roles, user.userPassword, user.gmail, user.exp, user.isBlocked],
-            (err) => {
-                if (err) {
-                    return callback(err);
+    static createUser(user) {
+        return new Promise((resolve, reject) => {
+            const sql = `INSERT INTO users (username, age, roles, userPassword, gmail, exp, isBlocked) 
+                         VALUES (?, ?, ?, ?, ? , ?, ?)`;
+
+            connect.query(
+                sql,
+                [user.username, user.age, user.roles, user.userPassword, user.gmail, user.exp, user.isBlocked],
+                (err, result) => {
+                    if (err) {
+                        return reject(err);
+                    }
+                    return resolve(result);
                 }
-                return callback(null, { hasCreateUser: true });
-            }
-        )
+            )
+        })
+
 
     }
 
 
     // Check user_name and gmail are exists
-    static isUserNameAndGmailExist(user, callback) {
-        console.log("here", user);
-        const sql = `select username, gmail 
-                     FROM users 
-                     WHERE username = ? or gmail = ?`;
-        connect.query(
-            sql,
-            [user.username, user.gmail],
-            (err, result) => {
-                if (err) {
-                    console.log("1")
-                    return callback(err);
-                }
-                if (isEmpty(result)) {
-                    console.log("2")
-                    return callback(null);
-                }
-                if (result.length === 2) {
-                    console.log("3")
-                    return callback(new Error("USERNAME_GMAIL_UNIQUE"));
-                } else if (result.length === 1) {
-                    console.log("4")
-                    if (result.some(item => item.username === user.username && item.gmail === user.gmail)) {
-                        return callback(new Error("USERNAME_GMAIL_UNIQUE"));
-                    }
+    static isUserNameAndGmailExist(user) {
+        return new Promise((resolve, reject) => {
+            const sql = `select username, gmail 
+            FROM users 
+            WHERE username = ? or gmail = ?`;
 
-                    if (result.some(item => item.username === user.username)) {
-                        return callback(new Error("USERNAME_UNIQUE"));
+            connect.query(
+                sql,
+                [user.username, user.gmail],
+                (err, result) => {
+                    if (err) {
+                        console.log("1")
+                        return reject(err);
                     }
+                    if (isEmpty(result)) {
+                        console.log("2")
+                        return resolve();
+                    }
+                    if (result.length === 2) {
+                        console.log("3")
+                        return reject(new Error("USERNAME_GMAIL_UNIQUE"));
+                    } else if (result.length === 1) {
+                        console.log("4")
+                        if (result.some(item => item.username === user.username && item.gmail === user.gmail)) {
+                            return reject(new Error("USERNAME_GMAIL_UNIQUE"));
+                        }
 
-                    if (result.some(item => item.gmail === user.gmail)) {
-                        return callback(new Error("GMAIL_UNIQUE"));
+                        if (result.some(item => item.username === user.username)) {
+                            return reject(new Error("USERNAME_UNIQUE"));
+                        }
+
+                        if (result.some(item => item.gmail === user.gmail)) {
+                            return reject(new Error("GMAIL_UNIQUE"));
+                        }
                     }
                 }
-            }
-        )
+            )
+        })
     }
 
 
-    static getUser(userId, callback) {
-        const sql = `SELECT userId, roles, username, age, gmail, exp, isBlocked
+    static getUser(userId) {
+        return new Promise((resolve, reject) => {
+            const sql = `SELECT userId, roles, username, age, gmail, exp, isBlocked
                 FROM users
                 WHERE userId = ? LIMIT 1`;
-        connect.query(
-            sql,
-            userId,
-            (err, result) => {
-                if (err) {
-                    return callback(err);
-                }
+            connect.query(
+                sql,
+                userId,
+                (err, result) => {
+                    if (err) {
+                        return reject(err);
+                    }
 
-                return callback(null, result);
-            }
-        )
+                    return resolve(result);
+                }
+            )
+        })
     }
-}
+
+
+};
 
 
 function isEmpty(obj) {

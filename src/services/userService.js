@@ -4,13 +4,12 @@ class UserService {
 
     constructor() { }
 
-    loginByUser = ({ username, userPassword }, callback) => {
-        UserModel.checkUserLogin(
-            { username, userPassword }, callback)
+    loginByUser = (username, userPassword) => {
+        return UserModel.checkUserLogin(username, userPassword)
     }
 
-    createUser = (user, callback) => {
-        UserModel.createUser(user, callback)
+    createUser = (user) => {
+        return UserModel.createUser(user);
     }
 }
 

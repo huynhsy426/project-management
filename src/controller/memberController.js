@@ -16,35 +16,25 @@ class MemberController {
     addMembers = (req, res, next) => {
         const members = req.body.members;
         const deptId = req.params.deptId;
-        MemberService.checkMemberInDeptOrIsBlock(
-            { memberSelect: members, deptId },
-            function (err) {
-                if (err) {
-                    return next(err);
+        MemberService.checkMemberInDeptOrIsBlock(members, deptId)
+            .then(() => {
+                return MemberService.addMembersToDept({ deptId, members })
+            })
+            .then((result) => {
+                if (result.affectedRows === 0) {
+                    return res.status(StatusCodes.CREATED).json({
+                        createMessage: "Add unsuccessful"
+                    })
                 }
 
-                MemberService.addMembersToDept(
-                    { deptId, members },
-                    function (err, result) {
-                        if (err) {
-                            return next(err);
-                        }
+                return res.status(StatusCodes.CREATED).json({
+                    createMessage: "Add members successfully"
+                })
+            })
+            .catch(err => {
+                return next(err);
+            })
 
-                        if (result.affectedRows === 0) {
-                            return res.status(StatusCodes.CREATED).json({
-                                createMessage: "Add unsuccessful"
-                            })
-                        }
-
-                        return res.status(StatusCodes.CREATED).json({
-                            createMessage: "Add members successfully"
-                        })
-                    }
-
-                )
-
-            }
-        )
     };
 }
 

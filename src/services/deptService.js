@@ -6,69 +6,53 @@ class DeptService {
 
     constructor() { }
 
-    listDeptsByRoles = ({ memberId, roles }, callback) => {
-        DeptModel.listDeptsByRole(
-            { memberId, roles },
-            callback
-        )
+    listDeptsByRoles = (userId, roles) => {
+        return DeptModel.listDeptsByRoles(userId, roles);
     }
 
 
     // Create new Dept
-    createDept = ({ deptEntity, members }, callback) => {
+    createDept = (deptEntity, members) => {
         // Check dept name
-        DeptModel.isExistDeptName(
-            deptEntity.deptName,
-            (err) => {
-                if (err) {
-                    return callback(err);
-                }
+        return DeptModel.isExistDeptName(deptEntity.deptName)
+            .then(() => {
+                return DeptModel.createAutoDeptId();
+            })
+            .then(newDeptId => {
+                deptEntity.deptId = newDeptId;
 
-                DeptModel.createAutoDeptId(
-                    function (err, newDeptId) {
-                        if (err) {
-                            return callback(err);
-                        }
-                        deptEntity.deptId = newDeptId;
-
-                        // After validation all create dept and add members to dept
-                        DeptModel.createDept(
-                            deptEntity,
-                            function (error, resultCreateDept) {
-                                if (error) {
-                                    return callback(err);
-                                }
-
-                                if (resultCreateDept.affectedRows !== 1) {
-                                    return callback(new Error('CREAT_DEPT_FAILED'));
-                                }
-
-                                MemberService.addMembersToDept(
-                                    { deptId: deptEntity.deptId, members, authorId: deptEntity.authorId },
-                                    callback
-                                )
-                            }
-                        )
-                    }
+                // After validation all create dept and add members to dept
+                return DeptModel.createDept(deptEntity);
+            })
+            .then(() => {
+                return MemberService.addMembersToDept(
+                    { deptId: deptEntity.deptId, members, authorId: deptEntity.authorId }
                 )
-            }
-        )
+            })
+            .then((resultAddMember) => {
+                return resultAddMember;
+            })
+            .catch(err => {
+                throw err;
+            });
     }
 
 
     // Search dept by name
-    searchDept = (inputName, callback) => {
-        DeptModel.searchDeptByName(inputName, callback)
+    searchDept = (inputName) => {
+        return DeptModel.searchDeptByName(inputName);
     }
 
 
     // Delete dept by Id
-    deleteById = (dept_id, results) => { }
+    deleteById = (deptId) => {
+        return DeptModel.deleteById(deptId);
+    }
 
 
     // Update dept by Id
-    updateById = (dept, callback) => {
-        DeptModel.updateById(dept, callback)
+    updateById = ({ deptId, deptName }) => {
+        return DeptModel.updateById({ deptId, deptName });
     }
 }
 

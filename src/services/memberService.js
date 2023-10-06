@@ -5,9 +5,8 @@ class MemberService {
     constructor() { }
 
     // Kiem tra isBlock Or co ton tai trong Dept 
-    checkMemberInDeptOrIsBlock = ({ memberSelect, deptId }, callback) => {
-        MemberModel.checkMemberInDeptOrIsBlock(
-            { memberSelect, deptId }, callback)
+    checkMemberInDeptOrIsBlock = (members, deptId) => {
+        return MemberModel.checkMemberInDeptOrIsBlock(members, deptId)
     };
 
 
@@ -15,8 +14,7 @@ class MemberService {
     // if has authorId add author to dept
     // Else not add
     // add memberList To Dept
-    addMembersToDept = ({ deptId, members, authorId }, callback) => {
-        console.log({ deptId, members, authorId })
+    addMembersToDept = ({ deptId, members, authorId }) => {
         const memberList = members.map(member => {
             return {
                 memberId: member.memberId,
@@ -25,16 +23,20 @@ class MemberService {
             }
         })
 
-        if (authorId) {
+        if (authorId && memberList.length > 0) {
             memberList.push({
                 memberId: authorId,
                 deptId: deptId,
                 position: "pm"
             })
+        };
+
+        if (memberList.length > 0) {
+            return MemberModel.insertMembers(deptId, memberList)
         }
 
-        MemberModel.insertMembers(
-            { deptId, memberList }, callback)
+        let resultAddMember = false;
+        return resultAddMember;
     }
 }
 

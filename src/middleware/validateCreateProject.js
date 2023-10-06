@@ -37,7 +37,8 @@ module.exports = {
 
         !validateString(projectEntity.projectName) && errMessage.push("projectName is valid");
         !validateDeptId(projectEntity.deptId) && errMessage.push("deptId must like 'D***   ");
-        
+        validateNumber
+
 
         if (errMessage.length === 0) {
             return next();

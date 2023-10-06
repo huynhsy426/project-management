@@ -29,25 +29,17 @@ class UserController {
             isBlocked: 0
         }
 
-        UserModel.isUserNameAndGmailExist(
-            user,
-            function (error) {
-                if (error) {
-                    return next(error);
-                }
-                UserService.createUser(
-                    user,
-                    function (err, isCreate) {
-                        if (err) {
-                            return next(err);
-                        }
-                        if (isCreate) {
-                            return res.status(StatusCodes.OK).json({
-                                registerMessage: "Register successfully"
-                            })
-                        }
-                    }
-                )
+        UserModel.isUserNameAndGmailExist(user)
+            .then(() => {
+                return UserService.createUser(user)
+            })
+            .then(() => {
+                return res.status(StatusCodes.OK).json({
+                    registerMessage: "Register successfully"
+                })
+            })
+            .catch(err => {
+                return next(err);
             });
     };
 
@@ -73,20 +65,17 @@ class UserController {
     // login
     loginByUser = (req, res, next) => {
         const { username, userPassword } = req.body;
-        UserService.loginByUser(
-            { username, userPassword },
-            function (err, { isBlocked, result }) {
-                console.log({ isBlocked, result })
-                if (err) {
-                    return next(err);
-                }
+        UserService.loginByUser(username, userPassword)
+            .then(({ isBlocked, result }) => {
+                console.log(isBlocked, result);
                 if (!result) {
                     return res.status(StatusCodes.BAD_REQUEST).json({
                         aaa: "Wrong account"
                     })
                 }
+
                 const user = {
-                    userId: result[0].userId,
+                    userId: result[0].userId
                 }
 
                 if (!isBlocked) {
@@ -97,8 +86,10 @@ class UserController {
                     })
                 }
                 return next(new Error("BLOCK_USER"))
-            }
-        )
+            })
+            .catch(err => {
+                return next(err);
+            });
     };
 
 
@@ -106,7 +97,7 @@ class UserController {
     logOutUser = (req, res) => {
         console.log(req);
         // req.session.destroy();
-        return res.status(200).json({
+        return res.status(StatusCodes.OK).json({
             loginMessage: "Logout successful"
         })
     };

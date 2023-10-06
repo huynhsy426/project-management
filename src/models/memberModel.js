@@ -26,76 +26,87 @@ class MemberModel {
 
 
     // Insert member by select
-    static insertMembers = ({ deptId, memberList }, callback) => {
-        let sql = "INSERT INTO members VALUES "
+    static insertMembers = (deptId, memberList) => {
+        return new Promise((resolve, reject) => {
+            let sql = "INSERT INTO members VALUES "
 
-        for (let index = 0; index < memberList.length; index++) {
-            sql += `(${memberList[index].memberId}, '${deptId}', '${memberList[index].position}')`;
-            (index < memberList.length - 1) ? sql += ',' : '';
-        }
-        console.log(sql);
-
-        connect.query(
-            sql,
-            function (err, result) {
-                if (err) {
-                    return callback(err)
-                }
-                console.log(result);
-                return callback(null, result)
+            for (let index = 0; index < memberList.length; index++) {
+                sql += `(${memberList[index].memberId}, '${deptId}', '${memberList[index].position}')`;
+                (index < memberList.length - 1) ? sql += ',' : '';
             }
-        )
+            console.log(sql);
+
+            connect.query(
+                sql,
+                function (err, resultAddMember) {
+                    if (err) {
+                        return reject(err)
+                    }
+                    return resolve(resultAddMember)
+                }
+            )
+        })
     }
 
 
     // Check member in dept or blocked
-    static checkMemberInDeptOrIsBlock({ memberSelect, deptId }, callback) {
-        let listMemberId = memberSelect.map((value) => value.memberId).join(",");
-
-        let sqlCheckIsBlock = `SELECT username
-                   FROM users
-                   WHERE userId IN (${listMemberId})
-                         AND roles = "User"
-                         AND (isBlocked = 1)`;
-
-        connect.query(
-            sqlCheckIsBlock,
-            function (err, result) {
-                if (err) {
-                    return callback(err);
-                }
-
-                if (result.length > 0) {
-                    return callback(new Error("ADD_MEMBER_BLOCK"))
-                }
-
-                if (!deptId) {
-                    return callback();
-                }
-
-                let sqlCheckAlreadyInDept = `SELECT memberId
-                                             FROM members
-                                             WHERE memberId IN 
-                                                   (SELECT userId 
-                                                    FROM users 
-                                                    WHERE userId IN (3,15)
-                                                    AND roles = "User") 
-                                             AND deptId = ${deptId}`;
-                connect.query(
-                    sqlCheckAlreadyInDept,
-                    function (err, result) {
-                        if (err) {
-                            return callback(err);
-                        }
-
-                        if (result.length > 0) {
-                            return callback(new Error("MEMBER_ALREADY_IN_DEPT"))
-                        }
-                        return callback();
-                    }
-                )
+    static checkMemberInDeptOrIsBlock(members, deptId) {
+        return new Promise((resolve, reject) => {
+            let listMemberId = "";
+            if (members.length !== 0) {
+                listMemberId = members.map((value) => value.memberId).join(",");
+            } else {
+                listMemberId = 0
             }
-        )
+
+
+            let sqlCheckIsBlock = `SELECT username, roles
+                       FROM users
+                       WHERE userId IN (${listMemberId})
+                            AND isBlocked = 1`;
+
+            connect.query(
+                sqlCheckIsBlock,
+                function (err, result) {
+                    if (err) {
+                        return reject(err);
+                    }
+
+                    if (result.length > 0) {
+                        return reject(new Error("ADD_MEMBER_BLOCK"));
+                    }
+
+                    const findNotUserRole = result.find(item => item.roles !== 'User');
+                    if (findNotUserRole) {
+                        return reject(new Error('NOT_ALLOW_ROLE'));
+                    }
+
+                    if (!deptId) {
+                        return resolve();
+                    }
+
+                    let sqlCheckAlreadyInDept = `SELECT memberId
+                                                 FROM members
+                                                 WHERE memberId IN (${listMemberId}) 
+                                                 AND deptId = "${deptId}"`;
+                    connect.query(
+                        sqlCheckAlreadyInDept,
+                        function (err, resultIndept) {
+                            if (err) {
+                                return reject(err);
+                            }
+
+                            if (resultIndept.length > 0) {
+                                return reject(new Error("MEMBER_ALREADY_IN_DEPT"))
+                            } else {
+                                return resolve();
+                            }
+                        }
+                    )
+                }
+            )
+
+        })
     }
 }
 

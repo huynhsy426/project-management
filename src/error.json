@@ -50,5 +50,9 @@
     "CREAT_DEPT_FAILED": {
         "message": "Can't create dept",
         "statusCode": 403
+    },
+    "NOT_ALLOW_ROLE": {
+        "message": "User not valid",
+        "statusCode": 400
     }
 }

@@ -35,7 +35,6 @@ const validatePosition = (members, errMessage) => {
 module.exports = {
     validateMembers: (req, res, next) => {
         const members = req.body.members;
-        console.log(members)
 
         const errMessage = []
 

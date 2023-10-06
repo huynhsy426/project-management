@@ -16,7 +16,7 @@ router.route("/admin/create")
     .post([validateCreateDept.validateDept, JWTMiddleware.verify(["Admin"])], deptController.createDept)
 
 // Search dept by dept_name
-router.get("/search", deptController.searchDept)
+router.get("/search/name/:deptName", deptController.searchDept)
 
 // Delete dept by Id
 // router.delete("/:id/delete", deleteById)
