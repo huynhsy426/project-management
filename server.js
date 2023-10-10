@@ -22,7 +22,6 @@ const memberRouter = require('./src/routes/memberRouter');
 // }
 // createJWT(payload);
 // let decodedData = verifyToken("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiZXJpYyIsImFkZHJlc3MiOiJoYSBub2kiLCJpYXQiOjE2OTUzNTA2MTF9.miTHjf2nWzpay7_YOwMnL1XWiHUkv_pAh3Y7Lss1G2E")
-// console.log(decodedData)==
 
 var dirName = __dirname;
 configViewEngine(app, session, dirName);

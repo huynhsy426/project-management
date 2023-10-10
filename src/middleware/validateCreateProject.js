@@ -37,7 +37,10 @@ module.exports = {
 
         !validateString(projectEntity.projectName) && errMessage.push("projectName is valid");
         !validateDeptId(projectEntity.deptId) && errMessage.push("deptId must like 'D***   ");
-        validateNumber
+        validateNumber(projectEntity.version) && errMessage.push("version must be number");
+        validateNumber(projectEntity.leaderId) && errMessage.push("leaderId must be number");
+        validateNumber(projectEntity.minExp) && errMessage.push("minExp must be number");
+
 
 
         if (errMessage.length === 0) {

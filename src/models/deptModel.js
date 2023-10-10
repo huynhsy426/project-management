@@ -1,4 +1,5 @@
-const connect = require('./connection')
+const mySQLConnection = require('./connection')
+const mysql = require('mysql2/promise');
 
 class DeptModel {
 
@@ -10,31 +11,30 @@ class DeptModel {
 
 
     // Create Dept
-    static createDept(dept) {
-        return new Promise((resolve, reject) => {
-            const sql = 'INSERT INTO dept SET ?';
-
-            connect.query(
+    static async createDept(dept) {
+        const connect = await mysql.createConnection(mySQLConnection);
+        const sql = 'INSERT INTO dept VALUES (?, ?, ?)';
+        try {
+            const [result] = await connect.execute(
                 sql,
-                dept,
-                (err, result) => {
-                    if (err) {
-                        return reject(err);
-                    }
-                    if (result.affectedRows !== 1) {
-                        return reject(new Error('CREAT_DEPT_FAILED'));
-                    }
-
-                    return resolve();
-                }
-            )
-        })
+                [dept.deptId, dept.deptName, dept.authorId]
+            );
+            if (result.affectedRows !== 1) {
+                throw (new Error('CREAT_DEPT_FAILED'));
+            }
+            return;
+        } catch (error) {
+            throw error;
+        } finally {
+            connect.end();
+        }
     }
 
 
     // List of Depts
-    static listDeptsByRoles(userId, roles) {
-        return new Promise((resolve, reject) => {
+    static async listDeptsByRoles(userId, roles) {
+        const connect = await mysql.createConnection(mySQLConnection);
+        try {
             let sql = "";
 
             if (roles === "Admin") {
@@ -44,145 +44,134 @@ class DeptModel {
                    FROM members
                    JOIN dept ON members.deptId = dept.deptId
                    WHERE memberId = ?`;
-
-
-            connect.query(
+            const [listDeptsByUser] = await connect.execute(
                 sql,
-                userId,
-                function (err, listDeptByUser) {
-                    if (err) {
-                        return reject(err);
-                    }
-                    return resolve(listDeptByUser);
-                }
+                [userId]
             )
-        })
+            return listDeptsByUser;
+        } catch (error) {
+            throw error;
+        } finally {
+            connect.end();
+        }
     }
 
 
     // List Dept sorts by deptId
-    static createAutoDeptId() {
-        return new Promise((resolve, reject) => {
+    static async createAutoDeptId() {
+        const connect = await mysql.createConnection(mySQLConnection);
+
+        try {
             const sql = `SELECT deptId 
             FROM dept
             ORDER BY deptId DESC LIMIT 1`;
-            connect.query(
-                sql,
-                function (err, result) {
-                    if (err) {
-                        return reject(err);
-                    }
-                    if (result.length !== 0) {
-                        const deptIdSplit = result[0].deptId.split("D");
-                        const deptIdAutoChange = +deptIdSplit[1] + 1;
-                        return resolve("D000" + deptIdAutoChange);
-                    }
-                    return resolve("D0001");
-                }
-            )
-        })
-
+            const [result] = await connect.execute(sql);
+            if (result.length !== 0) {
+                const deptIdSplit = result[0].deptId.split("D");
+                const deptIdAutoChange = +deptIdSplit[1] + 1;
+                return ("D000" + deptIdAutoChange);
+            }
+            return ("D0001");
+        } catch (error) {
+            throw error;
+        } finally {
+            connect.end();
+        }
     }
 
 
     // Check dept_Id is exists
-    static isExistDept(deptId, callback) {
+    static async isExistDept(deptId, callback) {
+        const connect = await mysql.createConnection(mySQLConnection);
         const sql = "SELECT 1 FROM dept WHERE deptId = ? LIMIT 1";
-        connect.query(
-            sql,
-            deptId,
-            (err, result) => {
-                if (err) {
-                    return callback(err);
-                }
 
-                return isEmpty(result) ?
-                    callback(null, { isdeptExist: false }) :
-                    callback(null, { isdeptExist: true })
-            }
+        const result = await connect.execute(
+            sql,
+            [deptId]
         )
+        return isEmpty(result)
+            ? callback(null, { isdeptExist: false })
+            : callback(null, { isdeptExist: true })
     }
 
-    static isExistDeptName(deptName) {
-        return new Promise((resolve, reject) => {
-            const sql = "SELECT 1 FROM dept WHERE deptName = ? LIMIT 1";
-            connect.query(
-                sql,
-                deptName,
-                (err, resultDeptName) => {
-                    if (err) {
-                        return reject(err);
-                    }
+    static async isExistDeptName(deptName) {
+        const connect = await mysql.createConnection(mySQLConnection);
 
-                    if (!isEmpty(resultDeptName)) {
-                        return reject(new Error("DEPTNAME_UNIQUE"));
-                    }
-                    return resolve();
-                }
-            )
-        })
+        try {
+            const sql = "SELECT 1 FROM dept WHERE deptName = ? LIMIT 1";
+            const [resultDeptName] = await connect.execute(sql, [deptName]);
+            if (!isEmpty(resultDeptName)) {
+                throw (new Error("DEPTNAME_UNIQUE"));
+            }
+            return;
+        } catch (error) {
+            throw error;
+        } finally {
+            connect.end();
+        }
     }
 
 
     // Search dept by deptName
-    static searchDeptByName(inputName) {
-        console.log("Input name: " + inputName)
-        return new Promise((resolve, reject) => {
-            const sql = "SELECT * FROM dept WHERE deptName LIKE (?) LIMIT 1"
-            connect.query(
+    static async searchDeptByName(inputName) {
+        const connect = await mysql.createConnection(mySQLConnection);
+
+        try {
+            const sql = "SELECT * FROM dept WHERE deptName LIKE (?) LIMIT 1";
+            const [result] = await connect.execute(
                 sql,
-                ['%' + inputName + '%'],
-                (err, result) => {
-                    if (err) {
-                        return reject(err);
-                    }
-                    return resolve(result);
-                }
-            )
-        })
+                ['%' + inputName + '%']
+            );
+            return result;
+        } catch (error) {
+            throw error;
+        } finally {
+            connect.end();
+        }
     }
 
 
     // Delete dept by Id
-    static deleteById(deptId) {
-        return new Promise((resolve, reject) => {
-            const sql = "DELETE FROM dept WHERE deptId = ?"
-            connect.query(
+    static async deleteById(deptId) {
+        const connect = await mysql.createConnection(mySQLConnection);
+
+        try {
+            const sql = "DELETE FROM dept WHERE deptId = ?";
+            const [result] = await connect.execute(
                 sql,
-                deptId,
-                (err, result) => {
-                    if (err) {
-                        console.log("error: ", err);
-                        return reject(err);
-                    }
-                    if (result.affectedRows === 0) {
-                        return resolve();
-                    }
-                    return resolve(result);
-                }
-            )
-        })
+                [deptId]
+            );
+            if (result.affectedRows === 0) {
+                return;
+            }
+            return (result);
+        } catch (error) {
+            throw error;
+        } finally {
+            connect.end();
+        }
     }
 
 
     // Update dept by Id
-    static updateById({ deptId, deptName }) {
-        return new Promise((resolve, reject) => {
-            const sql = "UPDATE dept SET deptName = ? WHERE deptId = ?"
-            connect.query(
-                sql,
-                [deptName, deptId],
-                (err, result) => {
-                    if (err) {
-                        return reject(err);
-                    }
-                    const isUpdate = result.affectedRows !== 0;
-                    return resolve(isUpdate);
-                }
-            )
-        })
-    }
+    static async updateById({ deptId, deptName }) {
+        const connect = await mysql.createConnection(mySQLConnection);
 
+        try {
+            const sql = "UPDATE dept SET deptName = ? WHERE deptId = ?";
+            const result = await connect.execute(
+                sql,
+                [deptName, deptId]
+            )
+
+            const isUpdate = result.affectedRows !== 0;
+            return (isUpdate);
+        } catch (error) {
+            throw error;
+        } finally {
+            connect.end();
+        }
+    }
 }
 
 

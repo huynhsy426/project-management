@@ -2,17 +2,20 @@ const ProjectService = require("../services/projectService")
 const { StatusCodes } = require('http-status-codes');
 
 module.exports = {
-    listProject: (req, res, next) => {
-        ProjectService.listProject().
-            then(result => {
-                return res.status(StatusCodes.OK).json({
-                    result
-                })
+    listProject: async (req, res, next) => {
+        try {
+            const result = await ProjectService.listProject();
+            return res.status(StatusCodes.OK).json({
+                result
             })
-            .catch(err => {
-                return next(err);
-            })
-    }
+        } catch (err) {
+            return next(err);
+        }
+    },
+
+    create: async (req, res, next) => {
+
+    },
 
 
 

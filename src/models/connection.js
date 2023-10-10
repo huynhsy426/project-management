@@ -1,12 +1,26 @@
-const mysql = require('mysql2');
-const dbConfig = require("../config/configDB");
 
-var connection = mysql.createPool({
+const dbConfig = require("../config/configDB");
+const bluebird = require('bluebird');
+
+// create the connection, specify bluebird as Promise
+// const connection = mysql.createConnection({
+//     host: dbConfig.HOST,
+//     user: dbConfig.USER,
+//     password: dbConfig.PASSWORD,
+//     database: dbConfig.DB,
+//     Promise: bluebird
+// });
+
+const mySQLConnection = {
     host: dbConfig.HOST,
     user: dbConfig.USER,
     password: dbConfig.PASSWORD,
     database: dbConfig.DB
-});
+};
+
+
+
+
 
 // const pool = mysql.createPool({
 //   host: 'localhost',
@@ -21,4 +35,4 @@ var connection = mysql.createPool({
 //   keepAliveInitialDelay: 0
 // });
 
-module.exports = connection;
+module.exports = mySQLConnection;

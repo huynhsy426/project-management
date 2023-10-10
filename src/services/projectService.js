@@ -7,7 +7,7 @@ class ProjectService {
 
     // List all projects
     listProject = () => {
-        return ProjectModel.listProject()
+        return ProjectModel.listProject();
     }
 
 

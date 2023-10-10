@@ -20,8 +20,13 @@ class JwtService {
 
     // Verify token
     verify(token) {
-        let secretKey = process.env.JWT_SECRET;
-        return jwt.verify(token, secretKey);
+        try {
+            let secretKey = process.env.JWT_SECRET;
+            return jwt.verify(token, secretKey);
+        } catch (error) {
+            throw new Error('UNAUTHORIZED');
+        }
+
     }
 
 

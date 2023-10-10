@@ -12,29 +12,28 @@ class DeptService {
 
 
     // Create new Dept
-    createDept = (deptEntity, members) => {
-        // Check dept name
-        return DeptModel.isExistDeptName(deptEntity.deptName)
-            .then(() => {
-                return DeptModel.createAutoDeptId();
-            })
-            .then(newDeptId => {
-                deptEntity.deptId = newDeptId;
+    createDept = async (deptEntity, members) => {
 
-                // After validation all create dept and add members to dept
-                return DeptModel.createDept(deptEntity);
-            })
-            .then(() => {
-                return MemberService.addMembersToDept(
-                    { deptId: deptEntity.deptId, members, authorId: deptEntity.authorId }
-                )
-            })
-            .then((resultAddMember) => {
-                return resultAddMember;
-            })
-            .catch(err => {
-                throw err;
-            });
+        try {
+            // Check dept name
+            console.log("hehehe")
+            await DeptModel.isExistDeptName(deptEntity.deptName);
+
+            // Create auto DeptId
+            const newDeptId = await DeptModel.createAutoDeptId();
+            deptEntity.deptId = newDeptId;
+
+            // After validation all create dept and add members to dept
+            await DeptModel.createDept(deptEntity);
+
+            // Add members to dept
+            const resultAddMember = await MemberService.addMembersToDept(
+                { deptId: deptEntity.deptId, members, authorId: deptEntity.authorId }
+            )
+            return resultAddMember;
+        } catch (err) {
+            throw err;
+        }
     }
 
 

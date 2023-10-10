@@ -142,7 +142,7 @@ FROM users
 LEFT JOIN members ON users.userId = members.memberId
 WHERE userId IN (3,15) 
 AND roles = "User" 
-and (isBlocked = 0 OR isBlocked IS NULL)--  AND users.userId NOT IN (SELECT memberId from members where deptId = "D0004")
+and (isBlocked = 0 OR isBlocked IS NULL) AND users.userId NOT IN (SELECT memberId from members where deptId = "D0004")
 GROUP BY userId;
 
 SELECT 1

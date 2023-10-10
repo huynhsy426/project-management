@@ -1,4 +1,5 @@
-const connect = require('./connection')
+const mySQLConnection = require('./connection')
+const mysql = require('mysql2/promise');
 
 
 class MemberModel {
@@ -11,23 +12,27 @@ class MemberModel {
 
 
     // Get all users
-    static listMembers(callback) {
-        const sql = "SELECT * FROM members";
-        connect.query(
-            sql,
-            function (err, result) {
-                if (err) {
-                    return callback(err, null);
-                }
-                return callback(null, result);
-            }
-        )
+    static async listMembers() {
+        const connect = await mysql.createConnection(mySQLConnection);
+
+        try {
+            const sql = "SELECT * FROM members";
+
+            const [result] = await connect.execute(sql);
+            return result;
+        } catch (error) {
+            throw error;
+        } finally {
+            connect.end();
+        }
     }
 
 
     // Insert member by select
-    static insertMembers = (deptId, memberList) => {
-        return new Promise((resolve, reject) => {
+    static insertMembers = async (deptId, memberList) => {
+        const connect = await mysql.createConnection(mySQLConnection);
+
+        try {
             let sql = "INSERT INTO members VALUES "
 
             for (let index = 0; index < memberList.length; index++) {
@@ -36,22 +41,21 @@ class MemberModel {
             }
             console.log(sql);
 
-            connect.query(
-                sql,
-                function (err, resultAddMember) {
-                    if (err) {
-                        return reject(err)
-                    }
-                    return resolve(resultAddMember)
-                }
-            )
-        })
+            const [resultAddMember] = await connect.execute(sql);
+            return (resultAddMember);
+        } catch (error) {
+            throw error;
+        } finally {
+            connect.end();
+        }
     }
 
 
     // Check member in dept or blocked
-    static checkMemberInDeptOrIsBlock(members, deptId) {
-        return new Promise((resolve, reject) => {
+    static async checkMemberInDeptOrIsBlock(members, deptId) {
+        const connect = await mysql.createConnection(mySQLConnection);
+
+        try {
             let listMemberId = "";
             if (members.length !== 0) {
                 listMemberId = members.map((value) => value.memberId).join(",");
@@ -59,54 +63,41 @@ class MemberModel {
                 listMemberId = 0
             }
 
-
             let sqlCheckIsBlock = `SELECT username, roles
-                       FROM users
-                       WHERE userId IN (${listMemberId})
-                            AND isBlocked = 1`;
+                                   FROM users
+                                   WHERE userId IN (${listMemberId})
+                                   AND isBlocked = 1`;
+            const [result] = await connect.execute(sqlCheckIsBlock);
+            if (result.length > 0) {
+                throw (new Error("ADD_MEMBER_BLOCK"));
+            }
 
-            connect.query(
-                sqlCheckIsBlock,
-                function (err, result) {
-                    if (err) {
-                        return reject(err);
-                    }
+            const findNotUserRole = result.find(item => item.roles !== 'User');
 
-                    if (result.length > 0) {
-                        return reject(new Error("ADD_MEMBER_BLOCK"));
-                    }
+            if (findNotUserRole) {
+                throw (new Error('NOT_ALLOW_ROLE'));
+            }
 
-                    const findNotUserRole = result.find(item => item.roles !== 'User');
-                    if (findNotUserRole) {
-                        return reject(new Error('NOT_ALLOW_ROLE'));
-                    }
+            if (!deptId) {
+                return;
+            }
 
-                    if (!deptId) {
-                        return resolve();
-                    }
-
-                    let sqlCheckAlreadyInDept = `SELECT memberId
+            let sqlCheckAlreadyInDept = `SELECT memberId
                                                  FROM members
                                                  WHERE memberId IN (${listMemberId}) 
                                                  AND deptId = "${deptId}"`;
-                    connect.query(
-                        sqlCheckAlreadyInDept,
-                        function (err, resultIndept) {
-                            if (err) {
-                                return reject(err);
-                            }
 
-                            if (resultIndept.length > 0) {
-                                return reject(new Error("MEMBER_ALREADY_IN_DEPT"))
-                            } else {
-                                return resolve();
-                            }
-                        }
-                    )
-                }
-            )
-
-        })
+            const [resultIndept] = await connect.execute(sqlCheckAlreadyInDept);
+            if (resultIndept.length > 0) {
+                throw (new Error("MEMBER_ALREADY_IN_DEPT"))
+            } else {
+                return;
+            }
+        } catch (error) {
+            throw error;
+        } finally {
+            connect.end();
+        }
     }
 }
 

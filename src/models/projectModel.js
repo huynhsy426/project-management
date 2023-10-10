@@ -1,50 +1,48 @@
-const connect = require('./connection')
+const mySQLConnection = require('./connection')
+const mysql = require('mysql2/promise');
 
 class ProjectModel {
 
     constructor(ProjectModel) {
-        this.project_id = ProjectModel.project_id;
-        this.project_name = ProjectModel.project_name;
-        this.dept_id = ProjectModel.dept_id;
-        this.difficulty = ProjectModel.difficulty;
-        this.ins_tm = ProjectModel.ins_tm;
-        this.upd_tm = ProjectModel.upd_tm;
+        this.projectId = ProjectModel.projectId;
+        this.projectName = ProjectModel.projectName;
+        this.deptId = ProjectModel.deptId;
+        this.insTm = ProjectModel.insTm;
+        this.updTm = ProjectModel.updTm;
         this.version = ProjectModel.version;
+        this.leaderId = ProjectModel.leaderId;
+        this.minExp = ProjectModel.minExp;
+        this.completedAt = ProjectModel.completedAt;
     }
 
-
     // List of project
-    static listProject() {
-        return new Promise((resolve, reject) => {
+    static async listProject() {
+        const connect = await mysql.createConnection(mySQLConnection);
+        try {
             const sql = "SELECT * FROM project";
-            connect.query(
-                sql,
-                (err, result) => {
-                    if (err) {
-                        return reject(err);
-                    }
-                    return resolve(result);
-                }
-            )
-        })
+            const [result] = await connect.execute(sql);
+            return result;
+        } catch (error) {
+            throw error;
+        } finally {
+            connect.end();
+        }
+
     }
 
 
     // Create a new project
-    static createProject(project, results) {
-        const sql = 'INSERT INTO project SET ?'
-        connect.query(
-            sql,
-            project,
-            (err) => {
-                if (err) {
-                    console.log("error: ", err);
-                    return results(err, null);
-                }
-
-                return results(null, true);
-            }
-        )
+    static async createProject(project) {
+        const connect = await mysql.createConnection(mySQLConnection);
+        try {
+            const sql = 'INSERT INTO project SET ?'
+            const [result] = await connect.execute(sql, [project]);
+            console.log(result);
+        } catch (error) {
+            throw error;
+        } finally {
+            connect.end();
+        }
     }
 
 
