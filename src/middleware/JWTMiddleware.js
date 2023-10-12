@@ -7,7 +7,7 @@ class JWTMiddleware {
 
 
     // Check Token
-    verify(roles) {
+    verify(roles = []) {
         return async (req, res, next) => {
             try {
                 const authorization = req.headers['authorization'] || '';

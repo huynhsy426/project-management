@@ -39,10 +39,9 @@ class MemberModel {
                 sql += `(${memberList[index].memberId}, '${deptId}', '${memberList[index].position}')`;
                 (index < memberList.length - 1) ? sql += ',' : '';
             }
-            console.log(sql);
 
             const [resultAddMember] = await connect.execute(sql);
-            return (resultAddMember);
+            return resultAddMember; // {}
         } catch (error) {
             throw error;
         } finally {

@@ -36,10 +36,8 @@ module.exports = {
         }
 
         try {
-            await ProjectService.create(projectEntity);
-            res.status(StatusCodes.OK).json({
-                message: "Create project successfully"
-            })
+            const newProject = await ProjectService.create(projectEntity);
+            res.status(StatusCodes.OK).json(newProject);
         } catch (err) {
             return next(err);
         }

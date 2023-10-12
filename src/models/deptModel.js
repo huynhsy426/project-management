@@ -190,7 +190,6 @@ class DeptModel {
             if (result.length !== 0) {
                 throw new Error("INVALID_SELECT_DEPT_BY_MIN_EXP");
             }
-            return;
         } catch (error) {
             throw error;
         } finally {

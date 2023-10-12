@@ -21,12 +21,8 @@ class MemberController {
             await MemberService.checkMemberInDeptOrIsBlock(members, deptId);
 
             const result = await MemberService.addMembersToDept({ deptId, members });
-            console.log(result);
-            console.log(result.affectedRows)
-            if (!result || result.affectedRows === 0) {
-                return res.status(StatusCodes.CREATED).json({
-                    createMessage: "Add unsuccessful"
-                })
+            if (result.affectedRows === 0) {
+                throw new Error('ADD_MEMBER_UNSUCCESSFULLY');
             }
 
             return res.status(StatusCodes.CREATED).json({
@@ -42,16 +38,12 @@ class MemberController {
         const { memberId } = req.body;
         const { deptId } = req.params;
 
-
         try {
             await MemberService.deleteMember(memberId, deptId)
-            return res.status(StatusCodes.OK).json({
-                message: "Deleted successfully"
-            })
+            return res.status(StatusCodes.NO_CONTENT);
         } catch (error) {
             return next(error);
         }
-
 
     };
 }

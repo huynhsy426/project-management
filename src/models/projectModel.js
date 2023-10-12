@@ -59,12 +59,10 @@ class ProjectModel {
         try {
             const sql = 'INSERT INTO project VALUES (?,?,?,?,?,?,?,?,?)'
             const [result] = await connect.execute(sql, arrProject);
-
-            console.log({ result });
             if (result.affectedRows !== 1) {
                 throw (new Error('CREAT_PROJECT_FAILED'));
             }
-            return;
+            return result;
         } catch (error) {
             throw error;
         } finally {
@@ -123,14 +121,13 @@ class ProjectModel {
     static async isExistName(projectName) {
         const connect = await mysql.createConnection(mySQLConnection);
         try {
-            const sql = "SELECT 1 FROM project WHERE projectName = ? LIMIT 1"
+            const sql = "SELECT 1 FROM project WHERE projectName = ? LIMIT 1";
 
             const [result] = await connect.execute(sql, [projectName]);
 
             if (result.length > 0) {
-                throw (new Error("PROJECT_NAME_EXIST"))
+                throw (new Error("PROJECT_NAME_EXIST"));
             }
-            return;
         } catch (error) {
             throw error;
         } finally {

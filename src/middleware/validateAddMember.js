@@ -42,7 +42,11 @@ const checkNotNull = (members, errMessage) => {
 module.exports = {
     validateMembers: (req, res, next) => {
         const members = req.body.members;
-
+        if (members.length === 0) {
+            return next({
+                error: new Error("INVALID_MEMBER_INPUT_BY_CLIENT"),
+            });
+        }
         const errMessage = []
 
         // Check not null

@@ -23,20 +23,14 @@ class MemberService {
             }
         })
 
-        if (authorId && memberList.length > 0) {
+        if (authorId) {
             memberList.push({
                 memberId: authorId,
                 deptId: deptId,
                 position: "pm"
             })
         };
-
-        if (memberList.length > 0) {
-            return MemberModel.insertMembers(deptId, memberList)
-        }
-
-        let resultAddMember = false;
-        return resultAddMember;
+        return MemberModel.insertMembers(deptId, memberList)
     }
 
     // Check member is in project
