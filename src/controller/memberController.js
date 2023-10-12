@@ -36,6 +36,24 @@ class MemberController {
             return next(err);
         }
     };
+
+
+    deleteMember = async (req, res, next) => {
+        const { memberId } = req.body;
+        const { deptId } = req.params;
+
+
+        try {
+            await MemberService.deleteMember(memberId, deptId)
+            return res.status(StatusCodes.OK).json({
+                message: "Deleted successfully"
+            })
+        } catch (error) {
+            return next(error);
+        }
+
+
+    };
 }
 
 

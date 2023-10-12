@@ -54,5 +54,29 @@
     "NOT_ALLOW_ROLE": {
         "message": "User not valid",
         "statusCode": 400
+    },
+    "PROJECT_NAME_EXIST": {
+        "message": "Project name is exists",
+        "statusCode": 400
+    },
+    "CREAT_PROJECT_FAILED": {
+        "message": "Can't create project",
+        "statusCode": 406
+    },
+    "INVALID_SELECT_DEPT_BY_MIN_EXP": {
+        "message": "Dept cannot select because memeber exp not valid",
+        "statusCode": 400
+    },
+    "MEMBER_NOT_IN_DEPT_FOR_PROJECT": {
+        "message": "AuthorId cannot be a leader because member not in Dept",
+        "statusCode": 400
+    },
+    "MEMBERS_CANNOT_DELETE": {
+        "message": "Members cannot be deleted because they in Project",
+        "statusCode": 406
+    },
+    "MEMBER_NOT_IN_DEPT_FOR_DEPT": {
+        "message": "Members cannot be deleted because they not in dept",
+        "statusCode": 406
     }
 }

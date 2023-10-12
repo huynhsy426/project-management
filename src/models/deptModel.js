@@ -85,7 +85,7 @@ class DeptModel {
         const connect = await mysql.createConnection(mySQLConnection);
         const sql = "SELECT 1 FROM dept WHERE deptId = ? LIMIT 1";
 
-        const result = await connect.execute(
+        const [result] = await connect.execute(
             sql,
             [deptId]
         )
@@ -150,7 +150,7 @@ class DeptModel {
         } finally {
             connect.end();
         }
-    }
+    };
 
 
     // Update dept by Id
@@ -159,7 +159,7 @@ class DeptModel {
 
         try {
             const sql = "UPDATE dept SET deptName = ? WHERE deptId = ?";
-            const result = await connect.execute(
+            const [result] = await connect.execute(
                 sql,
                 [deptName, deptId]
             )
@@ -171,8 +171,58 @@ class DeptModel {
         } finally {
             connect.end();
         }
+    };
+
+
+    // Check minExp members in dept for Project
+    static async checkMinExpForProject(minExp, deptId) {
+        const connect = await mysql.createConnection(mySQLConnection);
+
+        try {
+            const sql = `SELECT 1
+                         FROM users JOIN members ON users.userId = members.memberId
+                         WHERE exp < ? AND deptId = ? LIMIT 1`;
+            const [result] = await connect.execute(
+                sql,
+                [minExp, deptId]
+            )
+
+            if (result.length !== 0) {
+                throw new Error("INVALID_SELECT_DEPT_BY_MIN_EXP");
+            }
+            return;
+        } catch (error) {
+            throw error;
+        } finally {
+            connect.end();
+        }
+    };
+
+
+    static async checkMemberIndept(authorId, deptId) {
+        const connect = await mysql.createConnection(mySQLConnection);
+
+        try {
+            const sql = `SELECT 1
+                         FROM members 
+                         WHERE memberId = ? AND deptId = ? LIMIT 1`;
+            const [result] = await connect.execute(
+                sql,
+                [authorId, deptId]
+            )
+            if (result.length === 0) {
+                throw new Error("MEMBER_NOT_IN_DEPT");
+            }
+            return;
+        } catch (error) {
+            throw error;
+        } finally {
+            connect.end();
+        }
     }
 }
+
+
 
 
 function isEmpty(obj) {

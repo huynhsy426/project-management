@@ -99,6 +99,57 @@ class MemberModel {
             connect.end();
         }
     }
+
+
+    // Check member in project
+    static async checkMemberInProject(memberId) {
+        const connect = await mysql.createConnection(mySQLConnection);
+
+        try {
+            const sql = `SELECT 1
+                         FROM project
+                         WHERE deptId IN (SELECT deptId FROM members 
+                                          WHERE memberId = ?)
+                               AND completedAt IS NULL
+                         LIMIT 1`;
+
+            const [result] = await connect.execute(sql, [memberId]);
+            console.log({ result })
+
+            if (result.length !== 0) {
+                throw new Error("MEMBERS_CANNOT_DELETE");
+            }
+            return;
+        } catch (error) {
+            throw error;
+        } finally {
+            connect.end();
+        }
+    }
+
+
+    // Delete member out dept
+    static async delete(memberId, deptId) {
+        const connect = await mysql.createConnection(mySQLConnection);
+
+        try {
+            const sql = `DELETE 
+                         FROM members 
+                         WHERE memberId = ? AND deptId = ?`;
+            const [result] = await connect.execute(sql, [memberId, deptId]);
+            console.log({ result });
+
+            if (result.affectedRows === 0) {
+                throw new Error("MEMBER_NOT_IN_DEPT_FOR_DEPT");
+            }
+            return;
+        } catch (err) {
+            throw err;
+        } finally {
+            connect.end();
+        }
+    }
+
 }
 
 

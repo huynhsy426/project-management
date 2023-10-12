@@ -50,8 +50,8 @@ class DeptService {
 
 
     // Update dept by Id
-    updateById = ({ deptId, deptName }) => {
-        return DeptModel.updateById({ deptId, deptName });
+    updateById = (deptId, deptName) => {
+        return DeptModel.updateById(deptId, deptName);
     }
 }
 

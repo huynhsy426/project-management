@@ -10,7 +10,6 @@ class DeptController {
     // List dept by roles of user
     listDeptsByRoles = async (req, res, next) => {
         const { userId, roles } = req.user;
-        console.log("here list1")
         try {
             console.log("here list")
             const listDeptsByUser = await DeptService.listDeptsByRoles(userId, roles);
@@ -98,7 +97,7 @@ class DeptController {
         const deptName = req.body.deptName;
 
         try {
-            const isUpdate = await DeptService.updateById({ deptId, deptName });
+            const isUpdate = await DeptService.updateById(deptId, deptName);
             if (!isUpdate) {
                 return res.status(StatusCodes.BAD_REQUEST).json({
                     errMessage: "Dept Id not found."

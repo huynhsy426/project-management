@@ -220,3 +220,73 @@ AND deptId = 'D0001'
 
 
 SELECT * FROM members;
+SELECT * FROM users;
+SELECT * FROM dept;
+
+SELECT userId, deptId 
+FROM users JOIN members ON users.userId = members.memberId
+;
+
+
+SELECT distinct(deptId)
+FROM users JOIN members ON users.userId = members.memberId
+where exp < 2
+;
+
+SELECT deptId 
+FROM members 
+WHERE deptId NOT IN 
+	(SELECT distinct(deptId)
+	FROM users JOIN members ON users.userId = members.memberId
+	where exp < 2)
+;
+
+
+SELECT distinct(deptId)
+	FROM users JOIN members ON users.userId = members.memberId
+	where exp < 2
+;
+
+SELECT 1
+FROM users JOIN members ON users.userId = members.memberId
+where exp < 2 AND deptId = "D0005" LIMIT 1;
+;
+
+
+SELECT 1
+FROM members 
+WHERE memberId = 2 AND deptId = "D0005"
+;
+
+
+SELECT * 
+FROM members 
+WHERE deptId <> "D0006"
+;
+
+
+SELECT 1
+FROM users JOIN members ON users.userId = members.memberId
+WHERE exp < 2 AND deptId = "D0005" LIMIT 1
+;
+
+
+SELECT * 
+FROM members 
+WHERE memberId = 18
+;
+
+SELECT *
+FROM project
+WHERE deptId IN (SELECT deptId FROM members 
+				 WHERE memberId = 18)
+;
+
+
+SELECT 1
+FROM project
+WHERE deptId IN (SELECT deptId FROM members 
+				 WHERE memberId = 6)
+	  AND (completedAt IS NULL OR completedAt < CURDATE())
+LIMIT 1
+;

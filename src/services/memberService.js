@@ -38,6 +38,17 @@ class MemberService {
         let resultAddMember = false;
         return resultAddMember;
     }
+
+    // Check member is in project
+    // If no Delete member
+    deleteMember = async (memberId, deptId) => {
+        try {
+            await MemberModel.checkMemberInProject(memberId);
+            await MemberModel.delete(memberId, deptId);
+        } catch (err) {
+            throw err;
+        }
+    }
 }
 
 

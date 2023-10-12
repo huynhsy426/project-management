@@ -16,19 +16,26 @@ const validateMemberId = (members, errMessage) => {
     const duplicateMembers = members.filter((member, index, self) =>
         self.findIndex((m) => m.memberId === member.memberId) !== index
     );
-    duplicateMembers.length > 0 && errMessage.push(`memberId ${duplicateMembers[0].memberId} is already exists`)
+    duplicateMembers.length > 0 && errMessage.push(`memberId ${duplicateMembers[0].memberId} is already exists.`)
 };
 
 const validateMemberIdFormat = (members, errMessage) => {
     members.map((member) => {
-        !validateNumber(member.memberId) && errMessage.push(`memberId ${member.memberId} not valid`);
+        !validateNumber(member.memberId) && errMessage.push(`memberId ${member.memberId} not valid.`);
     })
 };
 
 const validatePosition = (members, errMessage) => {
     members.map((member) => {
-        !validateString(member.position) && errMessage.push(`Position ${member.position} not valid`);
+        !validateString(member.position) && errMessage.push(`Position ${member.position} not valid.`);
     })
+};
+
+
+const checkNotNull = (members, errMessage) => {
+    for (const member of members) {
+        member.memberId === '' && errMessage.push(`Must provide a member Id.`);
+    }
 };
 
 
@@ -38,6 +45,10 @@ module.exports = {
 
         const errMessage = []
 
+        // Check not null
+        checkNotNull(members, errMessage);
+
+        // Check valid input
         validateMemberIdFormat(members, errMessage);
         validateMemberId(members, errMessage);
         validatePosition(members, errMessage);
