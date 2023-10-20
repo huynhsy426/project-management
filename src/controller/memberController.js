@@ -22,8 +22,7 @@ class MemberController {
 
             const result = await MemberService.addMembersToDept({ deptId, members });
             console.log(result);
-            console.log(result.affectedRows)
-            if (!result || result.affectedRows === 0) {
+            if (!result || result.length === 0) {
                 return res.status(StatusCodes.CREATED).json({
                     createMessage: "Add unsuccessful"
                 })

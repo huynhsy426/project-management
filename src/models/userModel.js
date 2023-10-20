@@ -1,5 +1,4 @@
-const mySQLConnection = require('./connection')
-const mysql = require('mysql2/promise');
+const mongoose = require('mongoose');
 
 class UserModel {
 
@@ -14,74 +13,89 @@ class UserModel {
         this.isBlocked = UserModel.isBlocked;
     };
 
+    static userSchema = new mongoose.Schema({
+        username: {
+            type: String,
+            unique: true,
+            required: true
+        },
+        age: {
+            type: Number,
+            required: true,
+        },
+        roles: {
+            type: String,
+            required: true,
+        },
+        userPassword: {
+            type: String,
+            required: true
+        },
+        gmail: {
+            type: String,
+            unique: true,
+            required: true
+        },
+        exp: {
+            type: Number,
+            required: true
+        },
+        isBlocked: {
+            type: Boolean,
+            requierd: true
+        }
+    }, {
+        versionKey: false // You should be aware of the outcome after set to false
+    });
+
+    static users = mongoose.model('users', this.userSchema);
+
 
     // Check user login
     static async checkUserLogin(username, userPassword) {
-        const connect = await mysql.createConnection(mySQLConnection);
         try {
-            const sql = `SELECT * 
-                         FROM users 
-                         WHERE username = ? AND userPassword = ?`;
-
-            const [result] = await connect.execute(
-                sql,
-                [username, userPassword]);
-            console.log(result, "user dang nhap");
+            const result = await this.users.findOne(
+                { $and: [{ username: username }, { userPassword: userPassword }] },
+                { isBlocked: 1 }
+            )
             if (isEmpty(result)) {
-                return;
+                throw new Error("WRONG_ACCOUNT");
             } else {
-                if (result[0].isBlocked === 1) {
-                    // xoa hasLogin, only use result is enough
-                    console.log("1")
-                    return ({ isBlocked: true, result });
+                if (result.isBlocked === true) {
+                    throw new Error("USER_HAS_BLOCKED");
                 }
-                console.log("2")
-                return ({ isBlocked: false, result });
+                return result;
             }
         } catch (error) {
             throw error;
-        } finally {
-            connect.end();
         }
-    };
+    }
 
 
     // Create a new user
     static async createUser(user) {
-        const connect = await mysql.createConnection(mySQLConnection);
-
         try {
-            const sql = `INSERT INTO users (username, age, roles, userPassword, gmail, exp, isBlocked) 
-                             VALUES (?, ?, ?, ?, ? , ?, ?)`;
-            await connect.execute(
-                sql,
-                [user.username, user.age, user.roles, user.userPassword, user.gmail, user.exp, user.isBlocked]);
+            await this.users.insertMany(user);
             return;
         } catch (error) {
             throw error;
-        } finally {
-            connect.end();
         }
     };
 
 
     // Check user_name and gmail are exists
-    static async isUserNameAndGmailExist(user) {
-        const connect = await mysql.createConnection(mySQLConnection);
-
+    static isUserNameAndGmailExist = async (user) => {
         try {
-            const sql = `select username, gmail 
-                         FROM users 
-                         WHERE username = ? or gmail = ?`;
-
-            const [result] = await connect.execute(
-                sql,
-                [user.username, user.gmail]
+            const result = await this.users.find(
+                { $or: [{ username: user.username }, { gmail: user.gmail }] },
+                { username: 1, gmail: 1, _id: 0 }
             )
+
             if (isEmpty(result)) {
                 console.log("2")
                 return;
             }
+
             if (result.length === 2) {
                 console.log("3")
                 throw (new Error("USERNAME_GMAIL_UNIQUE"));
@@ -101,31 +115,28 @@ class UserModel {
                     throw (new Error("GMAIL_UNIQUE"));
                 }
             }
-        } catch (error) {
-            throw error;
-        } finally {
-            connect.end();
+        } catch (err) {
+            throw err;
         }
     };
 
 
-    static async getUser(userId) {
-        const connect = await mysql.createConnection(mySQLConnection);
-
+    static getUser = async (userId) => {
         try {
-            const sql = `SELECT userId, roles, username, age, gmail, exp, isBlocked
-                         FROM users
-                         WHERE userId = ? LIMIT 1`;
-            const [result] = await connect.execute(sql, [userId])
+            const result = await this.users.findById(
+                userId,
+                {
+                    roles: 1, username: 1,
+                    age: 1, gmail: 1,
+                    exp: 1, isBlocked: 1
+                }
+            ).limit(1);
+
             return result;
-        } catch (error) {
-            throw error;
-        } finally {
-            connect.end();
+        } catch (err) {
+            throw err;
         }
     };
-
-
 };
 
 

@@ -286,7 +286,7 @@ WHERE deptId IN (SELECT deptId FROM members
 SELECT 1
 FROM project
 WHERE deptId IN (SELECT deptId FROM members 
-				 WHERE memberId = 6)
+				 WHERE memberId = 5)
 	  AND (completedAt IS NULL OR completedAt < CURDATE())
 LIMIT 1
 ;

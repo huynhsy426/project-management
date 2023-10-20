@@ -11,7 +11,6 @@ class DeptController {
     listDeptsByRoles = async (req, res, next) => {
         const { userId, roles } = req.user;
         try {
-            console.log("here list")
             const listDeptsByUser = await DeptService.listDeptsByRoles(userId, roles);
             return res.status(StatusCodes.OK).json({
                 listDept: listDeptsByUser
@@ -42,6 +41,7 @@ class DeptController {
 
             // Check dept before create
             const resultAddMember = await DeptService.createDept(deptEntity, members);
+            console.log({ resultAddMember })
             if (!resultAddMember) {
                 DeptService.deleteById(deptEntity.deptId);
                 console.log("Delete successfully");
@@ -81,9 +81,7 @@ class DeptController {
                     message: "delete failed!!!"
                 })
             }
-            return res.status(StatusCodes.OK).json({
-                message: "delete succeeded!!!"
-            })
+            return res.status(StatusCodes.OK)
         } catch (err) {
             return next(err);
         }
@@ -103,9 +101,7 @@ class DeptController {
                     errMessage: "Dept Id not found."
                 })
             }
-            return res.status(StatusCodes.OK).json({
-                errMessage: "Update successfully."
-            })
+            return res.status(StatusCodes.OK).json();
         } catch (err) {
             return next(err);
         }

@@ -18,8 +18,6 @@ class ProjectService {
          await ProjectModel.isExistName(project.projectName);
          await DeptModel.checkMinExpForProject(project.minExp, project.deptId);
          await DeptModel.checkMemberIndept(project.leaderId, project.deptId);
-         const newProjectId = await ProjectModel.createAutoProjectId();
-         project.projectId = newProjectId;
          await ProjectModel.create(project);
       } catch (err) {
          throw err;

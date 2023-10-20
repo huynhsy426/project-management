@@ -15,11 +15,19 @@ router.get('/logout', userController.logOutUser)
 
 
 // Register user
-router.post('/register', [validateCreateUser.validateUser], userController.createUser)
+router.post(
+    '/register',
+    [validateCreateUser.body],
+    userController.createUser
+)
 
 
-// List all users
-router.get('/list', [JWTMiddleware.verify([])], userController.listUsers)
+// List all users test
+router.get(
+    '/list',
+    [JWTMiddleware.verify([])],
+    userController.listUsers
+)
 
 
 module.exports = router

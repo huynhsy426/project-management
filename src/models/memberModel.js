@@ -1,154 +1,183 @@
-const mySQLConnection = require('./connection')
-const mysql = require('mysql2/promise');
+const mongoose = require('mongoose');
+
+const UserModel = require('../models/userModel');
+const ProjectModel = require('../models/projectModel');
 
 
 class MemberModel {
 
-    constructor(MemberModel) {
-        this.memberId = MemberModel.memberId;
-        this.deptId = MemberModel.deptId;
-        this.position = MemberModel.position;
-    }
+   constructor(MemberModel) {
+      this.memberId = MemberModel.memberId;
+      this.deptId = MemberModel.deptId;
+      this.position = MemberModel.position;
+   };
 
 
-    // Get all users
-    static async listMembers() {
-        const connect = await mysql.createConnection(mySQLConnection);
-
-        try {
-            const sql = "SELECT * FROM members";
-
-            const [result] = await connect.execute(sql);
-            return result;
-        } catch (error) {
-            throw error;
-        } finally {
-            connect.end();
-        }
-    }
-
-
-    // Insert member by select
-    static insertMembers = async (deptId, memberList) => {
-        const connect = await mysql.createConnection(mySQLConnection);
-
-        try {
-            let sql = "INSERT INTO members VALUES "
-
-            for (let index = 0; index < memberList.length; index++) {
-                sql += `(${memberList[index].memberId}, '${deptId}', '${memberList[index].position}')`;
-                (index < memberList.length - 1) ? sql += ',' : '';
-            }
-            console.log(sql);
-
-            const [resultAddMember] = await connect.execute(sql);
-            return (resultAddMember);
-        } catch (error) {
-            throw error;
-        } finally {
-            connect.end();
-        }
-    }
+   static memberSchema = new mongoose.Schema({
+      memberId: [
+         {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'users',
+            required: true
+         }
+      ]
+      ,
+      deptId: [
+         {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'depts',
+            required: true
+         }
+      ],
+      position: {
+         type: String,
+         required: true
+      }
+   }, {
+      _id: false,
+      versionKey: false // You should be aware of the outcome after set to false
+   });
 
 
-    // Check member in dept or blocked
-    static async checkMemberInDeptOrIsBlock(members, deptId) {
-        const connect = await mysql.createConnection(mySQLConnection);
+   static member = mongoose.model('members', this.memberSchema);
+   static users = UserModel.users;
+   static projects = ProjectModel.projects;
 
-        try {
-            let listMemberId = "";
-            if (members.length !== 0) {
-                listMemberId = members.map((value) => value.memberId).join(",");
-            } else {
-                listMemberId = 0
-            }
-
-            let sqlCheckIsBlock = `SELECT username, roles
-                                   FROM users
-                                   WHERE userId IN (${listMemberId})
-                                   AND isBlocked = 1`;
-            const [result] = await connect.execute(sqlCheckIsBlock);
-            if (result.length > 0) {
-                throw (new Error("ADD_MEMBER_BLOCK"));
-            }
-
-            const findNotUserRole = result.find(item => item.roles !== 'User');
-
-            if (findNotUserRole) {
-                throw (new Error('NOT_ALLOW_ROLE'));
-            }
-
-            if (!deptId) {
-                return;
-            }
-
-            let sqlCheckAlreadyInDept = `SELECT memberId
-                                                 FROM members
-                                                 WHERE memberId IN (${listMemberId}) 
-                                                 AND deptId = "${deptId}"`;
-
-            const [resultIndept] = await connect.execute(sqlCheckAlreadyInDept);
-            if (resultIndept.length > 0) {
-                throw (new Error("MEMBER_ALREADY_IN_DEPT"))
-            } else {
-                return;
-            }
-        } catch (error) {
-            throw error;
-        } finally {
-            connect.end();
-        }
-    }
+   static async listMembers() {
+      try {
+         const result = await this.member.find(
+            {},
+            { memberId: 1, deptId: 1, position: 1, _id: 0 }
+         );
+         console.log({ result });
+         return result;
+      } catch (error) {
+         throw error;
+      }
+   };
 
 
-    // Check member in project
-    static async checkMemberInProject(memberId) {
-        const connect = await mysql.createConnection(mySQLConnection);
+   // Insert member by select
+   static insertMembers = async (deptId, memberList) => {
+      const listMembers = memberList.map(member => {
+         return member = {
+            memberId: member.memberId,
+            deptId,
+            position: member.position
+         }
+      });
+      try {
+         const result = await this.member.insertMany(listMembers);
+         return result;
+      } catch (error) {
+         throw error;
+      }
+   }
 
-        try {
-            const sql = `SELECT 1
-                         FROM project
-                         WHERE deptId IN (SELECT deptId FROM members 
-                                          WHERE memberId = ?)
-                               AND completedAt IS NULL
-                         LIMIT 1`;
 
-            const [result] = await connect.execute(sql, [memberId]);
-            console.log({ result })
+   // Check member in dept or blocked
+   static async checkMemberInDeptOrIsBlock(members, deptId) {
+      try {
+         console.log("herecheck member")
+         let listMemberId = "";
+         if (members.length !== 0) {
+            listMemberId = members.map((value) => { return (value.memberId.trim()) });
+         } else {
+            listMemberId = 0;
+         }
+         const result = await this.users.find(
+            {
+               _id: { $in: listMemberId },
+               isBlocked: true
+            },
+            { username: 1, roles: 1, _id: 0 }
+         )
 
-            if (result.length !== 0) {
-                throw new Error("MEMBERS_CANNOT_DELETE");
-            }
+         console.log({ result1111: result })
+         if (result.length > 0) {
+            throw (new Error("ADD_MEMBER_BLOCK"));
+         }
+
+         const resultCheckRoles = await this.users.find(
+            {
+               _id: { $in: listMemberId },
+               roles: "Admin"
+            },
+            { roles: 1, _id: 0 }
+         )
+
+         if (resultCheckRoles.length > 0) {
+            throw (new Error('NOT_ALLOW_ROLE'));
+         }
+
+         if (!deptId) {
             return;
-        } catch (error) {
-            throw error;
-        } finally {
-            connect.end();
-        }
-    }
+         }
+
+         const resultIndept = await this.member.find(
+            {
+               memberId: { $in: listMemberId },
+               deptId: deptId
+            },
+            { 1: 1 }
+         )
+         console.log({ resultIndept })
+         if (resultIndept.length > 0) {
+            throw (new Error("MEMBER_ALREADY_IN_DEPT"))
+         }
+         return;
 
 
-    // Delete member out dept
-    static async delete(memberId, deptId) {
-        const connect = await mysql.createConnection(mySQLConnection);
+      } catch (error) {
+         throw error;
+      }
+   }
 
-        try {
-            const sql = `DELETE 
-                         FROM members 
-                         WHERE memberId = ? AND deptId = ?`;
-            const [result] = await connect.execute(sql, [memberId, deptId]);
-            console.log({ result });
 
-            if (result.affectedRows === 0) {
-                throw new Error("MEMBER_NOT_IN_DEPT_FOR_DEPT");
-            }
-            return;
-        } catch (err) {
-            throw err;
-        } finally {
-            connect.end();
-        }
-    }
+   // Check member in project
+   static async checkMemberInProject(memberId) {
+
+      try {
+         const result = await this.member.find(
+            { memberId: memberId },
+            { deptId: 1, _id: 0 }
+         )
+         const listDeptId = result.map(item => {
+            return item.deptId;
+         })
+
+         const isInDept = await this.projects.findOne(
+            { deptId: { $in: listDeptId } },
+            { 1: 1 }
+         )
+
+         if (isInDept !== null) {
+            throw new Error("MEMBERS_CANNOT_DELETE");
+         }
+         return;
+      } catch (error) {
+         throw error;
+      }
+   };
+
+
+   // Delete member out dept
+   static async delete(memberId, deptId) {
+      try {
+         const result = await this.member.deleteMany(
+            { memberId: memberId, deptId: deptId }
+         )
+
+         if (result.deletedCount === 0) {
+            throw new Error("MEMBER_NOT_IN_DEPT_FOR_DEPT");
+         }
+         return;
+      } catch (err) {
+         throw err;
+      }
+   };
+
+
 
 }
 

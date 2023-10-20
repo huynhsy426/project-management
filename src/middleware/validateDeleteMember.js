@@ -1,44 +1,53 @@
-const validateNumber = (age) => {
-    const regex = /^[0-9]{0,3}$/;
-    const valid = regex.test(age);
-    return valid;
-};
+const Joi = require('joi');
+const validator = require('express-joi-validation').createValidator({});
+
+const bodySchema = Joi.object().keys(
+    {
+        memberId: Joi.string()
+            .regex(/^[0-9a-fA-F]{24}$/)
+            .required()
+    }
+)
 
 
-const validateString = (name) => {
-    const regex = /^[a-zA-Z0-9_ ]{3,50}$/;
-    const valid = regex.test(name)
-    return valid;
-};
-
-
-const validateDeptId = (id) => {
-    const regex = /^D[0-9]{2,}$/;
-    const valid = regex.test(id);
-    return valid;
-};
+const paramSchema = Joi.object().keys(
+    {
+        deptId: Joi.string()
+            .regex(/^[0-9a-fA-F]{24}$/)
+            .required()
+    }
+)
 
 
 module.exports = {
-    validateDelete: (req, res, next) => {
-        const { memberId } = req.body;
-        const { deptId } = req.params;
-
-        const errMessage = [];
-
-        (!memberId) && errMessage.push("Must provide a memberId.");
-        (!deptId) && errMessage.push("Must provide a dept id.");
-
-        !validateNumber(memberId) && errMessage.push("memberId must be number.");
-        !validateDeptId(deptId) && errMessage.push("deptId must like 'D***   .");
-
-        if (errMessage.length === 0) {
-            return next();
+    body: (req, res, next) => {
+        const { error, value } = bodySchema.validate(req.body, { abortEarly: false });
+        if (error) {
+            const errorMessages = error.details.map(detail => detail.message);
+            return next(
+                {
+                    error: new Error("INVALID_DEPT_INPUT_BY_CLIENT"),
+                    args: errorMessages,
+                    value
+                }
+            )
         }
+        return next();
+    },
 
-        return next({
-            error: new Error("INVALID_PROJECT_INPUT_BY_CLIENT"),
-            args: errMessage
-        });
+    params: (req, res, next) => {
+        console.log({ a: req.params })
+        const { error, value } = paramSchema.validate(req.params, { abortEarly: false });
+        if (error) {
+            const errorMessages = error.details.map(detail => detail.message);
+            return next(
+                {
+                    error: new Error("INVALID_DEPT_INPUT_BY_CLIENT"),
+                    args: errorMessages,
+                    value
+                }
+            )
+        }
+        return next();
     }
 }

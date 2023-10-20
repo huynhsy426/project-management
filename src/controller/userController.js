@@ -10,8 +10,19 @@ class UserController {
 
     constructor() { }
 
-    // List users
-    listUsers = (req, res) => { };
+    // List users test
+    listUsers = async (req, res) => {
+        try {
+            const user = req.user;
+            console.log({ user });
+            console.log("here")
+            const result = await UserModel.getUser(user.userId);
+            console.log({ result });
+            return res.json({ result })
+        } catch (err) {
+            console.log(err)
+        };
+    };
 
 
     // create Project
@@ -26,14 +37,12 @@ class UserController {
             userPassword: req.body.userPassword,
             gmail: req.body.gmail,
             exp: req.body.exp,
-            isBlocked: 0
+            isBlocked: false
         }
         try {
             await UserModel.isUserNameAndGmailExist(user);
             await UserService.createUser(user);
-            return res.status(StatusCodes.OK).json({
-                registerMessage: "Register successfully"
-            })
+            return res.status(StatusCodes.OK).json();
         } catch (error) {
             return next(error);
         }
@@ -61,28 +70,19 @@ class UserController {
     // login
     loginByUser = async (req, res, next) => {
         const { username, userPassword } = req.body;
-
+        console.log({ username, userPassword })
         try {
-            const { isBlocked, result } = await UserService.loginByUser(username, userPassword)
-            console.log(isBlocked, result)
-            if (!result) {
-                return res.status(StatusCodes.BAD_REQUEST).json({
-                    aaa: "Wrong account"
-                })
-            }
+            const result = await UserService.loginByUser(username, userPassword);
 
             const user = {
-                userId: result[0].userId
+                userId: result._id
             }
+            const token = JwtService.createJWT(user)
 
-            if (!isBlocked) {
-                const token = JwtService.createJWT(user)
-                return res.status(StatusCodes.OK).json({
-                    loginMessage: "Login successful",
-                    accessToken: token
-                })
-            }
-            return next(new Error("BLOCK_USER"))
+            return res.status(StatusCodes.OK).json({
+                loginMessage: "Login successful",
+                accessToken: token
+            });
         } catch (error) {
             return next(error);
         }
@@ -96,6 +96,27 @@ class UserController {
             loginMessage: "Logout successful"
         })
     };
+
+
+    loginTest = async (req, res, next) => {
+        const user = {
+            username: req.body.username,
+            age: req.body.age,
+            roles: 'User',
+            userPassword: req.body.userPassword,
+            gmail: req.body.gmail,
+            exp: req.body.exp,
+            isBlocked: false
+        }
+
+        try {
+            await UserModel.isUserNameAndGmailExist(user);
+            await UserModel.create(user);
+        } catch (err) {
+            return next(err)
+        };
+
+    }
 }
 
 module.exports = new UserController();

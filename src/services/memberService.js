@@ -14,7 +14,7 @@ class MemberService {
     // if has authorId add author to dept
     // Else not add
     // add memberList To Dept
-    addMembersToDept = ({ deptId, members, authorId }) => {
+    addMembersToDept = async ({ deptId, members, authorId }) => {
         const memberList = members.map(member => {
             return {
                 memberId: member.memberId,
@@ -32,7 +32,7 @@ class MemberService {
         };
 
         if (memberList.length > 0) {
-            return MemberModel.insertMembers(deptId, memberList)
+            return await MemberModel.insertMembers(deptId, memberList)
         }
 
         let resultAddMember = false;
@@ -44,7 +44,8 @@ class MemberService {
     deleteMember = async (memberId, deptId) => {
         try {
             await MemberModel.checkMemberInProject(memberId);
-            await MemberModel.delete(memberId, deptId);
+            console.log({ memberId, deptId });
+            // await MemberModel.delete(memberId, deptId);
         } catch (err) {
             throw err;
         }

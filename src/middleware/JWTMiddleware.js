@@ -14,22 +14,22 @@ class JWTMiddleware {
                 const token = authorization.split('Bearer ')[1];
                 const data = JwtService.verify(token);
 
-                const result = await UserModel.getUser(data.userId)
+                const result = await UserModel.getUser(data.userId);
 
                 // Check isBlocked token user
-                if (result[0].isBlocked === 0) {
+                if (result.isBlocked === false) {
                     // Check roles of token user
-                    if (roles.length !== 0 && !roles.includes(result[0].roles)) {
+                    if (roles.length !== 0 && !roles.includes(result.roles)) {
                         return next(new Error('INVALID_ROLE'));
                     }
                     req.user = {
-                        userId: result[0].userId,
-                        username: result[0].username,
-                        age: result[0].age,
-                        roles: result[0].roles,
-                        gmail: result[0].gmail,
-                        exp: result[0].exp,
-                        isBlocked: result[0].isBlocked
+                        userId: result._id,
+                        username: result.username,
+                        age: result.age,
+                        roles: result.roles,
+                        gmail: result.gmail,
+                        exp: result.exp,
+                        isBlocked: result.isBlocked
                     };
                     return next();
                 }

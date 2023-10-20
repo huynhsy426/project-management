@@ -1,78 +1,59 @@
-const validateString = (name) => {
-    const regex = /^[a-zA-Z0-9_ -]{3,50}$/;
-    const valid = regex.test(name)
-    return valid;
-};
+const Joi = require('joi');
+const validator = require('express-joi-validation').createValidator({});
 
 
-const validateNumber = (age) => {
-    const regex = /^[0-9]{0,3}$/;
-    const valid = regex.test(age);
-    return valid;
-};
+const bodySchema = Joi.object().keys(
+    {
+        projectName: Joi.string()
+            .regex(/^[a-zA-Z0-9_ -]{3,50}$/)
+            .required(),
+        deptId: Joi.string()
+            .regex(/^[0-9a-fA-F]{24}$/)
+            .required(),
+        leaderId: Joi.string()
+            .regex(/^[0-9a-fA-F]{24}$/)
+            .required()
+    }
+)
 
-
-const validateDeptId = (id) => {
-    const regex = /^D[0-9]{2,}$/;
-    const valid = regex.test(id);
-    return valid;
-};
-
-const validateDate = (date) => {
-    const regex = /^\d{4}\/\d{2}\/\d{2}$/;
-    const valid = regex.test(date);
-    return valid;
-}
-
-const checkDateBefore = (date) => {
-    let currentdate = new Date();
-    date = new Date(date);
-    return date <= currentdate;
-}
-
-const checkDateAfter = (date) => {
-    let currentdate = new Date();
-    date = new Date(date);
-    return date > currentdate;
-}
+const paramSchema = Joi.object().keys(
+    {
+        minExp: Joi.number()
+            .max(999)
+            .required()
+    }
+)
 
 
 module.exports = {
-    validateProject: (req, res, next) => {
-        const { minExp } = req.params;
-        const projectEntity = {
-            projectId: req.body.projecId,
-            projectName: req.body.projectName,
-            deptId: req.body.deptId,
-            insTm: req.body.insTm,
-            updTm: req.body.updTm,
-            version: req.body.version,
-            leaderId: req.body.leaderId,
-            minExp,
-            completedAt: req.body.completedAt
+    body: (req, res, next) => {
+        const { error, value } = bodySchema.validate(req.body, { abortEarly: false });
+        if (error) {
+            const errorMessages = error.details.map(detail => detail.message);
+            return next(
+                {
+                    error: new Error("INVALID_DEPT_INPUT_BY_CLIENT"),
+                    args: errorMessages,
+                    value
+                }
+            )
         }
+        return next();
+    },
 
-        const errMessage = [];
-
-        // Check not null
-        (!projectEntity.projectName) && errMessage.push("Must provide a project name.");
-        (!projectEntity.deptId) && errMessage.push("Must provide a dept id.");
-        (!projectEntity.leaderId) && errMessage.push("Must provide a leader.");
-        (!projectEntity.minExp) && errMessage.push("Must provide Minimum years of experiences.");
-
-        // Check valid input
-        !validateString(projectEntity.projectName) && errMessage.push("projectName is valid.");
-        !validateDeptId(projectEntity.deptId) && errMessage.push("deptId must like 'D***   .");
-        !validateNumber(projectEntity.leaderId) && errMessage.push("leaderId must be number.");
-        !validateNumber(projectEntity.minExp) && errMessage.push("minExp must be number.");
-
-        if (errMessage.length === 0) {
-            return next();
+    params: (req, res, next) => {
+        console.log({ a: req.params })
+        const { error, value } = paramSchema.validate(req.params, { abortEarly: false });
+        if (error) {
+            const errorMessages = error.details.map(detail => detail.message);
+            return next(
+                {
+                    error: new Error("INVALID_DEPT_INPUT_BY_CLIENT"),
+                    args: errorMessages,
+                    value
+                }
+            )
         }
-
-        return next({
-            error: new Error("INVALID_PROJECT_INPUT_BY_CLIENT"),
-            args: errMessage
-        });
+        return next();
     }
 }

@@ -1,6 +1,7 @@
 const express = require('express');
 const session = require('express-session');
 const app = express();
+const mongoose = require('mongoose');
 
 require('dotenv').config();
 
@@ -11,6 +12,7 @@ const projectRouter = require('./src/routes/projectRouter');
 const userRouter = require('./src/routes/userRouter');
 const deptRouter = require('./src/routes/deptRouter');
 const memberRouter = require('./src/routes/memberRouter');
+const testRouter = require('./src/routes/testRouter');
 
 
 
@@ -27,10 +29,10 @@ var dirName = __dirname;
 configViewEngine(app, session, dirName);
 
 // Router
-app.use("/project", projectRouter);
-app.use('/user', userRouter)
-app.use('/dept', deptRouter);
-app.use('/member', memberRouter);
+app.use("/projects", projectRouter);
+app.use('/users', userRouter)
+app.use('/depts', deptRouter);
+app.use('/members', memberRouter);
 
 
 app.use((req, res) => {
@@ -72,5 +74,19 @@ app.use((error, req, res, next) => {
 });
 
 
-app.listen(8082);
-console.log('Listening on port 8082');
+// app.listen(8082);
+// console.log('Listening on port 8082');
+
+const start = async () => {
+    try {
+        await mongoose.connect(
+            "mongodb://127.0.0.1:27017/project-management"
+        );
+        app.listen(8082, () => console.log(`Server started on port 8082`));
+    } catch (error) {
+        console.error(error);
+        process.exit(1);
+    }
+};
+
+start();

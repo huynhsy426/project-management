@@ -1,61 +1,56 @@
-const validateJustString = (name) => {
-    const regex = /^[a-zA-Z ]{3,50}$/;
-    const valid = regex.test(name)
-    return valid;
-};
+const Joi = require('joi');
+const validator = require('express-joi-validation').createValidator({});
 
-const validateNumber = (age) => {
-    const regex = /^[0-9]{0,3}$/;
-    const valid = regex.test(age);
-    return valid;
-};
 
-const validateGmail = (age) => {
-    const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    const valid = regex.test(age);
-    return valid;
-};
-
-const validatePassword = (password) => {
-    const regex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{3,20}$/;
-    const valid = regex.test(password);
-    return valid;
-};
+const bodySchema = Joi.object().keys(
+    {
+        username: Joi.string()
+            .regex(/^[a-zA-Z ]{3,50}$/)
+            .required(),
+        age: Joi.number()
+            .max(100)
+            .required(),
+        userPassword: Joi.string()
+            .regex(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{3,20}$/)
+            .required(),
+        gmail: Joi.string()
+            .regex(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/)
+            .required(),
+        exp: Joi.number()
+            .max(50)
+            .required()
+    }
+)
 
 
 module.exports = {
-    // Midleware: verify token, validate data vao tu FE
-    validateUser: (req, res, next) => {
-        const user = {
-            username: req.body.username,
-            age: req.body.age,
-            userPassword: req.body.userPassword,
-            gmail: req.body.gmail,
-            exp: req.body.exp,
-            isBlocked: false
+    body: (req, res, next) => {
+        const { error, value } = bodySchema.validate(req.body, { abortEarly: false });
+        if (error) {
+            const errorMessages = error.details.map(detail => detail.message);
+            return next(
+                {
+                    error: new Error("INVALID_DEPT_INPUT_BY_CLIENT"),
+                    args: errorMessages,
+                    value
+                }
+            )
         }
+        return next();
+    },
 
-        const errorMessage = []
-
-        // Check not null
-        user.username === '' && errorMessage.push("Must provide a username.");
-        user.userPassword === '' && errorMessage.push("Must provide password.");
-        user.gmail === '' && errorMessage.push("Must provide email address.");
-        user.exp === '' && errorMessage.push("Must provide experience.");
-
-        // Check valid input
-        !validateJustString(user.username) && errorMessage.push("username is valid.");
-        !validateNumber(user.age) && errorMessage.push("age is not a number.");
-        !validatePassword(user.userPassword) && errorMessage.push(`password must At least one digit, one lowercase letter, one uppercase letter, one special character and between 3 and 20 characters.`);
-        !validateGmail(user.gmail) && errorMessage.push("Invalid email address.");
-        !validateNumber(user.exp) && errorMessage.push("exp is not number.");
-        if (errorMessage.length === 0) {
-            return next();
+    params: (req, res, next) => {
+        const { error, value } = paramSchema.validate(req.params, { abortEarly: false });
+        if (error) {
+            const errorMessages = error.details.map(detail => detail.message);
+            return next(
+                {
+                    error: new Error("INVALID_DEPT_INPUT_BY_CLIENT"),
+                    args: errorMessages,
+                    value
+                }
+            )
         }
-
-        return next({
-            error: new Error("INVALID_USER_INPUT_BY_CLIENT"),
-            args: errorMessage
-        });
+        return next();
     }
 }

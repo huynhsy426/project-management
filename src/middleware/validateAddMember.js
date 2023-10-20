@@ -1,65 +1,34 @@
-const validateString = (name) => {
-    const regex = /^[a-zA-Z0-9_ ]{3,50}$/;
-    const valid = regex.test(name)
-    return valid;
-};
+const Joi = require('joi');
+const validator = require('express-joi-validation').createValidator({});
 
-
-const validateNumber = (age) => {
-    const regex = /^[0-9]{0,3}$/;
-    const valid = regex.test(age);
-    return valid;
-};
-
-
-const validateMemberId = (members, errMessage) => {
-    const duplicateMembers = members.filter((member, index, self) =>
-        self.findIndex((m) => m.memberId === member.memberId) !== index
-    );
-    duplicateMembers.length > 0 && errMessage.push(`memberId ${duplicateMembers[0].memberId} is already exists.`)
-};
-
-const validateMemberIdFormat = (members, errMessage) => {
-    members.map((member) => {
-        !validateNumber(member.memberId) && errMessage.push(`memberId ${member.memberId} not valid.`);
-    })
-};
-
-const validatePosition = (members, errMessage) => {
-    members.map((member) => {
-        !validateString(member.position) && errMessage.push(`Position ${member.position} not valid.`);
-    })
-};
-
-
-const checkNotNull = (members, errMessage) => {
-    for (const member of members) {
-        member.memberId === '' && errMessage.push(`Must provide a member Id.`);
-    }
-};
-
+const bodySchema = Joi.object().keys({
+    members: Joi.array().items(
+        Joi.object().keys(
+            {
+                memberId: Joi.string()
+                    .regex(/^[0-9a-fA-F]{24}$/)
+                    .required(),
+                position: Joi.string()
+                    .regex(/^[a-zA-Z0-9_ ]{3,50}$/)
+                    .required()
+            }
+        ).required()
+    ).required()
+})
 
 module.exports = {
-    validateMembers: (req, res, next) => {
-        const members = req.body.members;
-
-        const errMessage = []
-
-        // Check not null
-        checkNotNull(members, errMessage);
-
-        // Check valid input
-        validateMemberIdFormat(members, errMessage);
-        validateMemberId(members, errMessage);
-        validatePosition(members, errMessage);
-
-        if (errMessage.length === 0) {
-            return next();
+    body: (req, res, next) => {
+        const { error, value } = bodySchema.validate(req.body, { abortEarly: false });
+        if (error) {
+            const errorMessages = error.details.map(detail => detail.message);
+            return next(
+                {
+                    error: new Error("INVALID_DEPT_INPUT_BY_CLIENT"),
+                    args: errorMessages,
+                    value
+                }
+            )
         }
-
-        return next({
-            error: new Error("INVALID_MEMBER_INPUT_BY_CLIENT"),
-            args: errMessage
-        });
+        return next();
     }
 }
