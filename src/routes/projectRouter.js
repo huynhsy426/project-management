@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const projectController = require('../controller/projectController');
-const validateCreateProject = require("../middleware/validateCreateProject");
+const projectValidator = require("../validations/projectValidator");
 const JWTMiddleware = require('../middleware/JWTMiddleware');
 
 router.get('/list',
@@ -15,8 +15,7 @@ router.get('/list',
 router.post(
     '/create/:minExp/project',
     [
-        validateCreateProject.params,
-        validateCreateProject.body,
+        projectValidator.validateCreateProject,
         JWTMiddleware.verify(["Admin"])
     ],
     projectController.create
@@ -24,7 +23,8 @@ router.post(
 
 
 router.get(
-    '/lista',
+    '/list?limit=324&page=343',
+    [projectValidator.validateListProject],
     projectController.list
 )
 

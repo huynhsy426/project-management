@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const userController = require('../controller/userController');
-const validateCreateUser = require('../middleware/validateCreateUser');
+const userValidator = require('../validations/userValidator');
 const JWTMiddleware = require('../middleware/JWTMiddleware');
 
 
@@ -17,7 +17,7 @@ router.get('/logout', userController.logOutUser)
 // Register user
 router.post(
     '/register',
-    [validateCreateUser.body],
+    [userValidator.validateCreateUser],
     userController.createUser
 )
 
