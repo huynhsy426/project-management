@@ -1,19 +1,19 @@
 const { StatusCodes } = require('http-status-codes');
+
 const MemberService = require('../services/memberService');
 
-class MemberController {
 
-    constructor() { }
 
-    listMembersToJoin = (req, res, next) => {
+module.exports = {
+    listMembersToJoin: (req, res, next) => {
         const deptId = req.params.deptId;
-    };
+    },
 
 
     // Check validate first in middleware
     // Check members input isBlocked or in dept
     // Valid -> Add members to the dept
-    addMembers = async (req, res, next) => {
+    addMembers: async (req, res, next) => {
         const members = req.body.members;
         const deptId = req.params.deptId;
 
@@ -34,16 +34,16 @@ class MemberController {
         } catch (err) {
             return next(err);
         }
-    };
+    },
 
 
-    deleteMember = async (req, res, next) => {
+    deleteMember: async (req, res, next) => {
         const { memberId } = req.body;
         const { deptId } = req.params;
 
 
         try {
-            await MemberService.deleteMember(memberId, deptId)
+            await MemberService.delete(memberId, deptId)
             return res.status(StatusCodes.OK).json({
                 message: "Deleted successfully"
             })
@@ -52,8 +52,5 @@ class MemberController {
         }
 
 
-    };
+    }
 }
-
-
-module.exports = new MemberController();

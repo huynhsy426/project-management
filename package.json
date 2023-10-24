@@ -19,13 +19,11 @@
   },
   "homepage": "https://github.com/huynhsy426/project-management#readme",
   "dependencies": {
-    "bluebird": "^3.7.2",
     "body-parser": "^1.20.2",
     "cookie-parser": "^1.4.6",
     "dotenv": "^16.3.1",
     "ejs": "^3.1.9",
     "express": "^4.18.2",
-    "express-joi-validation": "^5.0.1",
     "express-session": "^1.17.3",
     "http-status-codes": "^2.3.0",
     "joi": "^17.11.0",

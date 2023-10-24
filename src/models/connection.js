@@ -1,6 +1,5 @@
 
 const dbConfig = require("../config/configDB");
-const bluebird = require('bluebird');
 const mongoose = require('mongoose');
 
 // create the connection, specify bluebird as Promise
@@ -16,16 +15,14 @@ const uri = `mongodb://127.0.0.1:27017/project-management`;
 
 async function connect() {
     try {
-        console.log('connect 1');
         await mongoose.connect(uri);
         console.log('Connect');
     } catch (err) {
-        console.log({ err });
-        return err;
+        throw err;
     }
 }
 
-module.exports = connect();
+module.exports = connect;
 
 // const mySQLConnection = {
 //     host: dbConfig.HOST,

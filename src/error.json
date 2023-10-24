@@ -82,5 +82,9 @@
     "SEARCH_NAME_NULL": {
         "message": "Search can't be empty",
         "statusCode": 400
+    },
+    "INVALID_INPUT_BY_CLIENT": {
+        "message": "Wrong Input",
+        "statusCode": 400
     }
 }

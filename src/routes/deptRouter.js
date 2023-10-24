@@ -2,10 +2,8 @@ const express = require('express');
 const router = express.Router();
 
 const deptController = require('../controller/deptController');
-
-const validateDept = require('../middleware/validateDept');
-
 const JWTMiddleware = require('../middleware/JWTMiddleware');
+const DeptValidator = require('../validations/deptValidator')
 
 
 // getDeptPage
@@ -15,7 +13,7 @@ router.get("/list", [JWTMiddleware.verify([])], deptController.listDeptsByRoles)
 router.route("/admin/create")
     .post(
         [
-            validateDept.createBody,
+            DeptValidator.validateCreatDept,
             JWTMiddleware.verify(["Admin"])
         ],
         deptController.createDept
@@ -30,8 +28,7 @@ router.get("/search/name/:deptName", deptController.searchDept)
 // Update dept by Id
 router.put("/admin/:deptId/update",
     [
-        validateDept.updataParams,
-        validateDept.updateBody,
+        DeptValidator.validateUpdateDept,
         JWTMiddleware.verify(["Admin"])
     ],
     deptController.updateById

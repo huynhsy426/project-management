@@ -1,20 +1,34 @@
 const JwtService = require("../services/JWTService");
-const UserModel = require("../models/userModel");
-class JWTMiddleware {
+const userModel = require("../models/userModel");
 
 
-    constructor() { }
+const getUser = async (userId) => {
+    try {
+        const result = await userModel.findById(
+            userId,
+            {
+                roles: 1, username: 1,
+                age: 1, gmail: 1,
+                exp: 1, isBlocked: 1
+            }
+        ).limit(1);
 
+        return result;
+    } catch (err) {
+        throw err;
+    }
+};
 
+module.exports = {
     // Check Token
-    verify(roles) {
+    verify: (roles) => {
         return async (req, res, next) => {
             try {
                 const authorization = req.headers['authorization'] || '';
                 const token = authorization.split('Bearer ')[1];
                 const data = JwtService.verify(token);
 
-                const result = await UserModel.getUser(data.userId);
+                const result = await getUser(data.userId);
 
                 // Check isBlocked token user
                 if (result.isBlocked === false) {
@@ -41,5 +55,3 @@ class JWTMiddleware {
         }
     }
 }
-
-module.exports = new JWTMiddleware();

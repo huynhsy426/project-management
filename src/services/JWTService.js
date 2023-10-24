@@ -3,23 +3,19 @@ const jwt = require('jsonwebtoken');
 require("dotenv").config()
 
 
-class JwtService {
-
-    constructor() { }
-
-
+module.exports = {
     // Create token
-    createJWT = (payload) => {
+    createJWT: (payload) => {
         let secretKey = process.env.JWT_SECRET;
         let expiresIn = {
             expiresIn: process.env.JWT_EXPIRES_IN
         }
         return jwt.sign(payload, secretKey, expiresIn);
-    }
+    },
 
 
     // Verify token
-    verify(token) {
+    verify: (token) => {
         try {
             let secretKey = process.env.JWT_SECRET;
             return jwt.verify(token, secretKey);
@@ -27,15 +23,12 @@ class JwtService {
             throw new Error('UNAUTHORIZED');
         }
 
-    }
+    },
 
 
     // Decode token
-    decode(token) {
+    decode: (token) => {
         // , { complete: true }
         return jwt.decode(token);
     }
-
 }
-
-module.exports = new JwtService();

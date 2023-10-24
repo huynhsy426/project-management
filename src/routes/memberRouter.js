@@ -2,8 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const MemberController = require('../controller/memberController');
-const validateAddMember = require('../middleware/validateAddMember');
-const validateDeleteMember = require('../middleware/validateDeleteMember');
+const MemberValidator = require("../validations/memberValidator");
 const JWTMiddleware = require('../middleware/JWTMiddleware');
 
 
@@ -11,13 +10,12 @@ const JWTMiddleware = require('../middleware/JWTMiddleware');
 router.get("/list/:deptId", [JWTMiddleware.verify([])], MemberController.listMembersToJoin)
 
 // Add user for dept
-router.post("/:deptId/add", [validateAddMember.body, JWTMiddleware.verify(["Admin"])], MemberController.addMembers)
+router.post("/:deptId/add", [MemberValidator.validateAddMember, JWTMiddleware.verify(["Admin"])], MemberController.addMembers)
 
 router.delete(
     "/:deptId/delete",
     [
-        validateDeleteMember.params,
-        validateDeleteMember.body,
+        MemberValidator.validateDeleteMember,
         JWTMiddleware.verify(["Admin"])
     ],
     MemberController.deleteMember

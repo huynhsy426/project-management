@@ -1,5 +1,4 @@
 const ProjectService = require("../services/projectService");
-const mongoTest = require("../models/mongoTest");
 const { StatusCodes } = require('http-status-codes');
 
 module.exports = {
@@ -13,15 +12,6 @@ module.exports = {
         } catch (err) {
             return next(err);
         }
-    },
-
-
-    list: async (req, res, next) => {
-        console.log("here")
-        const result = await mongoTest.list();
-        return res.json({
-            result
-        });
     },
 
 
@@ -54,9 +44,6 @@ module.exports = {
             return next(err);
         }
     }
-
-
-
 
 
 }
