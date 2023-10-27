@@ -86,5 +86,9 @@
     "INVALID_INPUT_BY_CLIENT": {
         "message": "Wrong Input",
         "statusCode": 400
+    },
+    "USER_NOT_EXIST": {
+        "message": "User not found",
+        "statusCode": 400
     }
 }

@@ -6,11 +6,20 @@ const deptSchema = new mongoose.Schema({
         unique: true,
         required: true
     },
-    authorId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'users',
-        required: true
-    }
+    members: [
+        {
+            memberId: {
+                type: mongoose.Schema.Types.ObjectId,
+                unique: true,
+                ref: 'users',
+                required: true
+            },
+            position: {
+                type: String
+            },
+            _id: false
+        }
+    ]
 }, {
     versionKey: false // You should be aware of the outcome after set to false
 });

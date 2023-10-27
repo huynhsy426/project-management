@@ -27,24 +27,21 @@ module.exports = {
         const deptEntity = {
             deptId: '',
             deptName: deptName,
-            authorId: userId
+            authorId: userId,
+            members
         }
 
-
+        console.log({ deptEntity })
 
         try {
             // Check members of listSelect
-            await MemberService.checkMemberInDeptOrIsBlock(members);
+            await DeptService.checkMemberIsBlockAndRoles(deptEntity.members);
+
+            // Check members is exist
+            await DeptService.checkMembersIsExist(deptEntity.members);
 
             // Check dept before create
-            const resultAddMember = await DeptService.createDept(deptEntity, members);
-            if (!resultAddMember) {
-                DeptService.deleteById(deptEntity.deptId);
-                console.log("Delete successfully");
-                return res.status(StatusCodes.BAD_REQUEST).json({
-                    createMessage: "Create unsuccessful"
-                })
-            }
+            await DeptService.createDept(deptEntity);
             return res.status(StatusCodes.CREATED).json({
                 createMessage: "Create Dept successfully"
             })

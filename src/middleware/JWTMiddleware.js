@@ -37,7 +37,7 @@ module.exports = {
                         return next(new Error('INVALID_ROLE'));
                     }
                     req.user = {
-                        userId: result._id,
+                        userId: JSON.stringify(result._id).split('"')[1],
                         username: result.username,
                         age: result.age,
                         roles: result.roles,

@@ -7,6 +7,7 @@ const projectSchema = new mongoose.Schema({
     },
     deptId: {
         type: mongoose.Schema.Types.ObjectId,
+        ref: 'depts',
         required: true
     },
     insTm: {
@@ -23,6 +24,7 @@ const projectSchema = new mongoose.Schema({
     },
     leaderId: {
         type: mongoose.Schema.Types.ObjectId,
+        ref: 'users',
         required: true
     },
     minExp: {

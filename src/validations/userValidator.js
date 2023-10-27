@@ -6,7 +6,7 @@ const schemas = {
         body: Joi.object().keys(
             {
                 username: Joi.string()
-                    .regex(/^[^0-9]$/)
+                    .regex(/^[^0-9]*$/)
                     .min(3)
                     .max(50)
                     .messages({
