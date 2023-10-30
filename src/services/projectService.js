@@ -1,24 +1,31 @@
-const projectModel = require("../models/projectModel");
+const ProjectModel = require("../models/projectModel");
 const memberModel = require("../models/memberModel");
+const DeptModel = require("../models/deptModel");
 
 
 const listProjectByRoles = async (roles, userId) => {
    try {
       let result = null;
       if (roles === "Admin") {
-         result = await this.projects.find(
+         result = await ProjectModel.find(
             {},
             { projectName: 1, deptId: 1, insTm: 1, updTm: 1, version: 1, LeaderId: 1, minExp: 1, completedAt: 1 }
          );
       } else {
-         const listMember = await this.members.find({ memberId: userId });
-         const listDeptId = listMember.map((member) => {
-            return member.deptId;
+         const listDept = await DeptModel.find(
+            { "members.memberId": userId },
+            { _id: 1 }
+         );
+
+         const listDeptId = listDept.map((dept) => {
+            return dept._id;
          })
-         console.log({ listDeptId })
-         result = await this.projects.find({
-            deptId: { $in: listDeptId }
-         })
+
+         const query = { deptId: { $in: listDeptId } }
+         result = await ProjectModel.find(
+            query,
+            { _id: 0 }
+         )
 
       }
       console.log({ result1111: result })
@@ -44,7 +51,7 @@ const create = async (project) => {
          }
       ];
 
-      const result = await this.projects.insertMany(arrProject);
+      const result = await ProjectModel.insertMany(arrProject);
       project.projectId = result._id;
       return;
 
@@ -56,7 +63,7 @@ const create = async (project) => {
 
 const isExistName = async (projectName) => {
    try {
-      const result = await this.projects.findOne(
+      const result = await ProjectModel.findOne(
          { projectName: projectName },
          { 1: 1 }
       )
@@ -73,11 +80,25 @@ const isExistName = async (projectName) => {
 
 const checkMinExpForProject = async (minExp, deptId) => {
    try {
-      const result = await memberModel.findOne({ deptId: deptId })
-         .populate({ path: 'memberId', match: { exp: { $lt: minExp } } })
+      const result = await DeptModel.findOne(
+         { _id: deptId },
+         { members: 1, _id: 0 }
+      )
+         .populate(
+            {
+               path: 'members.memberId',
+               select: 'exp -_id'
+            })
 
-      console.log({ result })
-      if (result.memberId.length > 0) {
+      console.log(result.members[0].memberId.exp)
+      const arrMembers = result.members;
+      const listMinExp = arrMembers.filter(member => {
+         console.log({ member })
+         const exp = member.memberId.exp;
+         return exp < minExp;
+      })
+      console.log({ listMinExp })
+      if (listMinExp.length > 0) {
          throw new Error("INVALID_SELECT_DEPT_BY_MIN_EXP");
       }
       return;
@@ -89,12 +110,12 @@ const checkMinExpForProject = async (minExp, deptId) => {
 
 const checkMemberIndept = async (authorId, deptId) => {
    try {
-      const result = await memberModel.findOne(
-         { memberId: authorId, deptId: deptId },
+      const result = await DeptModel.findOne(
+         { _id: deptId, "members.memberId": authorId },
          { 1: 1 }
       );
 
-      if ([result].length === 0) {
+      if (result === null) {
          throw new Error("MEMBER_NOT_IN_DEPT_FOR_PROJECT");
       }
       return;
@@ -118,6 +139,7 @@ module.exports = {
          await checkMinExpForProject(project.minExp, project.deptId);
          await checkMemberIndept(project.leaderId, project.deptId);
          await create(project);
+         return;
       } catch (err) {
          throw err;
       }
@@ -125,7 +147,7 @@ module.exports = {
 
 
    // Search project by project_id, project_name, difficulty, dept_id
-   searchProjectService: (inputSearch, results) => {
+   searchProject: (inputSearch, results) => {
       projectModel.searchProject(
          inputSearch,
          function (err, result) {
@@ -139,7 +161,7 @@ module.exports = {
 
 
    // Delete project by Id
-   deleteByIdService: (project_id, results) => {
+   deleteById: (project_id, results) => {
 
       projectModel.isExistProject(
          project_id,
@@ -168,7 +190,7 @@ module.exports = {
 
 
    // Update project by Id
-   updateProjectByIdService: (project, results) => {
+   updateProjectById: (project, results) => {
       projectModel.isExistProject(
          project.project_id,
          function (err, result, projectEntity) {

@@ -2,6 +2,7 @@ const { StatusCodes } = require('http-status-codes');
 
 const MemberService = require('../services/memberService');
 
+const DeptService = require("../services/deptService");
 
 
 module.exports = {
@@ -16,21 +17,15 @@ module.exports = {
     addMembers: async (req, res, next) => {
         const members = req.body.members;
         const deptId = req.params.deptId;
-
+        console.log({ members, deptId });
         try {
-            await MemberService.checkMemberInDeptOrIsBlock(members, deptId);
-
-            const result = await MemberService.addMembersToDept({ deptId, members });
-            console.log(result);
+            const result = await DeptService.addMemberToDept(members, deptId);
             if (!result || result.length === 0) {
                 return res.status(StatusCodes.CREATED).json({
                     createMessage: "Add unsuccessful"
                 })
             }
-
-            return res.status(StatusCodes.CREATED).json({
-                createMessage: "Add members successfully"
-            })
+            return res.status(StatusCodes.OK).json();
         } catch (err) {
             return next(err);
         }
@@ -43,7 +38,7 @@ module.exports = {
 
 
         try {
-            await MemberService.delete(memberId, deptId)
+            await DeptService.removeMember(memberId, deptId)
             return res.status(StatusCodes.OK).json({
                 message: "Deleted successfully"
             })

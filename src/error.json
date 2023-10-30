@@ -90,5 +90,9 @@
     "USER_NOT_EXIST": {
         "message": "User not found",
         "statusCode": 400
+    },
+    "DELETE_UNSUCCESSFUL": {
+        "message": "Delete unsuccessful",
+        "statusCode": 500
     }
 }

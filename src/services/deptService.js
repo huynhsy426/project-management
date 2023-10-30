@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const DeptModel = require("../models/deptModel");
 const UserModel = require("../models/userModel");
+const ProjectModel = require("../models/projectModel");
 
 
 // Create Dept
@@ -46,19 +47,33 @@ const listDeptsByRoles = async (userId, roles) => {
             )
         } else {
             console.log("here user");
-            const query = { _id: userId };
+            const query = { "members.memberId": userId };
 
-            result = await UserModel.findOne(
+            const resultDeptList = await DeptModel.find(
                 query,
-                { username: 1, depts: 1, _id: 0 }
+                { deptName: 1, members: 1, _id: 0 }
             )
-                .populate({
-                    path: 'depts.deptId',
-                    match: {
-                        "members.memberId": '6528c701d67c305e6fff8276'
-                    },
-                    select: { 'memebers.memberId': '6528c701d67c305e6fff8276' },
+                .populate(
+                    {
+                        path: 'members.memberId',
+                        match: {
+                            "_id": userId
+                        },
+
+                        select: { "members.position": 1, "_id": 1, username: 1 }
+                    }
+                )
+
+            result = resultDeptList.map(dept => {
+                const arrMembers = dept.members;
+                const newArr = arrMembers.filter(member => {
+                    return member.memberId !== null
                 })
+                return {
+                    deptName: dept.deptName,
+                    members: newArr
+                }
+            })
         }
         console.log({ result })
         return result;
@@ -202,28 +217,6 @@ const checkMemberIsBlockAndRoles = async (members) => {
 };
 
 
-// update user to dept
-// const updateUserToDept = async (members, deptId) => {
-//     const listMemberId = members.map((value) => { return (value.memberId) });
-//     try {
-//         let query = { _id: { $in: listMemberId } };
-//         let dept = { deptId: new mongoose.Types.ObjectId(deptId) };
-//         await UserModel.updateMany(
-//             query,
-//             {
-//                 $push: {
-//                     depts: dept
-//                 }
-//             }
-//         )
-//         return;
-//     } catch (error) {
-//         throw error;
-//     }
-// };
-
-
-
 // Check member in dept or blocked
 const checkMemberInDeptOrIsBlock = async (members, deptId) => {
     try {
@@ -295,7 +288,7 @@ const addMemberToDept = async (members, deptId) => {
         }
     });
     try {
-        const query = { id: deptId };
+        const query = { _id: deptId };
         const result = await DeptModel.updateMany(
             query,
             {
@@ -311,6 +304,57 @@ const addMemberToDept = async (members, deptId) => {
     }
 }
 
+// Check member in project
+const checkMemberInProject = async (memberId) => {
+
+    try {
+        const result = await DeptModel.find(
+            { "members.memberId": memberId },
+            { _id: 1 }
+        )
+        const listDeptId = result.map(item => {
+            return JSON.stringify(item._id).split('"')[1];
+        })
+
+        console.log({ listDeptId })
+        const isInDept = await ProjectModel.findOne(
+            { deptId: { $in: listDeptId } },
+            { 1: 1 }
+        )
+        console.log({ isInDept })
+
+        if (isInDept !== null) {
+            throw new Error("MEMBERS_CANNOT_DELETE");
+        }
+        return;
+    } catch (error) {
+        throw error;
+    }
+};
+
+// Remove member out of dept
+const removeMember = async (memberId, deptId) => {
+    console.log({ memberId, deptId })
+    try {
+        const result = await DeptModel.updateOne(
+            { _id: deptId },
+            {
+                $pull: {
+                    members: {
+                        "memberId": memberId,
+                    }
+                }
+            }
+        )
+
+        if (result.upsertedCount === 0) {
+            throw new Error("DELETE_UNSUCCESSFUL");
+        }
+        return;
+    } catch (err) {
+        throw err;
+    }
+}
 
 module.exports = {
     // Kiem tra isBlock Or co ton tai trong Dept 
@@ -337,7 +381,6 @@ module.exports = {
             await isExistDeptName(deptEntity.deptName);
             // After validation all create dept and add members to dept and deptId
             await createDept(deptEntity);
-            // const resultUpdateUser = await updateUserToDept(deptEntity.members, deptEntity.deptId);
             return;
         } catch (err) {
             throw err;
@@ -365,12 +408,20 @@ module.exports = {
         return updateById(deptId, deptName);
     },
 
-
     addMemberToDept: async (members, deptId) => {
         try {
             await checkMemberInDeptOrIsBlock(members, deptId);
             const result = await addMemberToDept(members, deptId);
             return result;
+        } catch (err) {
+            throw err;
+        }
+    },
+
+    removeMember: async (memberId, deptId) => {
+        try {
+            await checkMemberInProject(memberId);
+            await removeMember(memberId, deptId);
         } catch (err) {
             throw err;
         }

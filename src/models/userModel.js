@@ -30,18 +30,7 @@ const userSchema = new mongoose.Schema({
     isBlocked: {
         type: Boolean,
         requierd: true
-    },
-    depts: [
-        {
-            deptId: {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: 'depts',
-                unique: true
-            },
-            _id: false
-        }
-
-    ]
+    }
 }, {
     versionKey: false // You should be aware of the outcome after set to false
 });
