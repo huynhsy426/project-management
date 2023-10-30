@@ -1,7 +1,5 @@
 const { StatusCodes } = require('http-status-codes');
 
-const MemberService = require('../services/memberService');
-
 const DeptService = require("../services/deptService");
 
 
