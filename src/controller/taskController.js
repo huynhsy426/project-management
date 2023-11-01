@@ -59,15 +59,15 @@ module.exports = {
         }
     },
 
-    asignTask: async (req, res, next) => {
+    assignTask: async (req, res, next) => {
         const user = req.user;
         const { assignee } = req.body;
         const { taskId } = req.params;
 
         try {
             assignee.userId !== null
-                ? await taskService.asignTask(assignee.userId, taskId)
-                : await taskService.asignTask(user.id, taskId);
+                ? await taskService.assignTask(assignee.userId, taskId)
+                : await taskService.assignTask(user.id, taskId);
             res.status(StatusCodes.OK).json();
         } catch (error) {
             return next(error);

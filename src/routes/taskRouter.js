@@ -24,7 +24,7 @@ router.put('/assign/:taskId',
         taskValidator.validateAssignTask,
         JWTMiddleware.verify([])
     ],
-    taskController.asignTask
+    taskController.assignTask
 )
 
 

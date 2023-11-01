@@ -36,14 +36,13 @@ const checkTaskName = async (taskName) => {
 const listTasks = async () => {
     try {
         const query = {
-            assignee: {
-
-            }
+            assignee: {}
         }
         const result = await taskModel.find(
             query,
             { taskName: 1, assignee: 1, content: 1, attachments: 1, status: 1, point: 1, create: 1, _id: 0 }
         );
+        console.log({ result })
         return result;
     } catch (error) {
         throw error;
