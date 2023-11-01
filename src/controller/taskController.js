@@ -8,7 +8,6 @@ module.exports = {
         const attachments = req.files;
         const user = req.user;
 
-
         const today = new Date();
 
         let version = 0;

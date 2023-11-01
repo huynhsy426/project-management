@@ -89,15 +89,32 @@ const checkUserExist = async (userId) => {
 };
 
 
-const updateVersion = async (userId, taskId) => {
+const updateVersion = async (userId, taskId, content) => {
     try {
         const query = {
             _id: taskId
         }
-        const result = await taskModel.findOne(
+        const fineTask = await taskModel.findOne(
             query,
-            { content }
+            { content: 1, version: 1, _id: 0 }
         )
+        const version = {
+            "userId": new mongoose.Types.ObjectId(userId),
+            "version": fineTask.version.version,
+            "updateTime": new Date(),
+            "content": content,
+        }
+
+        const result = await taskModel.updateOne(
+            query,
+            {
+                $pull: {
+                    version: version
+                }
+            }
+        )
+        console.log({ result })
+        return;
     } catch (error) {
         throw error;
     }
@@ -172,7 +189,7 @@ module.exports = {
             await checkUserExist(userId);
             await checkTaskIsAssign(userId, taskId);
             await assignTask(userId, taskId);
-            await updateVersion(userId, taskId);
+            await updateVersion(userId, taskId, `${userId} asign`);
         } catch (err) {
             throw err;
         }
