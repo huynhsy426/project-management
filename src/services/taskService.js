@@ -36,7 +36,7 @@ const checkTaskName = async (taskName) => {
 const listTasks = async () => {
     try {
         const query = {
-            assignee: {}
+            "version.version": 0
         }
         const result = await taskModel.find(
             query,
@@ -89,31 +89,74 @@ const checkUserExist = async (userId) => {
 };
 
 
-const checkUserIsAssignTask = async (userId, taskId) => {
+const updateVersion = async (userId, taskId) => {
+    try {
+        const query = {
+            _id: taskId
+        }
+        const result = await taskModel.findOne(
+            query,
+            { content }
+        )
+    } catch (error) {
+        throw error;
+    }
+};
+
+
+const checkTaskIsAssign = async (userId, taskId) => {
     try {
         const query = {
             _id: taskId,
-            "assignee.userId": userId
+            "assignee": {}
         }
         const result = await taskModel.findOne(
             query,
             { 1: 1 }
         )
         if (result !== null) {
-            throw new Error("USER_HAS_ASSIGNED")
+            throw new Error("TASK_HAS_ASSIGNED")
         }
         return;
     } catch (error) {
         throw error;
-    };
+    }
+};
+
+const checkUserIsAuthor = async (userId, taskId) => {
+    try {
+        const query = {
+            _id: taskId,
+            "create.userId": userId
+        };
+
+        const result = await taskModel.findOne(
+            query,
+            { 1: 1 }
+        )
+
+        if (result !== null) {
+            return true;
+        }
+        return false;
+    } catch (error) {
+        throw error;
+    }
+};
+
+
+const changeAssignTask = async (authorId, userId, taskId) => {
+
 }
 
 
 module.exports = {
     create: async (task) => {
         try {
-            console.log("herkjaskdjn")
             await checkTaskName(task.taskName);
+            if (JSON.stringify(task.assignee) !== '{}') {
+                await checkUserExist(task.assignee.userId);
+            }
             await create(task);
         } catch (e) {
             throw e;
@@ -127,14 +170,28 @@ module.exports = {
     assignTask: async (userId, taskId) => {
         try {
             await checkUserExist(userId);
-            await checkUserIsAssignTask(userId, taskId);
+            await checkTaskIsAssign(userId, taskId);
             await assignTask(userId, taskId);
+            await updateVersion(userId, taskId);
         } catch (err) {
             throw err;
         }
     },
 
+    checkUserIsAuthor: async (userId, taskId) => {
+        return checkUserIsAuthor(userId, taskId);
+    },
+
     updateTask: async () => {
 
+    },
+
+
+    changeAssignee: async (authorId, userId, taskId) => {
+        try {
+            await changeAssignTask(authorId, userId, taskId);
+        } catch (err) {
+            throw err;
+        }
     }
 }

@@ -61,13 +61,10 @@ module.exports = {
 
     assignTask: async (req, res, next) => {
         const user = req.user;
-        const { assignee } = req.body;
         const { taskId } = req.params;
 
         try {
-            assignee.userId !== null
-                ? await taskService.assignTask(assignee.userId, taskId)
-                : await taskService.assignTask(user.id, taskId);
+            await taskService.assignTask(user.id, taskId);
             res.status(StatusCodes.OK).json();
         } catch (error) {
             return next(error);
@@ -77,5 +74,17 @@ module.exports = {
 
     update: async (req, res, next) => {
 
+    },
+
+
+    changeAssignee: async (req, res, next) => {
+        const { userId } = req.body;
+        const { taskId } = req.params;
+        const user = req.user;
+        try {
+            await taskService.changeAssignee(user.userId, userId, taskId)
+        } catch (error) {
+            return next(error);
+        }
     }
 }

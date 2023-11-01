@@ -107,8 +107,8 @@
         "message": "Can't create task",
         "statusCode": 500
     },
-    "USER_HAS_ASSIGNED": {
-        "message": "user is assigned to task",
+    "TASK_HAS_ASSIGNED": {
+        "message": "Task is assigned",
         "statusCode": 400
     }
 }
