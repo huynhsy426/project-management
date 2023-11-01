@@ -28,9 +28,9 @@ router.put('/assign/:taskId',
 );
 
 
-router.get('/change-assignee/:taskId',
+router.put('/change-assignee/:taskId',
     [
-        taskValidator.validateAssignTask,
+        taskValidator.validateChangeAssignee,
         JWTMiddleware.verify(["Admin"])
     ],
     taskController.changeAssignee

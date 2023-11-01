@@ -89,7 +89,8 @@ const checkUserExist = async (userId) => {
 };
 
 
-const updateVersion = async (userId, taskId, content) => {
+const updateVersion = async ({ userId, taskId, content }) => {
+    console.log({ userId, taskId, content })
     try {
         const query = {
             _id: taskId
@@ -98,17 +99,19 @@ const updateVersion = async (userId, taskId, content) => {
             query,
             { content: 1, version: 1, _id: 0 }
         )
+        console.log({ asd: fineTask.version })
         const version = {
             "userId": new mongoose.Types.ObjectId(userId),
-            "version": fineTask.version.version,
+            "version": fineTask.version[fineTask.version.length - 1].version + 1,
             "updateTime": new Date(),
             "content": content,
         }
 
+        console.log({ version })
         const result = await taskModel.updateOne(
             query,
             {
-                $pull: {
+                $push: {
                     version: version
                 }
             }
@@ -121,15 +124,15 @@ const updateVersion = async (userId, taskId, content) => {
 };
 
 
-const checkTaskIsAssign = async (userId, taskId) => {
+const checkTaskIsAssign = async (taskId) => {
     try {
         const query = {
             _id: taskId,
-            "assignee": {}
+            "assignee.userId": { $exists: true }
         }
         const result = await taskModel.findOne(
             query,
-            { 1: 1 }
+            {}
         )
         if (result !== null) {
             throw new Error("TASK_HAS_ASSIGNED")
@@ -162,8 +165,26 @@ const checkUserIsAuthor = async (userId, taskId) => {
 };
 
 
-const changeAssignTask = async (authorId, userId, taskId) => {
-
+const changeAssignTask = async (userId, taskId) => {
+    try {
+        const query = {
+            _id: taskId
+        };
+        const result = await taskModel.updateOne(
+            query,
+            {
+                assignee: {
+                    userId: new mongoose.Types.ObjectId(userId)
+                }
+            }
+        )
+        if (result.modifiedCount === 0) {
+            throw new Error("CANNOT_CHANGE_USER")
+        }
+        return;
+    } catch (error) {
+        throw error;
+    }
 }
 
 
@@ -187,9 +208,9 @@ module.exports = {
     assignTask: async (userId, taskId) => {
         try {
             await checkUserExist(userId);
-            await checkTaskIsAssign(userId, taskId);
+            await checkTaskIsAssign(taskId);
             await assignTask(userId, taskId);
-            await updateVersion(userId, taskId, `${userId} asign`);
+            await updateVersion({ userId, taskId, content: `${userId} user asign` });
         } catch (err) {
             throw err;
         }
@@ -206,7 +227,9 @@ module.exports = {
 
     changeAssignee: async (authorId, userId, taskId) => {
         try {
-            await changeAssignTask(authorId, userId, taskId);
+            await checkUserExist(userId);
+            await changeAssignTask(userId, taskId);
+            await updateVersion({ authorId, taskId, content: `Change task to ${userId} users` })
         } catch (err) {
             throw err;
         }

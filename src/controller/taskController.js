@@ -63,7 +63,7 @@ module.exports = {
         const { taskId } = req.params;
 
         try {
-            await taskService.assignTask(user.id, taskId);
+            await taskService.assignTask(user.userId, taskId);
             res.status(StatusCodes.OK).json();
         } catch (error) {
             return next(error);
@@ -80,8 +80,11 @@ module.exports = {
         const { userId } = req.body;
         const { taskId } = req.params;
         const user = req.user;
+
         try {
-            await taskService.changeAssignee(user.userId, userId, taskId)
+            await taskService.changeAssignee(user.userId, userId, taskId);
+
+            res.status(StatusCodes.OK).json();
         } catch (error) {
             return next(error);
         }

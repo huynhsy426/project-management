@@ -49,21 +49,28 @@ const schemas = {
 
 
     assignTask: {
+        params: Joi.object().keys(
+            {
+                taskId: Joi.string()
+                    .hex()
+                    .length(24)
+                    .required()
+            }
+        )
+    },
+
+    changeAssignee: {
         body: Joi.object().keys(
             {
-                assignee: Joi.object().keys(
-                    {
-                        userId: Joi.string()
-                            .hex()
-                            .length(24)
-                            .messages({
-                                "string.pattern.base": "User not valid"
-                            })
-                    }
-                )
+                userId: Joi.string()
+                    .hex()
+                    .length(24)
+                    .required()
+                    .messages({
+                        "string.pattern.base": "User not valid"
+                    })
             }
         ),
-
         params: Joi.object().keys(
             {
                 taskId: Joi.string()
@@ -101,7 +108,7 @@ class taskValidator extends MyValidator {
         } catch (error) {
             return next(error);
         }
-    }
+    };
 
 
     validateAssignTask(req, res, next) {
@@ -111,7 +118,17 @@ class taskValidator extends MyValidator {
         } catch (error) {
             return next(error);
         }
-    }
+    };
+
+
+    validateChangeAssignee(req, res, next) {
+        try {
+            super.handleValidationError(req, schemas.changeAssignee);
+            return next();
+        } catch (error) {
+            return next(error);
+        };
+    };
 }
 
 module.exports = new taskValidator();
