@@ -11,7 +11,6 @@ module.exports = {
             const result = await UserService.list(user.userId);
             return res.json({ result })
         } catch (err) {
-            console.log(err)
         };
     },
 
@@ -61,7 +60,6 @@ module.exports = {
     // login
     loginByUser: async (req, res, next) => {
         const { username, userPassword } = req.body;
-        console.log({ username, userPassword })
         try {
             const result = await UserService.loginByUser(username, userPassword);
 

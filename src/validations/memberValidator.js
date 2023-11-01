@@ -64,7 +64,6 @@ class MemberValidator extends MyValidator {
 
     validateAddMember(req, res, next) {
         try {
-            console.log({ a: req.body.members })
             super.handleValidationError(req, schemas.addMembers);
             return next();
         } catch (error) {

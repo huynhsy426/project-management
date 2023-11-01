@@ -5,6 +5,8 @@ const projectRouter = require('./src/routes/projectRouter');
 const userRouter = require('./src/routes/userRouter');
 const deptRouter = require('./src/routes/deptRouter');
 const memberRouter = require('./src/routes/memberRouter');
+const taskRouter = require('./src/routes/taskRouter');
+const reportRouter = require('./src/routes/reportRouter');
 
 const connection = require('./src/models/connection');
 const errors = require('./src/error.json');
@@ -23,6 +25,8 @@ app.use("/projects", projectRouter);
 app.use('/users', userRouter)
 app.use('/depts', deptRouter);
 app.use('/members', memberRouter);
+app.use('/tasks', taskRouter);
+app.use('/reports', reportRouter);
 
 
 app.use((req, res) => {

@@ -15,12 +15,11 @@ module.exports = {
     addMembers: async (req, res, next) => {
         const members = req.body.members;
         const deptId = req.params.deptId;
-        console.log({ members, deptId });
         try {
             const result = await DeptService.addMemberToDept(members, deptId);
             if (!result || result.length === 0) {
                 return res.status(StatusCodes.CREATED).json({
-                    createMessage: "Add unsuccessful"
+                    createMessage: "Add failed"
                 })
             }
             return res.status(StatusCodes.OK).json();

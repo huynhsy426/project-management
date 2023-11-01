@@ -18,6 +18,7 @@ const configViewEngine = (app, session, dirName) => {
         secret: 'some secrets',
         saveUninitialized: false
     }))
+    app.use('/uploads', express.static('uploads'))
 };
 
 module.exports = configViewEngine;

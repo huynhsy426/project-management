@@ -36,17 +36,14 @@ const createDept = async (dept) => {
 
 // Can sua
 const listDeptsByRoles = async (userId, roles) => {
-    console.log({ userId, roles })
     try {
         let result = null;
         if (roles === "Admin") {
-            console.log("here admin");
             result = await DeptModel.find(
                 {},
-                { deptName: 1, authorId: 1, members: 1, _id: 0 }
+                { deptName: 1, members: 1, _id: 0 }
             )
         } else {
-            console.log("here user");
             const query = { "members.memberId": userId };
 
             const resultDeptList = await DeptModel.find(
@@ -75,7 +72,6 @@ const listDeptsByRoles = async (userId, roles) => {
                 }
             })
         }
-        console.log({ result })
         return result;
     } catch (error) {
         throw error;
@@ -92,8 +88,6 @@ const isExistDeptName = async (deptName) => {
         if (result !== null) {
             throw (new Error("DEPTNAME_UNIQUE"));
         }
-
-        console.log("isHere isss")
         return;
     } catch (err) {
         throw err;
@@ -107,7 +101,6 @@ const searchDeptByName = async (inputName) => {
         const result = await DeptModel.find(
             { deptName: new RegExp(inputName) }
         )
-        console.log({ result })
         return result;
     } catch (error) {
         throw error;
@@ -131,13 +124,11 @@ const deleteById = async (deptId) => {
 
 // Update dept by Id
 const updateById = async (deptId, deptName) => {
-    console.log({ deptId, deptName });
     try {
         const result = await DeptModel.updateMany(
             { _id: deptId },
             { $set: { deptName: deptName } }
         );
-        console.log({ result });
         let isUpdate = true;
         if (result.matchedCount === 0) {
             return !isUpdate;
@@ -166,7 +157,6 @@ const checkMemberIsExist = async (members) => {
         const result = await UserModel.find(
             { _id: { $in: listMemberId } }
         )
-        console.log({ result })
         if (result.length !== listMemberId.length) {
             throw new Error("USER_NOT_EXIST");
         }
@@ -251,15 +241,12 @@ const checkMemberInDeptOrIsBlock = async (members, deptId) => {
             throw (new Error('NOT_ALLOW_ROLE'));
         }
 
-        console.log({ deptId })
         const resultIndept = await DeptModel.findOne(
             {
                 _id: new mongoose.Types.ObjectId(deptId),
             },
             { members: 1, _id: 0 }
         )
-
-        console.log({ asd: resultIndept.members })
 
         const inDeptList = [];
         resultIndept.members.forEach(element => {
@@ -316,12 +303,10 @@ const checkMemberInProject = async (memberId) => {
             return JSON.stringify(item._id).split('"')[1];
         })
 
-        console.log({ listDeptId })
         const isInDept = await ProjectModel.findOne(
             { deptId: { $in: listDeptId } },
             { 1: 1 }
         )
-        console.log({ isInDept })
 
         if (isInDept !== null) {
             throw new Error("MEMBERS_CANNOT_DELETE");
@@ -334,7 +319,6 @@ const checkMemberInProject = async (memberId) => {
 
 // Remove member out of dept
 const removeMember = async (memberId, deptId) => {
-    console.log({ memberId, deptId })
     try {
         const result = await DeptModel.updateOne(
             { _id: deptId },

@@ -1,14 +1,13 @@
 const { StatusCodes } = require('http-status-codes');
 
-const DeptService = require("../services/deptService");
-const MemberService = require("../services/memberService");
+const deptService = require("../services/deptService");
 
 module.exports = {
     // List dept by roles of user
     listDeptsByRoles: async (req, res, next) => {
         const { userId, roles } = req.user;
         try {
-            const listDeptsByUser = await DeptService.listDeptsByRoles(userId, roles);
+            const listDeptsByUser = await deptService.listDeptsByRoles(userId, roles);
             return res.status(StatusCodes.OK).json({
                 listDept: listDeptsByUser
             })
@@ -31,17 +30,15 @@ module.exports = {
             members
         }
 
-        console.log({ deptEntity })
-
         try {
             // Check members of listSelect
-            await DeptService.checkMemberIsBlockAndRoles(deptEntity.members);
+            await deptService.checkMemberIsBlockAndRoles(deptEntity.members);
 
             // Check members is exist
-            await DeptService.checkMembersIsExist(deptEntity.members);
+            await deptService.checkMembersIsExist(deptEntity.members);
 
             // Check dept before create
-            await DeptService.createDept(deptEntity);
+            await deptService.createDept(deptEntity);
             return res.status(StatusCodes.CREATED).json({
                 createMessage: "Create Dept successfully"
             })
@@ -55,7 +52,7 @@ module.exports = {
     searchDept: async (req, res, next) => {
         const { deptName } = req.params;
         try {
-            const searchResult = await DeptService.searchDept(deptName);
+            const searchResult = await deptService.searchDept(deptName);
             return res.status(StatusCodes.OK).json({
                 deptList: searchResult
             })
@@ -68,7 +65,7 @@ module.exports = {
     deleteById: async (req, res, next) => {
         const { deptId } = req.params;
         try {
-            const result = await DeptService.deleteById(deptId);
+            const result = await deptService.deleteById(deptId);
             if (!result) {
                 return res.status(StatusCodes.BAD_REQUEST).json({
                     message: "delete failed!!!"
@@ -88,7 +85,7 @@ module.exports = {
         const deptName = req.body.deptName;
 
         try {
-            const isUpdate = await DeptService.updateById(deptId, deptName);
+            const isUpdate = await deptService.updateById(deptId, deptName);
             if (!isUpdate) {
                 return res.status(StatusCodes.BAD_REQUEST).json({
                     errMessage: "Dept Id not found."

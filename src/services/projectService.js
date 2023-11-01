@@ -27,7 +27,6 @@ const listProjectByRoles = async (roles, userId) => {
          )
 
       }
-      console.log({ result1111: result })
       return result;
    } catch (error) {
       throw error;
@@ -66,7 +65,6 @@ const isExistName = async (projectName) => {
          { projectName: projectName },
          { 1: 1 }
       )
-      console.log({ result })
       if (result !== null) {
          throw (new Error("PROJECT_NAME_EXIST"))
       }
@@ -89,14 +87,12 @@ const checkMinExpForProject = async (minExp, deptId) => {
                select: 'exp -_id'
             })
 
-      console.log(result.members[0].memberId.exp)
       const arrMembers = result.members;
       const listMinExp = arrMembers.filter(member => {
-         console.log({ member })
          const exp = member.memberId.exp;
          return exp < minExp;
       })
-      console.log({ listMinExp })
+
       if (listMinExp.length > 0) {
          throw new Error("INVALID_SELECT_DEPT_BY_MIN_EXP");
       }
@@ -123,6 +119,23 @@ const checkMemberIndept = async (authorId, deptId) => {
    }
 };
 
+
+const checkDeptExist = async (deptId) => {
+   try {
+      const result = await DeptModel.findOne(
+         { _id: deptId },
+         { 1: 1 }
+      );
+
+      if (result === null) {
+         throw new Error("DEPT_NOT_EXIST");
+      }
+      return;
+   } catch (error) {
+      throw error;
+   }
+}
+
 module.exports = {
    // List all projects
    listProjectByRoles: (roles, userId) => {
@@ -132,8 +145,8 @@ module.exports = {
 
    // Create a new project
    create: async (project) => {
-      console.log({ project })
       try {
+         await checkDeptExist(project.deptId);
          await isExistName(project.projectName);
          await checkMinExpForProject(project.minExp, project.deptId);
          await checkMemberIndept(project.leaderId, project.deptId);

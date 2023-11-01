@@ -21,13 +21,12 @@ module.exports = {
         const { deptId, projectName, leaderId } = req.body;
 
         const today = new Date();
-        const getToDay = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`
 
         const projectEntity = {
             projectId: '',
             projectName,
             deptId,
-            insTm: getToDay,
+            insTm: today,
             updTm: null,
             version: 1,
             leaderId,

@@ -3,7 +3,7 @@ const router = express.Router();
 
 const deptController = require('../controller/deptController');
 const JWTMiddleware = require('../middleware/JWTMiddleware');
-const DeptValidator = require('../validations/deptValidator')
+const DeptValidator = require('../validations/deptValidator');
 
 
 // getDeptPage
@@ -35,4 +35,4 @@ router.put("/admin/:deptId/update",
 )
 
 
-module.exports = router
+module.exports = router;

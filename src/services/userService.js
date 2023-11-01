@@ -42,26 +42,21 @@ const isUserNameAndGmailExist = async (user) => {
         )
 
         if (result.length === 0) {
-            console.log("2")
             return;
         }
 
         if (result.length === 2) {
-            console.log("3")
             throw (new Error("USERNAME_GMAIL_UNIQUE"));
         } else if (result.length === 1) {
-            console.log("4")
             if (result.some(item => item.username === user.username && item.gmail === user.gmail)) {
                 throw (new Error("USERNAME_GMAIL_UNIQUE"));
             }
 
             if (result.some(item => item.username === user.username)) {
-                console.log("5");
                 throw (new Error("USERNAME_UNIQUE"));
             }
 
             if (result.some(item => item.gmail === user.gmail)) {
-                console.log("6");
                 throw (new Error("GMAIL_UNIQUE"));
             }
         }

@@ -92,7 +92,23 @@
         "statusCode": 400
     },
     "DELETE_UNSUCCESSFUL": {
-        "message": "Delete unsuccessful",
+        "message": "Delete failed",
         "statusCode": 500
+    },
+    "DEPT_NOT_EXIST": {
+        "message": "Dept not exist",
+        "statusCode": 400
+    },
+    "TASK_NAME_EXISTS": {
+        "message": "Task name is exist",
+        "statusCode": 400
+    },
+    "CREATE_TASK_FAILED": {
+        "message": "Can't create task",
+        "statusCode": 500
+    },
+    "USER_HAS_ASSIGNED": {
+        "message": "user is assigned to task",
+        "statusCode": 400
     }
 }
