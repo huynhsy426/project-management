@@ -7,7 +7,7 @@ const taskController = require('../controller/taskController');
 
 const upload = require('../middleware/saveFile');
 
-router.get('/list', taskController.listTask);
+router.get('/list', taskController.listUnassignTask);
 
 router.post('/create',
     [
@@ -28,13 +28,22 @@ router.put('/assign/:taskId',
 );
 
 
-router.put('/change-assignee/:taskId',
+router.put('/admin/change-assignee/:taskId',
     [
         taskValidator.validateChangeAssignee,
         JWTMiddleware.verify(["Admin"])
     ],
     taskController.changeAssignee
-)
+);
+
+
+router.put('/admin/:taskId/update',
+    [
+        taskValidator.validateUpdateTask,
+        JWTMiddleware.verify(["Admin"])
+    ],
+    taskController.update
+);
 
 
 

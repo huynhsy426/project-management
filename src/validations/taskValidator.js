@@ -12,16 +12,13 @@ const schemas = {
                         "string.pattern.base": "Task name not valid"
                     })
                     .required(),
-                assignee: Joi.object().keys(
-                    {
-                        userId: Joi.string()
-                            .hex()
-                            .length(24)
-                            .messages({
-                                "string.pattern.base": "User not valid"
-                            })
-                    }
-                ),
+                assignee: Joi.string()
+                    .hex()
+                    .length(24)
+                    .allow(null, '')
+                    .messages({
+                        "string.pattern.base": "User not valid"
+                    }),
                 content: Joi.string()
                     .min(3)
                     .max(999)
@@ -31,9 +28,6 @@ const schemas = {
                         "string.max": "must less than 1000 characters."
                     }),
                 attachments: Joi.any(),
-                status: Joi.string()
-                    .regex(/todo|doing|done|rejected/)
-                    .required(),
                 point: Joi.number()
                     .min(1)
                     .max(10)
@@ -66,9 +60,6 @@ const schemas = {
                     .hex()
                     .length(24)
                     .required()
-                    .messages({
-                        "string.pattern.base": "User not valid"
-                    })
             }
         ),
         params: Joi.object().keys(
@@ -79,6 +70,39 @@ const schemas = {
                     .required()
             }
         )
+    },
+
+
+    updateTask: {
+        body: Joi.object().keys({
+            taskName: Joi.string()
+                .regex(/^[a-zA-Z0-9_ ]{3,100}$/)
+                .allow(null)
+                .messages({
+                    "string.pattern.base": "Task name not valid"
+                }),
+            content: Joi.string()
+                .min(3)
+                .max(999)
+                .required()
+                .messages({
+                    "string.min": "must more than 2 characters.",
+                    "string.max": "must less than 1000 characters."
+                }),
+            attachments: Joi.any(),
+            point: Joi.number()
+                .min(1)
+                .max(10)
+                .allow(null)
+                .messages({
+                    "string.min": "must more than 0 characters.",
+                    "string.max": "must less than or equal 10 characters.",
+                    "string.pattern.base": "Format must in todo|doing|done|rejected"
+                }),
+            status: Joi.string()
+                .regex(/todo|doing|done|rejected/)
+                .allow(null)
+        })
     }
 }
 
@@ -124,6 +148,16 @@ class taskValidator extends MyValidator {
     validateChangeAssignee(req, res, next) {
         try {
             super.handleValidationError(req, schemas.changeAssignee);
+            return next();
+        } catch (error) {
+            return next(error);
+        };
+    };
+
+
+    validateUpdateTask(req, res, next) {
+        try {
+            super.handleValidationError(req, schemas.updateTask);
             return next();
         } catch (error) {
             return next(error);

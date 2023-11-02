@@ -114,5 +114,9 @@
     "CANNOT_CHANGE_USER": {
         "message": "Task can't change user",
         "statusCode": 503
+    },
+    "TASK_NOT_EXIST": {
+        "message": "Task not exist",
+        "statusCode": 503
     }
 }

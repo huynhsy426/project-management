@@ -6,27 +6,28 @@ const taskSchema = new mongoose.Schema({
         required: true
     },
     assignee: {
-        userId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'users'
-        }
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'users'
     },
     content: {
         type: String,
         required: true
     },
-    attachments: [
-        {
-            path: {
-                type: String,
-                trim: true
-            },
-            originalname: {
-                type: String
-            },
-            _id: false
-        }
-    ],
+    attachments: {
+        type: [
+            {
+                path: {
+                    type: String,
+                    trim: true
+                },
+                originalname: {
+                    type: String
+                },
+                _id: false
+            }
+        ],
+        default: undefined
+    },
     //  status(trạng thái của task: todo, doing, done, rejected)
     status: {
         type: String,
@@ -39,37 +40,105 @@ const taskSchema = new mongoose.Schema({
         max: [10, 'More than 1 and less than 10'],
         required: true
     },
-    create: {
-        userId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'users',
-            required: true
-        },
-        createAt: {
-            type: Date,
-            required: true
-        },
-        _id: false
+    createdBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'users',
+        required: true
     },
-    version: [
+    versions: [
         {
-            userId: {
+            changeBy: {
                 type: mongoose.Schema.Types.ObjectId
             },
-            version: {
-                type: Number
-            },
-            updateTime: {
+            updated_at: {
                 type: Date
             },
-            content: {
-                type: String
-            }
+            old: {
+                taskName: {
+                    type: String
+                },
+                assignee: {
+                    type: mongoose.Schema.Types.ObjectId,
+                    ref: 'users'
+                },
+                content: {
+                    type: String
+                },
+                attachments: {
+                    type: [
+                        {
+                            path: {
+                                type: String,
+                                trim: true
+                            },
+                            originalname: {
+                                type: String
+                            },
+                            _id: false
+                        }
+                    ],
+                    default: undefined
+                },
+                //  status(trạng thái của task: todo, doing, done, rejected)
+                status: {
+                    type: String
+                },
+                // point(trọng số của task để đánh giá độ ưu tiên)
+                point: {
+                    type: Number,
+                    min: [1, 'More than 1 and less than 10'],
+                    max: [10, 'More than 1 and less than 10']
+                }
+            },
+            new: {
+                taskName: {
+                    type: String
+                },
+                assignee: {
+                    type: mongoose.Schema.Types.ObjectId,
+                    ref: 'users'
+                },
+                content: {
+                    type: String
+                },
+                attachments: {
+                    type: [
+                        {
+                            path: {
+                                type: String,
+                                trim: true
+                            },
+                            originalname: {
+                                type: String
+                            },
+                            _id: false
+                        }
+                    ],
+                    default: undefined
+                },
+                //  status(trạng thái của task: todo, doing, done, rejected)
+                status: {
+                    type: String
+                },
+                // point(trọng số của task để đánh giá độ ưu tiên)
+                point: {
+                    type: Number,
+                    min: [1, 'More than 1 and less than 10'],
+                    max: [10, 'More than 1 and less than 10']
+                }
+            },
+            _id: false
         }
     ]
 }, {
     versionKey: false,// You should be aware of the outcome after set to false
-    minimize: false
+    minimize: true,
+    timestamps: true
+});
+
+taskSchema.pre('save', function (next) {
+    this.updated_at = Date.now();
+    next();
 });
 
 const taskModel = mongoose.model('tasks', taskSchema);

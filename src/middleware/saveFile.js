@@ -5,8 +5,6 @@ var multer = require('multer');
 var storage = multer.diskStorage({
     destination: function (req, file, cb) {
         const duoiFile = path.extname(file.originalname).toUpperCase();
-        console.log({ duoiFile });
-        console.log({ kjnkjn: file })
         if (duoiFile === ".JPG" || duoiFile === ".JPEG" || duoiFile === ".PNG" || duoiFile === ".GIF") {
             cb(null, 'uploads/images/')
         }

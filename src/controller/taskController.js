@@ -4,16 +4,9 @@ const taskService = require("../services/taskService");
 
 module.exports = {
     create: async (req, res, next) => {
-        const { taskName, assignee, content, status, point } = JSON.parse(req.body.data);
+        const { taskName, assignee, content, point } = JSON.parse(req.body.data);
         const attachments = req.files;
         const user = req.user;
-
-        const today = new Date();
-
-        let version = 0;
-        (JSON.stringify(assignee) !== '{}')
-            ? version = 1
-            : version = 0;
 
         const newAttachments = attachments.map(attach => {
             return {
@@ -24,21 +17,27 @@ module.exports = {
 
         const taskEntity = {
             taskName,
-            assignee: assignee,
+            assignee,
             content,
             attachments: newAttachments,
-            status,
+            status: "todo",
             point,
-            create: {
-                userId: user.userId,
-                createAt: today
-            },
-            version: {
-                userId: user.userId,
-                version,
-                updateTime: today,
-                content: content
-            }
+            createdBy: user.userId,
+            // versions: [
+            //     {
+            //         changeBy: user.userId,
+            //         updated_at: new Date(),
+            //         old: {},
+            //         new: {
+            //             taskName,
+            //             assignee,
+            //             content,
+            //             attachments: newAttachments,
+            //             status: "todo",
+            //             point,
+            //         }
+            //     }
+            // ]
         }
 
         try {
@@ -49,7 +48,7 @@ module.exports = {
         }
     },
 
-    listTask: async (req, res, next) => {
+    listUnassignTask: async (req, res, next) => {
         try {
             const result = await taskService.listTasks();
             res.status(200).json({ result });
@@ -70,9 +69,27 @@ module.exports = {
         }
     },
 
-
+    /** pending */
     update: async (req, res, next) => {
+        const user = req.user;
+        const { taskName, content, status, point } = req.body;
+        const { taskId } = req.params;
+        const attachments = req.files;
 
+        taskEntity = {
+            taskName,
+            attachments,
+            content,
+            status,
+            point
+        }
+
+        try {
+            await taskService.updateTask({ authorId: user.userId, taskId, taskEntity })
+            res.status(StatusCodes.OK).json()
+        } catch (error) {
+            return next(error);
+        }
     },
 
 
@@ -82,8 +99,7 @@ module.exports = {
         const user = req.user;
 
         try {
-            await taskService.changeAssignee(user.userId, userId, taskId);
-
+            await taskService.changeAssignee({ authorId: user.userId, assigneeId: userId, taskId });
             res.status(StatusCodes.OK).json();
         } catch (error) {
             return next(error);
