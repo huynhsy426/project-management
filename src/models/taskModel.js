@@ -45,6 +45,10 @@ const taskSchema = new mongoose.Schema({
         ref: 'users',
         required: true
     },
+    deadline: {
+        type: Date,
+        required: true
+    },
     versions: [
         {
             changeBy: {
@@ -88,7 +92,11 @@ const taskSchema = new mongoose.Schema({
                     type: Number,
                     min: [1, 'More than 1 and less than 10'],
                     max: [10, 'More than 1 and less than 10']
-                }
+                },
+                deadline: {
+                    type: Date,
+                    required: true
+                },
             },
             new: {
                 taskName: {
@@ -125,7 +133,11 @@ const taskSchema = new mongoose.Schema({
                     type: Number,
                     min: [1, 'More than 1 and less than 10'],
                     max: [10, 'More than 1 and less than 10']
-                }
+                },
+                deadline: {
+                    type: Date,
+                    required: true
+                },
             },
             _id: false
         }

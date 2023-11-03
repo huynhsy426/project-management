@@ -118,5 +118,17 @@
     "TASK_NOT_EXIST": {
         "message": "Task not exist",
         "statusCode": 503
+    },
+    "TASK_DONE": {
+        "message": "Task has been done.",
+        "statusCode": 400
+    },
+    "TASK_REJECTED": {
+        "message": "Task has been rejected.",
+        "statusCode": 400
+    },
+    "GREATER_DATE": {
+        "message": "deadline must greater than now.",
+        "statusCode": 400
     }
 }
