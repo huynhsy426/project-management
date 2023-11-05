@@ -7,9 +7,12 @@ module.exports = {
         const user = req.user;
 
         try {
-            const { reportNumber, averageTime } = await reportService.reportUser(user)
+            const { reportTasks, averageTime, longestTaskTime, shortestTaskTime } = await reportService.reportUser(user)
             res.status(StatusCodes.OK).json({
-                reportNumber, averageTime
+                reportTasks,
+                averageTime,
+                longestTaskTime,
+                shortestTaskTime
             });
         } catch (err) {
             return next(err);

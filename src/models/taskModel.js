@@ -45,7 +45,7 @@ const taskSchema = new mongoose.Schema({
         ref: 'users',
         required: true
     },
-    deadline: {
+    deadlineAt: {
         type: Date,
         required: true
     },
@@ -93,7 +93,7 @@ const taskSchema = new mongoose.Schema({
                     min: [1, 'More than 1 and less than 10'],
                     max: [10, 'More than 1 and less than 10']
                 },
-                deadline: {
+                deadlineAt: {
                     type: Date,
                     required: true
                 },
@@ -134,7 +134,7 @@ const taskSchema = new mongoose.Schema({
                     min: [1, 'More than 1 and less than 10'],
                     max: [10, 'More than 1 and less than 10']
                 },
-                deadline: {
+                deadlineAt: {
                     type: Date,
                     required: true
                 },

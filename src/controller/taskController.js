@@ -4,7 +4,7 @@ const taskService = require("../services/taskService");
 
 module.exports = {
     create: async (req, res, next) => {
-        const { taskName, assignee, content, point, deadline } = JSON.parse(req.body.data);
+        const { taskName, assignee, content, point, deadlineAt } = JSON.parse(req.body.data);
         const attachments = req.files;
         const user = req.user;
 
@@ -15,7 +15,6 @@ module.exports = {
             }
         })
 
-        console.log({ deadline })
 
         const taskEntity = {
             taskName,
@@ -25,22 +24,7 @@ module.exports = {
             status: "todo",
             point,
             createdBy: user.userId,
-            deadline: new Date(deadline)
-            // versions: [
-            //     {
-            //         changeBy: user.userId,
-            //         updated_at: new Date(),
-            //         old: {},
-            //         new: {
-            //             taskName,
-            //             assignee,
-            //             content,
-            //             attachments: newAttachments,
-            //             status: "todo",
-            //             point,
-            //         }
-            //     }
-            // ]
+            deadlineAt: new Date(deadlineAt)
         }
 
         try {
@@ -86,6 +70,8 @@ module.exports = {
             status,
             point
         }
+
+        console.log({ taskEntity });
 
         try {
             await taskService.updateTask({ authorId: user.userId, taskId, taskEntity })

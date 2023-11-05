@@ -37,7 +37,7 @@ const schemas = {
                         "string.max": "must less than or equal 10 characters.",
                         "string.pattern.base": "Format must in todo|doing|done|rejected"
                     }),
-                deadline: Joi.date()
+                deadlineAt: Joi.date()
                     .greater(Date.now())
                     .required()
             }
@@ -105,7 +105,7 @@ const schemas = {
             status: Joi.string()
                 .regex(/todo|doing|done|rejected/)
                 .allow(null),
-            deadline: Joi.date()
+            deadlineAt: Joi.date()
                 .greater(Date.now())
                 .allow(null)
         })

@@ -32,22 +32,21 @@ const checkTaskName = async (taskName) => {
 };
 
 
-const taskIsExist = async (taskId) => {
+const getTaskById = async (taskId) => {
     try {
         const query = {
             _id: taskId
         }
-        const result = await taskModel.findOne(
-            query, { 1: 1 }
-        )
+        const result = await taskModel.findOne(query);
         if (!result) {
             throw new Error("TASK_NOT_EXIST")
         }
-        return;
-    } catch (err) {
-        throw err;
+        return result;
+    } catch (error) {
+        throw error;
     }
 };
+
 
 
 const listTasks = async () => {
@@ -66,16 +65,11 @@ const listTasks = async () => {
 };
 
 
-const assignTask = async (userId, taskId) => {
+const assignTask = async (userId, task) => {
     try {
         const query = {
-            _id: taskId
+            _id: task._id
         }
-        const findTask = await taskModel.findOne(
-            query,
-            { _id: 0 }
-        )
-
         const update = {
             $set: {
                 assignee: new mongoose.Types.ObjectId(userId),
@@ -86,12 +80,13 @@ const assignTask = async (userId, taskId) => {
                     changeBy: userId,
                     updated_at: Date.now(),
                     new: {
-                        taskName: findTask.taskName,
+                        taskName: task.taskName,
                         assignee: new mongoose.Types.ObjectId(userId),
                         content: `${userId} user asigned task`,
-                        attachments: findTask.attachments,
+                        attachments: task.attachments,
                         status: 'doing',
-                        point: findTask.point
+                        point: task.point,
+                        deadlineAt: task.deadlineAt
                     }
                 }
             }
@@ -125,45 +120,28 @@ const checkUserExist = async (userId) => {
 };
 
 
-const buildTaskVersion = async (userId, taskId) => {
-    try {
-        const query = {
-            _id: taskId
+const buildTaskVersion = (userId, task) => {
+    const version = {
+        changeBy: userId,
+        updated_at: Date.now(),
+        old: {
+            ...task.versions[task.versions.length - 1].new
         }
-        const findTask = await taskModel.findOne(
-            query,
-            { _id: 0 }
-        )
-        const version = {
-            changeBy: userId,
-            updated_at: Date.now(),
-            old: {
-                ...findTask.versions[findTask.versions.length - 1].new
-            }
-        }
-        return { version, findTask };
-    } catch (error) {
-        throw error;
     }
+    return version;
 };
 
 
-const canAssignTask = async (taskId) => {
-    try {
-        const query = {
-            _id: taskId,
-            "assignee": { $exists: true }
+const checkTaskForUpdate = (task, taskEntity) => {
+    const taskUpdate = {};
+    for (const key in taskEntity) {
+        if (taskEntity[key] !== undefined) {
+            taskUpdate[key] = taskEntity[key];
         }
-        const result = await taskModel.findOne(
-            query,
-            { 1: 1 }
-        )
-
-        return result;
-    } catch (error) {
-        throw error;
     }
-};
+    checkStatusOfTask(task);
+    return taskUpdate;
+}
 
 
 const changeTaskAssignee = async ({ assigneeId, taskId, newVersion }) => {
@@ -178,9 +156,7 @@ const changeTaskAssignee = async ({ assigneeId, taskId, newVersion }) => {
                 versions: newVersion
             }
         }
-        const result = await taskModel.updateOne(
-            query, update
-        )
+        const result = await taskModel.updateOne(query, update);
         if (result.modifiedCount === 0) {
             throw new Error("CANNOT_CHANGE_USER")
         }
@@ -191,45 +167,14 @@ const changeTaskAssignee = async ({ assigneeId, taskId, newVersion }) => {
 };
 
 
-const checkTaskForUpdate = async (taskId, task) => {
-    try {
-        const taskEntity = {};
-        for (const key in task) {
-            if (task[key] !== undefined) {
-                taskEntity[key] = task[key];
-            }
-        }
-        await checkStatusOfTask(taskId);
-        if (taskEntity.taskName) {
-            await checkTaskName(taskEntity.taskName);
-            return taskEntity;
-        }
-        return taskEntity;
-    } catch (err) {
-        throw err;
+const checkStatusOfTask = (task) => {
+    if (task.status === "done") {
+        throw new Error("TASK_DONE")
     }
-};
-
-
-const checkStatusOfTask = async (taskId) => {
-    try {
-        const query = {
-            _id: taskId,
-            $or: [{ status: "done" }, { status: "rejected" }]
-        }
-        const result = await taskModel.findOne(
-            query, { status: 1, _id: 0 }
-        )
-        if (result) {
-            if (result.status === "done") {
-                throw new Error("TASK_DONE")
-            }
-            throw new Error("TASK_REJECTED");
-        }
-        return;
-    } catch (err) {
-        throw err;
+    else if (task.status === "rejected") {
+        throw new Error("TASK_REJECTED");
     }
+    return;
 }
 
 
@@ -238,6 +183,8 @@ const taskUpdate = async ({ taskId, newVersion, taskEntityUpdate }) => {
         const query = {
             _id: taskId
         };
+
+        console.log({ newVersion, taskEntityUpdate })
 
         const update = {
             $set: taskEntityUpdate,
@@ -267,47 +214,49 @@ module.exports = {
         }
     },
 
+    // Done
     listTasks: () => {
         return listTasks();
     },
 
+
+    // Done
     assignTask: async (userId, taskId) => {
         try {
-            await taskIsExist(taskId);
-            await checkStatusOfTask(taskId);
-            const canAssign = await canAssignTask(taskId);
-            if (canAssign) {
+            const result = await getTaskById(taskId);
+            checkStatusOfTask(result);
+            if (result.assignee) {
                 throw new Error("TASK_HAS_ASSIGNED")
             }
-            await assignTask(userId, taskId);
+            await assignTask(userId, result);
         } catch (err) {
             throw err;
         }
     },
 
-    //choose field want to update
+    // choose field want to update
     // Check Data of taskName 
     // udate field 
     // Update version
     updateTask: async ({ authorId, taskId, taskEntity }) => {
         try {
-            const taskEntityUpdate = await checkTaskForUpdate(taskId, taskEntity);
-            const { version, findTask } = await buildTaskVersion(authorId, taskId);
-
+            const result = await getTaskById(taskId);
+            const taskEntityUpdate = checkTaskForUpdate(result, taskEntity);
+            const version = buildTaskVersion(authorId, result);
             version.new = {
-                taskName: findTask.taskName,
-                assignee: findTask.assignee,
-                content: findTask.content,
-                attachments: findTask.attachments,
-                status: findTask.status,
-                point: findTask.point,
-                deadline: findTask.deadline
+                taskName: result.taskName,
+                assignee: result.assignee,
+                content: result.content,
+                attachments: result.attachments,
+                status: result.status,
+                point: result.point,
+                deadlineAt: result.deadlineAt
             }
 
             for (const key in taskEntityUpdate) {
-                version.new[key] = taskEntityUpdate[key];
+                version.new[key] = taskEntity[key];
             }
-
+            console.log({ version });
             await taskUpdate({ taskId, newVersion: version, taskEntityUpdate });
         } catch (err) {
             throw err;
@@ -315,27 +264,27 @@ module.exports = {
     },
 
 
+
     changeAssignee: async ({ authorId, assigneeId, taskId }) => {
         try {
-            const canAssign = await canAssignTask(taskId);
-            if (canAssign) {
-                await checkStatusOfTask(taskId);
-                await checkUserExist(assigneeId);
-                const { version, findTask } = await buildTaskVersion(authorId, taskId);
-                version.new = {
-                    taskName: findTask.taskName,
-                    assignee: new mongoose.Types.ObjectId(assigneeId),
-                    content: `Admin ${authorId} change ${taskId} task to ${assigneeId}`,
-                    attachments: findTask.attachments,
-                    status: findTask.status,
-                    point: findTask.point,
-                    deadline: findTask.deadline
-                }
-                await changeTaskAssignee({ assigneeId, taskId, newVersion: version });
+            const result = await getTaskById(taskId);
+            checkStatusOfTask(result);
+            if (!result.assignee) {
+                await assignTask(assigneeId, result);
+                return;
             }
-            await taskIsExist(taskId);
-            await checkStatusOfTask(taskId);
-            await assignTask(assigneeId, taskId);
+            await checkUserExist(assigneeId);
+            const version = buildTaskVersion(authorId, result);
+            version.new = {
+                taskName: result.taskName,
+                assignee: new mongoose.Types.ObjectId(assigneeId),
+                content: `Admin ${authorId} change ${taskId} task to ${assigneeId}`,
+                attachments: result.attachments,
+                status: result.status,
+                point: result.point,
+                deadlineAt: result.deadlineAt
+            }
+            await changeTaskAssignee({ assigneeId, taskId, newVersion: version });
         } catch (err) {
             throw err;
         }
