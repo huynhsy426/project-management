@@ -7,7 +7,7 @@ module.exports = {
     listDeptsByRoles: async (req, res, next) => {
         const { userId, roles } = req.user;
         try {
-            const listDeptsByUser = await deptService.listDeptsByRoles(userId, roles);
+            const listDeptsByUser = await deptService.listDeptsByRoles(userId.trim(), roles.trim());
             return res.status(StatusCodes.OK).json({
                 listDept: listDeptsByUser
             })
@@ -25,8 +25,8 @@ module.exports = {
 
         const deptEntity = {
             deptId: '',
-            deptName: deptName,
-            authorId: userId,
+            deptName: deptName.trim(),
+            authorId: userId.trim(),
             members
         }
 
@@ -52,7 +52,7 @@ module.exports = {
     searchDept: async (req, res, next) => {
         const { deptName } = req.params;
         try {
-            const searchResult = await deptService.searchDept(deptName);
+            const searchResult = await deptService.searchDept(deptName.trim());
             return res.status(StatusCodes.OK).json({
                 deptList: searchResult
             })
@@ -65,7 +65,7 @@ module.exports = {
     deleteById: async (req, res, next) => {
         const { deptId } = req.params;
         try {
-            const result = await deptService.deleteById(deptId);
+            const result = await deptService.deleteById(deptId.trim());
             if (!result) {
                 return res.status(StatusCodes.BAD_REQUEST).json({
                     message: "delete failed!!!"
@@ -85,7 +85,7 @@ module.exports = {
         const deptName = req.body.deptName;
 
         try {
-            const isUpdate = await deptService.updateById(deptId, deptName);
+            const isUpdate = await deptService.updateById(deptId.trim(), deptName.trim());
             if (!isUpdate) {
                 return res.status(StatusCodes.BAD_REQUEST).json({
                     errMessage: "Dept Id not found."

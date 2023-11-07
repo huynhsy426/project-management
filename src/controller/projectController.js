@@ -5,7 +5,7 @@ module.exports = {
     listProjectByRoles: async (req, res, next) => {
         const { roles, userId } = req.user;
         try {
-            const result = await ProjectService.listProjectByRoles(roles, userId);
+            const result = await ProjectService.listProjectByRoles(roles, userId.trim());
             return res.status(StatusCodes.OK).json({
                 result
             })
@@ -24,12 +24,12 @@ module.exports = {
 
         const projectEntity = {
             projectId: '',
-            projectName,
-            deptId,
+            projectName: projectName.trim(),
+            deptId: deptId.trim(),
             insTm: today,
             updTm: null,
             version: 1,
-            leaderId,
+            leaderId: leaderId.trim(),
             minExp,
             completedAt: null
         }

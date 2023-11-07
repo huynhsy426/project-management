@@ -29,6 +29,7 @@ const schemas = {
                     }),
                 attachments: Joi.any(),
                 point: Joi.number()
+                    .integer()
                     .min(1)
                     .max(10)
                     .required()
@@ -38,7 +39,7 @@ const schemas = {
                         "string.pattern.base": "Format must in todo|doing|done|rejected"
                     }),
                 deadlineAt: Joi.date()
-                    .greater(Date.now())
+                    .greater(Date.now() - 3000)
                     .required()
             }
         )
@@ -94,6 +95,7 @@ const schemas = {
                 }),
             attachments: Joi.any(),
             point: Joi.number()
+                .integer()
                 .min(1)
                 .max(10)
                 .allow(null)
@@ -103,10 +105,10 @@ const schemas = {
                     "string.pattern.base": "Format must in todo|doing|done|rejected"
                 }),
             status: Joi.string()
-                .regex(/todo|doing|done|rejected/)
+                .valid("todo", "doing", "done", "rejected")
                 .allow(null),
             deadlineAt: Joi.date()
-                .greater(Date.now())
+                .greater(Date.now() - 3000)
                 .allow(null)
         })
     }
@@ -117,10 +119,10 @@ class taskValidator extends MyValidator {
 
     validateCreateTask(req, res, next) {
         try {
-            const data = req.body;
+            const data = req.body.data;
 
             let errorMessages = [];
-            const { error } = schemas.createTask.body.validate(JSON.parse(req.body.data), { abortEarly: false });
+            const { error } = schemas.createTask.body.validate(JSON.parse(data), { abortEarly: false });
             if (error) {
                 for (let index = 0; index < error.details.length; index++) {
                     const element = error.details[index];

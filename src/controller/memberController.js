@@ -16,7 +16,7 @@ module.exports = {
         const members = req.body.members;
         const deptId = req.params.deptId;
         try {
-            const result = await DeptService.addMemberToDept(members, deptId);
+            const result = await DeptService.addMemberToDept(members, deptId.trim());
             if (!result || result.length === 0) {
                 return res.status(StatusCodes.CREATED).json({
                     createMessage: "Add failed"
@@ -35,7 +35,7 @@ module.exports = {
 
 
         try {
-            await DeptService.removeMember(memberId, deptId)
+            await DeptService.removeMember(memberId.trim(), deptId.trim())
             return res.status(StatusCodes.OK).json({
                 message: "Deleted successfully"
             })

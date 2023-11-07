@@ -25,6 +25,7 @@ const schemas = {
         params: Joi.object().keys(
             {
                 minExp: Joi.number()
+                    .integer()
                     .max(50)
                     .messages({
                         "number.max": "minExp must be less than 50."

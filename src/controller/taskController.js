@@ -10,19 +10,19 @@ module.exports = {
 
         const newAttachments = attachments.map(attach => {
             return {
-                path: attach.path,
-                originalname: attach.originalname
+                path: attach.path.trim(),
+                originalname: attach.originalname.trim()
             }
         })
 
 
         const taskEntity = {
-            taskName,
-            assignee,
-            content,
+            taskName: taskName.trim(),
+            assignee: assignee.trim(),
+            content: content.trim(),
             attachments: newAttachments,
             status: "todo",
-            point,
+            point: point.trim(),
             createdBy: user.userId,
             deadlineAt: new Date(deadlineAt)
         }
@@ -49,7 +49,7 @@ module.exports = {
         const { taskId } = req.params;
 
         try {
-            await taskService.assignTask(user.userId, taskId);
+            await taskService.assignTask(user.userId, taskId.trim());
             res.status(StatusCodes.OK).json();
         } catch (error) {
             return next(error);
@@ -64,9 +64,9 @@ module.exports = {
         const attachments = req.files;
 
         taskEntity = {
-            taskName,
+            taskName: taskName.trim(),
             attachments,
-            content,
+            content: content.trim(),
             status,
             point
         }
@@ -74,7 +74,7 @@ module.exports = {
         console.log({ taskEntity });
 
         try {
-            await taskService.updateTask({ authorId: user.userId, taskId, taskEntity })
+            await taskService.updateTask({ authorId: user.userId, taskId: taskId.trim(), taskEntity })
             res.status(StatusCodes.OK).json()
         } catch (error) {
             return next(error);
@@ -88,7 +88,7 @@ module.exports = {
         const user = req.user;
 
         try {
-            await taskService.changeAssignee({ authorId: user.userId, assigneeId: userId, taskId });
+            await taskService.changeAssignee({ authorId: user.userId, assigneeId: userId.trim(), taskId: taskId.trim() });
             res.status(StatusCodes.OK).json();
         } catch (error) {
             return next(error);

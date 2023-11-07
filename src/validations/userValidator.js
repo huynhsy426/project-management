@@ -6,7 +6,7 @@ const schemas = {
         body: Joi.object().keys(
             {
                 username: Joi.string()
-                    .regex(/^[^0-9]*$/)
+                    .regex(/^[^0-9 ]*$/)
                     .min(3)
                     .max(50)
                     .messages({
@@ -16,6 +16,8 @@ const schemas = {
                     })
                     .required(),
                 age: Joi.number()
+                    .integer()
+                    .min(18)
                     .max(100)
                     .messages({
                         "number.max": "age is not a number."
@@ -27,13 +29,15 @@ const schemas = {
                         "string.pattern.base": "password must At least one digit, one lowercase letter, one uppercase letter, one special character and between 3 and 20 characters."
                     })
                     .required(),
-                gmail: Joi.string()
+                email: Joi.string()
                     .email()
                     .messages({
                         "string.email": "Invalid email address."
                     })
                     .required(),
                 exp: Joi.number()
+                    .integer()
+                    .min(0)
                     .max(50)
                     .messages({
                         "number.max": "exp is not a number."

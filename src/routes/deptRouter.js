@@ -10,14 +10,13 @@ const DeptValidator = require('../validations/deptValidator');
 router.get("/list", [JWTMiddleware.verify([])], deptController.listDeptsByRoles)
 
 // Create Dept
-router.route("/admin/create")
-    .post(
-        [
-            DeptValidator.validateCreatDept,
-            JWTMiddleware.verify(["Admin"])
-        ],
-        deptController.createDept
-    )
+router.post("/admin/create",
+    [
+        DeptValidator.validateCreatDept,
+        JWTMiddleware.verify(["Admin"])
+    ],
+    deptController.createDept
+)
 
 // Search dept by dept_name
 router.get("/search/name/:deptName", deptController.searchDept)

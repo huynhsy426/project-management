@@ -5,12 +5,13 @@ const { StatusCodes } = require('http-status-codes');
 
 
 module.exports = {
-    listUsers: async (req, res) => {
+    listUsers: async (req, res, next) => {
         try {
             const user = req.user;
             const result = await UserService.list(user.userId);
             return res.json({ result })
         } catch (err) {
+            return next(err);
         };
     },
 
@@ -21,11 +22,11 @@ module.exports = {
     // Tao user -> 
     createUser: async (req, res, next) => {
         const user = {
-            username: req.body.username,
-            age: req.body.age,
+            username: req.body.username.trim(),
+            age: req.body.age.trim(),
             roles: 'User',
-            userPassword: req.body.userPassword,
-            gmail: req.body.gmail,
+            userPassword: req.body.userPassword.trim(),
+            email: req.body.email.trim(),
             exp: req.body.exp,
             isBlocked: false
         }
@@ -61,7 +62,7 @@ module.exports = {
     loginByUser: async (req, res, next) => {
         const { username, userPassword } = req.body;
         try {
-            const result = await UserService.loginByUser(username, userPassword);
+            const result = await UserService.loginByUser(username.trim(), userPassword.trim());
 
             const user = {
                 userId: result._id

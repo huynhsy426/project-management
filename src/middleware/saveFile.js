@@ -5,15 +5,17 @@ var multer = require('multer');
 var storage = multer.diskStorage({
     destination: function (req, file, cb) {
         const duoiFile = path.extname(file.originalname).toUpperCase();
-        if (duoiFile === ".JPG" || duoiFile === ".JPEG" || duoiFile === ".PNG" || duoiFile === ".GIF") {
-            cb(null, 'uploads/images/')
-        }
-        else if (duoiFile === ".MP3" || duoiFile === ".WMA" || duoiFile === ".WAV" || duoiFile === ".FLAC") {
-            cb(null, 'uploads/audios/')
-        } else {
-            cb(null, 'uploads/files/')
-        }
 
+        if ([".JPG", ".JPEG", ".PNG", ".GIF"].includes(duoiFile)) {
+            cb(null, 'uploads/images/')
+            return;
+        }
+        if ([".MP3", ".WMA", ".WAV", ".FLAC"].includes(duoiFile)) {
+            cb(null, 'uploads/audios/')
+            return;
+        }
+        cb(null, 'uploads/files/')
+        return;
     },
     filename: function (req, file, cb) {
         cb(null, file.originalname);

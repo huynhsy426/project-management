@@ -8,7 +8,7 @@ const getUser = async (userId) => {
             userId,
             {
                 roles: 1, username: 1,
-                age: 1, gmail: 1,
+                age: 1, email: 1,
                 exp: 1, isBlocked: 1
             }
         ).limit(1);
@@ -31,23 +31,23 @@ module.exports = {
                 const result = await getUser(data.userId);
 
                 // Check isBlocked token user
-                if (result.isBlocked === false) {
-                    // Check roles of token user
-                    if (roles.length !== 0 && !roles.includes(result.roles)) {
-                        return next(new Error('INVALID_ROLE'));
-                    }
-                    req.user = {
-                        userId: JSON.stringify(result._id).split('"')[1],
-                        username: result.username,
-                        age: result.age,
-                        roles: result.roles,
-                        gmail: result.gmail,
-                        exp: result.exp,
-                        isBlocked: result.isBlocked
-                    };
-                    return next();
+                if (result.isBlocked) {
+                    return next(new Error('USER_HAS_BLOCKED'));
                 }
-                return next(new Error('USER_HAS_BLOCKED'));
+                // Check roles of token user
+                if (roles.length !== 0 && !roles.includes(result.roles)) {
+                    return next(new Error('INVALID_ROLE'));
+                }
+                req.user = {
+                    userId: JSON.stringify(result._id).split('"')[1],
+                    username: result.username,
+                    age: result.age,
+                    roles: result.roles,
+                    email: result.email,
+                    exp: result.exp,
+                    isBlocked: result.isBlocked
+                };
+                return next();
             } catch (err) {
                 console.error(err);
                 return next(err);

@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const taskSchema = new mongoose.Schema({
     taskName: {
         type: String,
+        trim: true,
         required: true
     },
     assignee: {
@@ -148,10 +149,6 @@ const taskSchema = new mongoose.Schema({
     timestamps: true
 });
 
-taskSchema.pre('save', function (next) {
-    this.updated_at = Date.now();
-    next();
-});
 
 const taskModel = mongoose.model('tasks', taskSchema);
 

@@ -18,16 +18,12 @@ const createDept = async (dept) => {
         });
 
 
-        try {
-            const [result] = await DeptModel.insertMany(deptEntity);
-            if (result === null) {
-                throw (new Error('CREAT_DEPT_FAILED'));
-            }
-            dept.deptId = result._id;
-            return;
-        } catch (error) {
-            throw error;
+        const [result] = await DeptModel.insertMany(deptEntity);
+        if (result === null) {
+            throw (new Error('CREAT_DEPT_FAILED'));
         }
+        dept.deptId = result._id;
+        return;
     }
     let resultAddMember = false;
     return resultAddMember;
@@ -36,106 +32,87 @@ const createDept = async (dept) => {
 
 // Can sua
 const listDeptsByRoles = async (userId, roles) => {
-    try {
-        let result = null;
-        if (roles === "Admin") {
-            result = await DeptModel.find(
-                {},
-                { deptName: 1, members: 1, _id: 0 }
-            )
-        } else {
-            const query = { "members.memberId": userId };
+    let result = null;
+    if (roles === "Admin") {
+        result = await DeptModel.find(
+            {},
+            { deptName: 1, members: 1, _id: 0 }
+        )
+    } else {
+        const query = { "members.memberId": userId };
 
-            const resultDeptList = await DeptModel.find(
-                query,
-                { deptName: 1, members: 1, _id: 0 }
-            )
-                .populate(
-                    {
-                        path: 'members.memberId',
-                        match: {
-                            "_id": userId
-                        },
+        const resultDeptList = await DeptModel.find(
+            query,
+            { deptName: 1, members: 1, _id: 0 }
+        )
+            .populate(
+                {
+                    path: 'members.memberId',
+                    match: {
+                        "_id": userId
+                    },
 
-                        select: { "members.position": 1, "_id": 1, username: 1 }
-                    }
-                )
-
-            result = resultDeptList.map(dept => {
-                const arrMembers = dept.members;
-                const newArr = arrMembers.filter(member => {
-                    return member.memberId !== null
-                })
-                return {
-                    deptName: dept.deptName,
-                    members: newArr
+                    select: { "members.position": 1, "_id": 1, username: 1 }
                 }
+            )
+
+        result = resultDeptList.map(dept => {
+            const arrMembers = dept.members;
+            const newArr = arrMembers.filter(member => {
+                return member.memberId !== null
             })
-        }
-        return result;
-    } catch (error) {
-        throw error;
+            return {
+                deptName: dept.deptName,
+                members: newArr
+            }
+        })
     }
+    return result;
 };
 
 
 const isExistDeptName = async (deptName) => {
-    try {
-        const result = await DeptModel.findOne(
-            { deptName: deptName },
-            { 1: 1 }
-        );
-        if (result !== null) {
-            throw (new Error("DEPTNAME_UNIQUE"));
-        }
-        return;
-    } catch (err) {
-        throw err;
+    const result = await DeptModel.findOne(
+        { deptName: deptName },
+        { _id: 1 }
+    ).lean();
+    if (result) {
+        throw (new Error("DEPTNAME_UNIQUE"));
     }
+    return;
 };
 
 
 // Search dept by deptName
 const searchDeptByName = async (inputName) => {
-    try {
-        const result = await DeptModel.find(
-            { deptName: new RegExp(inputName) }
-        )
-        return result;
-    } catch (error) {
-        throw error;
-    }
+    const result = await DeptModel.find(
+        { deptName: new RegExp(inputName) }
+    )
+    return result;
 };
 
 
 // Delete dept by Id
 const deleteById = async (deptId) => {
-    try {
-        const result = await DeptModel.deleteById(deptId);
-        if (result.deletedCount === 0) {
-            return false;
-        }
-        return;
-    } catch (error) {
-        throw error;
+    const result = await DeptModel.deleteById(deptId);
+    if (result.deletedCount === 0) {
+        return false;
     }
+    return;
 };
 
 
 // Update dept by Id
 const updateById = async (deptId, deptName) => {
-    try {
-        const result = await DeptModel.updateMany(
-            { _id: deptId },
-            { $set: { deptName: deptName } }
-        );
-        let isUpdate = true;
-        if (result.matchedCount === 0) {
-            return !isUpdate;
-        } return isUpdate;
-    } catch (error) {
-        throw error;
+    const result = await DeptModel.updateMany(
+        { _id: deptId },
+        { $set: { deptName: deptName } }
+    );
+    let isUpdate = true;
+    if (result.matchedCount === 0) {
+        return !isUpdate;
     }
+    return isUpdate;
 };
 
 
@@ -153,191 +130,165 @@ const checkMemberIsExist = async (members) => {
         listMemberId = 0;
     }
 
-    try {
-        const result = await UserModel.find(
-            { _id: { $in: listMemberId } }
-        )
-        if (result.length !== listMemberId.length) {
-            throw new Error("USER_NOT_EXIST");
-        }
-        return;
-    } catch (err) {
-        throw err;
+    const result = await UserModel.find(
+        { _id: { $in: listMemberId } }
+    )
+    if (result.length !== listMemberId.length) {
+        throw new Error("USER_NOT_EXIST");
     }
+    return;
 }
 
 // Check member blocked
 const checkMemberIsBlockAndRoles = async (members) => {
-    try {
-        let listMemberId = "";
-        if (members.length !== 0) {
-            listMemberId = members.map((value) => { return (value.memberId.trim()) });
-        } else {
-            listMemberId = 0;
-        }
-        const result = await UserModel.find(
-            {
-                _id: { $in: listMemberId },
-                isBlocked: true
-            },
-            { username: 1, roles: 1, _id: 0 }
-        )
-
-        if (result.length > 0) {
-            throw (new Error("ADD_MEMBER_BLOCK"));
-        }
-
-        const resultCheckRoles = await UserModel.find(
-            {
-                _id: { $in: listMemberId },
-                roles: "Admin"
-            },
-            { roles: 1, _id: 0 }
-        )
-
-        if (resultCheckRoles.length > 0) {
-            throw (new Error('NOT_ALLOW_ROLE'));
-        }
-        return;
-
-
-    } catch (error) {
-        throw error;
+    let listMemberId = "";
+    if (members.length !== 0) {
+        listMemberId = members.map((value) => { return (value.memberId.trim()) });
+    } else {
+        listMemberId = 0;
     }
+    const result = await UserModel.find(
+        {
+            _id: { $in: listMemberId },
+            isBlocked: true
+        },
+        { username: 1, roles: 1, _id: 0 }
+    )
+
+    if (result.length > 0) {
+        throw (new Error("ADD_MEMBER_BLOCK"));
+    }
+
+    const resultCheckRoles = await UserModel.find(
+        {
+            _id: { $in: listMemberId },
+            roles: "Admin"
+        },
+        { roles: 1, _id: 0 }
+    )
+
+    if (resultCheckRoles.length > 0) {
+        throw (new Error('NOT_ALLOW_ROLE'));
+    }
+    return;
 };
 
 
 // Check member in dept or blocked
 const checkMemberInDeptOrIsBlock = async (members, deptId) => {
-    try {
-        let listMemberId = "";
-        if (members.length !== 0) {
-            listMemberId = members.map((value) => { return (value.memberId.trim()) });
-        } else {
-            listMemberId = 0;
-        }
-        const query = {
-            _id: { $in: listMemberId },
-            isBlocked: true
-        };
-        const result = await UserModel.findOne(
-            query,
-            { 1: 1 }
-        )
-
-        if (result !== null) {
-            throw (new Error("ADD_MEMBER_BLOCK"));
-        }
-
-        const resultCheckRoles = await UserModel.findOne(
-            {
-                _id: { $in: listMemberId },
-                roles: "Admin"
-            },
-            { roles: 1, _id: 0 }
-        )
-
-        if (resultCheckRoles !== null) {
-            throw (new Error('NOT_ALLOW_ROLE'));
-        }
-
-        const resultIndept = await DeptModel.findOne(
-            {
-                _id: new mongoose.Types.ObjectId(deptId),
-            },
-            { members: 1, _id: 0 }
-        )
-
-        const inDeptList = [];
-        resultIndept.members.forEach(element => {
-            let memberId = JSON.stringify(element.memberId).split('"')[1];
-            if (listMemberId.includes(memberId)) {
-                inDeptList.push(memberId);
-                return;
-            }
-        });
-
-        if (inDeptList.length > 0) {
-            throw (new Error("MEMBER_ALREADY_IN_DEPT"))
-        }
-        return;
-    } catch (error) {
-        throw error;
+    let listMemberId = "";
+    if (members.length !== 0) {
+        listMemberId = members.map((value) => { return (value.memberId.trim()) });
+    } else {
+        listMemberId = 0;
     }
+    const query = {
+        _id: { $in: listMemberId },
+        isBlocked: true
+    };
+    const result = await UserModel.findOne(
+        query,
+        { _id: 1 }
+    ).lean();
+
+    if (result) {
+        throw (new Error("ADD_MEMBER_BLOCK"));
+    }
+
+    const resultCheckRoles = await UserModel.findOne(
+        {
+            _id: { $in: listMemberId },
+            roles: "Admin"
+        },
+        { roles: 1, _id: 0 }
+    ).lean();
+
+    if (resultCheckRoles) {
+        throw (new Error('NOT_ALLOW_ROLE'));
+    }
+
+    const resultIndept = await DeptModel.findOne(
+        {
+            _id: (deptId),
+        },
+        { members: 1, _id: 0 }
+    ).lean();
+
+    const inDeptList = [];
+    resultIndept.members.forEach(element => {
+        let memberId = JSON.stringify(element.memberId).split('"')[1];
+        if (listMemberId.includes(memberId)) {
+            inDeptList.push(memberId);
+            return;
+        }
+    });
+
+    if (inDeptList.length > 0) {
+        throw (new Error("MEMBER_ALREADY_IN_DEPT"))
+    }
+    return;
 }
 
 
 const addMemberToDept = async (members, deptId) => {
     const listMembers = members.map(member => {
         return member = {
-            memberId: new mongoose.Types.ObjectId(member.memberId),
+            memberId: (member.memberId),
             position: member.position
         }
     });
-    try {
-        const query = { _id: deptId };
-        const result = await DeptModel.updateMany(
-            query,
-            {
-                $push: {
-                    members: { $each: listMembers }
-                }
+    const query = { _id: deptId };
+    const result = await DeptModel.updateMany(
+        query,
+        {
+            $push: {
+                members: { $each: listMembers }
             }
-        )
+        }
+    )
 
-        return result;
-    } catch (error) {
-        throw error;
-    }
+    return result;
 }
 
 // Check member in project
 const checkMemberInProject = async (memberId) => {
 
-    try {
-        const result = await DeptModel.find(
-            { "members.memberId": memberId },
-            { _id: 1 }
-        )
-        const listDeptId = result.map(item => {
-            return JSON.stringify(item._id).split('"')[1];
-        })
+    const result = await DeptModel.find(
+        { "members.memberId": memberId },
+        { _id: 1 }
+    )
+    const listDeptId = result.map(item => {
+        return JSON.stringify(item._id).split('"')[1];
+    })
 
-        const isInDept = await ProjectModel.findOne(
-            { deptId: { $in: listDeptId } },
-            { 1: 1 }
-        )
+    const isInDept = await ProjectModel.findOne(
+        { deptId: { $in: listDeptId } },
+        { _id: 1 }
+    ).lean();
 
-        if (isInDept !== null) {
-            throw new Error("MEMBERS_CANNOT_DELETE");
-        }
-        return;
-    } catch (error) {
-        throw error;
+    if (isInDept) {
+        throw new Error("MEMBERS_CANNOT_DELETE");
     }
+    return;
 };
 
 // Remove member out of dept
 const removeMember = async (memberId, deptId) => {
-    try {
-        const result = await DeptModel.updateOne(
-            { _id: deptId },
-            {
-                $pull: {
-                    members: {
-                        "memberId": memberId,
-                    }
+    const result = await DeptModel.updateOne(
+        { _id: deptId },
+        {
+            $pull: {
+                members: {
+                    "memberId": memberId,
                 }
             }
-        )
-
-        if (result.upsertedCount === 0) {
-            throw new Error("DELETE_UNSUCCESSFUL");
         }
-        return;
-    } catch (err) {
-        throw err;
+    )
+
+    if (result.upsertedCount === 0) {
+        throw new Error("DELETE_UNSUCCESSFUL");
     }
+    return;
 }
 
 module.exports = {
@@ -360,15 +311,11 @@ module.exports = {
 
     // Create new Dept
     createDept: async (deptEntity) => {
-        try {
-            // Check dept name
-            await isExistDeptName(deptEntity.deptName);
-            // After validation all create dept and add members to dept and deptId
-            await createDept(deptEntity);
-            return;
-        } catch (err) {
-            throw err;
-        }
+        // Check dept name
+        await isExistDeptName(deptEntity.deptName.trim());
+        // After validation all create dept and add members to dept and deptId
+        await createDept(deptEntity);
+        return;
     },
 
 
@@ -393,21 +340,13 @@ module.exports = {
     },
 
     addMemberToDept: async (members, deptId) => {
-        try {
-            await checkMemberInDeptOrIsBlock(members, deptId);
-            const result = await addMemberToDept(members, deptId);
-            return result;
-        } catch (err) {
-            throw err;
-        }
+        await checkMemberInDeptOrIsBlock(members, deptId);
+        const result = await addMemberToDept(members, deptId);
+        return result;
     },
 
     removeMember: async (memberId, deptId) => {
-        try {
-            await checkMemberInProject(memberId);
-            await removeMember(memberId, deptId);
-        } catch (err) {
-            throw err;
-        }
+        await checkMemberInProject(memberId);
+        await removeMember(memberId, deptId);
     }
 }
