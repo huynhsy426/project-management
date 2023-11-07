@@ -18,11 +18,11 @@ module.exports = {
 
         const taskEntity = {
             taskName: taskName.trim(),
-            assignee: assignee.trim(),
+            assignee: assignee,
             content: content.trim(),
             attachments: newAttachments,
             status: "todo",
-            point: point.trim(),
+            point: point,
             createdBy: user.userId,
             deadlineAt: new Date(deadlineAt)
         }

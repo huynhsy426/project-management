@@ -105,12 +105,21 @@ const checkUserExist = async (userId) => {
 };
 
 
-const buildTaskVersion = (userId, task) => {
+const buildTaskVersion = ({ userId, task, newVersion }) => {
     const version = {
         changeBy: userId,
         updated_at: Date.now(),
         old: {
             ...task.versions[task.versions.length - 1].new
+        },
+        new: {
+            taskName: newVersion?.taskName ?? task.taskName,
+            assignee: newVersion?.assignee ?? task.assignee,
+            content: newVersion?.content ?? task.content,
+            attachments: newVersion?.attachments ?? task.attachments,
+            status: newVersion?.status ?? task.status,
+            point: newVersion?.point ?? task.point,
+            deadlineAt: newVersion?.deadlineAt ?? task.deadlineAt
         }
     }
     return version;
@@ -206,20 +215,8 @@ module.exports = {
     updateTask: async ({ authorId, taskId, taskEntity }) => {
         const result = await getTaskById(taskId);
         const taskEntityUpdate = checkTaskForUpdate(result, taskEntity);
-        const version = buildTaskVersion(authorId, result);
-        version.new = {
-            taskName: result.taskName,
-            assignee: result.assignee,
-            content: result.content,
-            attachments: result.attachments,
-            status: result.status,
-            point: result.point,
-            deadlineAt: result.deadlineAt
-        }
+        const version = buildTaskVersion({ userId: authorId, task: result, newVersion: taskEntity });
 
-        for (const key in taskEntityUpdate) {
-            version.new[key] = taskEntity[key];
-        }
         // console.log({ version });
         await taskUpdate({ taskId, newVersion: version, taskEntityUpdate });
     },
@@ -235,16 +232,13 @@ module.exports = {
                 await assignTask(assigneeId, result);
                 return;
             }
-            const version = buildTaskVersion(authorId, result);
-            version.new = {
-                taskName: result.taskName,
+
+            const newVersion = {
                 assignee: new mongoose.Types.ObjectId(assigneeId),
                 content: `Admin ${authorId} change ${taskId} task to ${assigneeId}`,
-                attachments: result.attachments,
-                status: result.status,
-                point: result.point,
-                deadlineAt: result.deadlineAt
             }
+            const version = buildTaskVersion({ userId: authorId, task: result, newVersion });
+
             await changeTaskAssignee({ assigneeId, taskId, newVersion: version });
         } catch (err) {
             throw err;
