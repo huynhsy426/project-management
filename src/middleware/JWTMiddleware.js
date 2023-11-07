@@ -1,5 +1,6 @@
 const JwtService = require("../services/JWTService");
 const userModel = require("../models/userModel");
+const { ErrorCodes } = require("../constants/errorConstant");
 
 
 const getUser = async (userId) => {
@@ -32,11 +33,11 @@ module.exports = {
 
                 // Check isBlocked token user
                 if (result.isBlocked) {
-                    return next(new Error('USER_HAS_BLOCKED'));
+                    return next(new Error(ErrorCodes.USER_HAS_BLOCKED));
                 }
                 // Check roles of token user
                 if (roles.length !== 0 && !roles.includes(result.roles)) {
-                    return next(new Error('INVALID_ROLE'));
+                    return next(new Error(ErrorCodes.INVALID_ROLE));
                 }
                 req.user = {
                     userId: JSON.stringify(result._id).split('"')[1],

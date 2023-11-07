@@ -1,3 +1,5 @@
+const { ErrorCodes } = require("../constants/errorConstant");
+
 module.exports = class MyValidator {
     handleValidationError(req, schemas) {
         let errorMessages = [];
@@ -13,7 +15,7 @@ module.exports = class MyValidator {
 
         if (errorMessages.length > 0) {
             throw {
-                error: new Error("INVALID_INPUT_BY_CLIENT"),
+                error: new Error(ErrorCodes.INVALID_INPUT_BY_CLIENT),
                 args: errorMessages,
             };
         }

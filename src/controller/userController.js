@@ -22,11 +22,11 @@ module.exports = {
     // Tao user -> 
     createUser: async (req, res, next) => {
         const user = {
-            username: req.body.username.trim(),
-            age: req.body.age.trim(),
+            username: req.body.username,
+            age: req.body.age,
             roles: 'User',
-            userPassword: req.body.userPassword.trim(),
-            email: req.body.email.trim(),
+            userPassword: req.body.userPassword,
+            email: req.body.email,
             exp: req.body.exp,
             isBlocked: false
         }
@@ -62,7 +62,7 @@ module.exports = {
     loginByUser: async (req, res, next) => {
         const { username, userPassword } = req.body;
         try {
-            const result = await UserService.loginByUser(username.trim(), userPassword.trim());
+            const result = await UserService.loginByUser(username, userPassword);
 
             const user = {
                 userId: result._id

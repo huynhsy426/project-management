@@ -1,6 +1,8 @@
 const ProjectModel = require("../models/projectModel");
 const DeptModel = require("../models/deptModel");
 
+const { ErrorCodes } = require("../constants/errorConstant");
+
 
 const listProjectByRoles = async (roles, userId) => {
    let result = null;
@@ -58,7 +60,7 @@ const isExistName = async (projectName) => {
    ).lean();
 
    if (result) {
-      throw (new Error("PROJECT_NAME_EXIST"))
+      throw (new Error(ErrorCodes.PROJECT_NAME_EXIST))
    }
    return;
 };
@@ -82,7 +84,7 @@ const checkMinExpForProject = async (minExp, deptId) => {
    })
 
    if (listMinExp.length > 0) {
-      throw new Error("INVALID_SELECT_DEPT_BY_MIN_EXP");
+      throw new Error(ErrorCodes.INVALID_SELECT_DEPT_BY_MIN_EXP);
    }
    return;
 };
@@ -95,7 +97,7 @@ const checkMemberIndept = async (authorId, deptId) => {
    ).lean();
 
    if (!result) {
-      throw new Error("MEMBER_NOT_IN_DEPT_FOR_PROJECT");
+      throw new Error(ErrorCodes.MEMBER_NOT_IN_DEPT_FOR_PROJECT);
    }
    return;
 };
@@ -108,7 +110,7 @@ const checkDeptExist = async (deptId) => {
    ).lean();
 
    if (!result) {
-      throw new Error("DEPT_NOT_EXIST");
+      throw new Error(ErrorCodes.DEPT_NOT_EXIST);
    }
    return;
 }

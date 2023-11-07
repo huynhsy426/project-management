@@ -7,14 +7,6 @@
         "message": "Gmail has been exsisted",
         "statusCode": 400
     },
-    "USERNAME_UNIQUE": {
-        "message": "Username has been exsisted",
-        "statusCode": 400
-    },
-    "DEFAULT_ERROR": {
-        "message": "Something went wrong",
-        "statusCode": 400
-    },
     "UNAUTHORIZED": {
         "message": "Unauthorized",
         "statusCode": 401
@@ -22,10 +14,6 @@
     "DEPTNAME_UNIQUE": {
         "message": "Deptname has been existed",
         "statusCode": 400
-    },
-    "FORBIDDEN": {
-        "message": "403 Forbidden",
-        "statusCode": 403
     },
     "USER_HAS_BLOCKED": {
         "message": "Account has been blocked",
@@ -55,10 +43,6 @@
         "message": "Project name is exists",
         "statusCode": 400
     },
-    "CREAT_PROJECT_FAILED": {
-        "message": "Can't create project",
-        "statusCode": 406
-    },
     "INVALID_SELECT_DEPT_BY_MIN_EXP": {
         "message": "Dept cannot select because memeber exp not valid",
         "statusCode": 400
@@ -69,10 +53,6 @@
     },
     "MEMBERS_CANNOT_DELETE": {
         "message": "Members cannot be deleted because they in Project",
-        "statusCode": 406
-    },
-    "MEMBER_NOT_IN_DEPT_FOR_DEPT": {
-        "message": "Members cannot be deleted because they not in dept",
         "statusCode": 406
     },
     "WRONG_ACCOUNT": {
@@ -125,10 +105,6 @@
     },
     "TASK_REJECTED": {
         "message": "Task has been rejected.",
-        "statusCode": 400
-    },
-    "GREATER_DATE": {
-        "message": "deadline must greater than now.",
         "statusCode": 400
     }
 }

@@ -1,13 +1,6 @@
-const mongoose = require('mongoose');
 const taskModel = require('../models/taskModel');
-const userModel = require('../models/userModel');
 
-
-const TASK_STATUS = {
-    DOING: "doing",
-    REJECTED: "rejected",
-    DONE: "done"
-}
+const { TaskStatus } = require('../constants/taskConstant');
 
 
 const getTaskUserAssign = async (userId) => {
@@ -25,18 +18,21 @@ const getTaskUserAssign = async (userId) => {
 const checkTaskStatus = (tasks) => {
 
     // Phân loại các tasks
-    const constTasksBy = tasks.reduce((taskStatus, task) => {
-        // taskStatus[task.status].push(task)
-        if (task.status === TASK_STATUS.DOING) {
-            taskStatus.doingTasks.push(task);
+    const constTasksBy = tasks.reduce((taskStatusCheck, task) => {
+        switch (task.status) {
+            case TaskStatus.DOING:
+                taskStatusCheck.doingTasks.push(task);
+                break;
+            case TaskStatus.REJECTED:
+                taskStatusCheck.rejectedTasks.push(task);
+                break;
+            case TaskStatus.DONE:
+                taskStatusCheck.doneTasks.push(task);
+                break;
+            default:
+                break;
         }
-        if (task.status === TASK_STATUS.REJECTED) {
-            taskStatus.rejectedTasks.push(task);
-        }
-        if (task.status === TASK_STATUS.DONE) {
-            taskStatus.doneTasks.push(task);
-        }
-        return taskStatus;
+        return taskStatusCheck;
     }, {
         doneTasks: [],
         doingTasks: [],
@@ -104,7 +100,7 @@ module.exports = {
     // Kiểm tra trạng thái các task của User
     // Tính thời gian hoàn thành trung bình
     reportUser: async (user) => {
-        const listTasksUserAssign = await getTaskUserAssign(user.userId.trim());
+        const listTasksUserAssign = await getTaskUserAssign(user.userId);
         const reportTasks = checkTaskStatus(listTasksUserAssign);
 
         // Check time of done task

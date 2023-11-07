@@ -1,24 +1,21 @@
 const userModel = require('../models/userModel');
 
+const { ErrorCodes } = require("../constants/errorConstant");
 
 // Check user login
 const checkUserLogin = async (username, userPassword) => {
-    try {
-        const result = await userModel.findOne(
-            { $and: [{ username: username }, { userPassword: userPassword }] },
-            { isBlocked: 1 }
-        ).lean();
+    const result = await userModel.findOne(
+        { $and: [{ username: username }, { userPassword: userPassword }] },
+        { isBlocked: 1 }
+    ).lean();
 
-        if (result) {
-            if (result.isBlocked === true) {
-                throw new Error("USER_HAS_BLOCKED");
-            }
-            return result;
-        }
-        throw new Error("WRONG_ACCOUNT");
-    } catch (error) {
-        throw error;
+    if (!result) {
+        throw new Error(ErrorCodes.WRONG_ACCOUNT);
     }
+    if (result.isBlocked) {
+        throw new Error(ErrorCodes.USER_HAS_BLOCKED);
+    }
+    return result;
 }
 
 
@@ -26,7 +23,6 @@ const checkUserLogin = async (username, userPassword) => {
 const createUser = async (user) => {
     await userModel.insertMany(user);
     return;
-
 };
 
 
@@ -38,7 +34,7 @@ const isUserNameAndGmailExist = async (user) => {
     ).lean();
 
     if (result) {
-        throw (new Error("USERNAME_GMAIL_UNIQUE"));
+        throw (new Error(ErrorCodes.USERNAME_GMAIL_UNIQUE));
     }
     return;
 };

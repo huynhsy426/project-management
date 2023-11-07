@@ -1,6 +1,7 @@
 const { StatusCodes } = require('http-status-codes');
 
 const taskService = require("../services/taskService");
+const { TaskStatus } = require("../constants/taskConstant");
 
 module.exports = {
     create: async (req, res, next) => {
@@ -10,18 +11,18 @@ module.exports = {
 
         const newAttachments = attachments.map(attach => {
             return {
-                path: attach.path.trim(),
-                originalname: attach.originalname.trim()
+                path: attach.path,
+                originalname: attach.originalname
             }
         })
 
 
         const taskEntity = {
-            taskName: taskName.trim(),
+            taskName: taskName,
             assignee: assignee,
-            content: content.trim(),
+            content: content,
             attachments: newAttachments,
-            status: "todo",
+            status: TaskStatus.TODO,
             point: point,
             createdBy: user.userId,
             deadlineAt: new Date(deadlineAt)
@@ -49,7 +50,7 @@ module.exports = {
         const { taskId } = req.params;
 
         try {
-            await taskService.assignTask(user.userId, taskId.trim());
+            await taskService.assignTask(user.userId, taskId);
             res.status(StatusCodes.OK).json();
         } catch (error) {
             return next(error);
@@ -64,17 +65,15 @@ module.exports = {
         const attachments = req.files;
 
         taskEntity = {
-            taskName: taskName.trim(),
+            taskName: taskName,
             attachments,
-            content: content.trim(),
+            content: content,
             status,
             point
         }
 
-        console.log({ taskEntity });
-
         try {
-            await taskService.updateTask({ authorId: user.userId, taskId: taskId.trim(), taskEntity })
+            await taskService.updateTask({ authorId: user.userId, taskId: taskId, taskEntity })
             res.status(StatusCodes.OK).json()
         } catch (error) {
             return next(error);
@@ -88,7 +87,7 @@ module.exports = {
         const user = req.user;
 
         try {
-            await taskService.changeAssignee({ authorId: user.userId, assigneeId: userId.trim(), taskId: taskId.trim() });
+            await taskService.changeAssignee({ authorId: user.userId, assigneeId: userId, taskId: taskId });
             res.status(StatusCodes.OK).json();
         } catch (error) {
             return next(error);

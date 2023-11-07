@@ -6,6 +6,7 @@ const JWTMiddleware = require('../middleware/JWTMiddleware');
 const taskController = require('../controller/taskController');
 
 const upload = require('../middleware/saveFile');
+const { UserRoles } = require('../constants/usersConstant');
 
 router.get('/list', taskController.listUnassignTask);
 
@@ -32,7 +33,7 @@ router.put('/assign/:taskId',
 router.put('/admin/change-assignee/:taskId',
     [
         taskValidator.validateChangeAssignee,
-        JWTMiddleware.verify(["Admin"])
+        JWTMiddleware.verify([UserRoles.ADMIN])
     ],
     taskController.changeAssignee
 );
@@ -41,7 +42,7 @@ router.put('/admin/change-assignee/:taskId',
 router.put('/admin/:taskId/update',
     [
         taskValidator.validateUpdateTask,
-        JWTMiddleware.verify(["Admin"])
+        JWTMiddleware.verify([UserRoles.ADMIN])
     ],
     taskController.update
 );

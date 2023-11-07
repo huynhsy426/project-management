@@ -7,6 +7,7 @@ const schemas = {
             {
                 username: Joi.string()
                     .regex(/^[^0-9 ]*$/)
+                    .trim()
                     .min(3)
                     .max(50)
                     .messages({
@@ -16,6 +17,7 @@ const schemas = {
                     })
                     .required(),
                 age: Joi.number()
+                    .trim()
                     .integer()
                     .min(18)
                     .max(100)

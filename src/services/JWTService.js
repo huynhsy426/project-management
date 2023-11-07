@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 
 require("dotenv").config()
+const { ErrorCodes } = require("../constants/errorConstant");
 
 
 module.exports = {
@@ -20,7 +21,7 @@ module.exports = {
             let secretKey = process.env.JWT_SECRET;
             return jwt.verify(token, secretKey);
         } catch (error) {
-            throw new Error('UNAUTHORIZED');
+            throw new Error(ErrorCodes.UNAUTHORIZED);
         }
 
     },

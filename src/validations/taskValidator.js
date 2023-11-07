@@ -1,5 +1,6 @@
 const Joi = require('joi');
 const MyValidator = require('./validator');
+const { ErrorCodes } = require('../constants/errorConstant');
 
 
 const schemas = {
@@ -7,12 +8,14 @@ const schemas = {
         body: Joi.object().keys(
             {
                 taskName: Joi.string()
+                    .trim()
                     .regex(/^[a-zA-Z0-9_ ]{3,100}$/)
                     .messages({
                         "string.pattern.base": "Task name not valid"
                     })
                     .required(),
                 assignee: Joi.string()
+                    .trim()
                     .hex()
                     .length(24)
                     .allow(null, '')
@@ -20,6 +23,7 @@ const schemas = {
                         "string.pattern.base": "User not valid"
                     }),
                 content: Joi.string()
+                    .trim()
                     .min(3)
                     .max(999)
                     .required()
@@ -29,6 +33,7 @@ const schemas = {
                     }),
                 attachments: Joi.any(),
                 point: Joi.number()
+                    .trim()
                     .integer()
                     .min(1)
                     .max(10)
@@ -50,6 +55,7 @@ const schemas = {
         params: Joi.object().keys(
             {
                 taskId: Joi.string()
+                    .trim()
                     .hex()
                     .length(24)
                     .required()
@@ -61,6 +67,7 @@ const schemas = {
         body: Joi.object().keys(
             {
                 userId: Joi.string()
+                    .trim()
                     .hex()
                     .length(24)
                     .required()
@@ -69,6 +76,7 @@ const schemas = {
         params: Joi.object().keys(
             {
                 taskId: Joi.string()
+                    .trim()
                     .hex()
                     .length(24)
                     .required()
@@ -80,12 +88,14 @@ const schemas = {
     updateTask: {
         body: Joi.object().keys({
             taskName: Joi.string()
+                .trim()
                 .regex(/^[a-zA-Z0-9_ ]{3,100}$/)
                 .allow(null)
                 .messages({
                     "string.pattern.base": "Task name not valid"
                 }),
             content: Joi.string()
+                .trim()
                 .min(3)
                 .max(999)
                 .required()
@@ -95,6 +105,7 @@ const schemas = {
                 }),
             attachments: Joi.any(),
             point: Joi.number()
+                .trim()
                 .integer()
                 .min(1)
                 .max(10)
@@ -132,7 +143,7 @@ class taskValidator extends MyValidator {
 
             if (errorMessages.length > 0) {
                 return next({
-                    error: new Error("INVALID_INPUT_BY_CLIENT"),
+                    error: new Error(ErrorCodes.INVALID_INPUT_BY_CLIENT),
                     args: errorMessages,
                 });
             }

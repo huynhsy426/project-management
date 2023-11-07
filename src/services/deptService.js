@@ -1,7 +1,8 @@
-const mongoose = require("mongoose");
 const DeptModel = require("../models/deptModel");
 const UserModel = require("../models/userModel");
 const ProjectModel = require("../models/projectModel");
+
+const { ErrorCodes } = require("../constants/errorConstant");
 
 
 // Create Dept
@@ -20,7 +21,7 @@ const createDept = async (dept) => {
 
         const [result] = await DeptModel.insertMany(deptEntity);
         if (result === null) {
-            throw (new Error('CREAT_DEPT_FAILED'));
+            throw (new Error(ErrorCodes.CREAT_DEPT_FAILED));
         }
         dept.deptId = result._id;
         return;
@@ -77,7 +78,7 @@ const isExistDeptName = async (deptName) => {
         { _id: 1 }
     ).lean();
     if (result) {
-        throw (new Error("DEPTNAME_UNIQUE"));
+        throw (new Error(ErrorCodes.DEPTNAME_UNIQUE));
     }
     return;
 };
@@ -134,7 +135,7 @@ const checkMemberIsExist = async (members) => {
         { _id: { $in: listMemberId } }
     )
     if (result.length !== listMemberId.length) {
-        throw new Error("USER_NOT_EXIST");
+        throw new Error(ErrorCodes.USER_NOT_EXIST);
     }
     return;
 }
@@ -156,7 +157,7 @@ const checkMemberIsBlockAndRoles = async (members) => {
     )
 
     if (result.length > 0) {
-        throw (new Error("ADD_MEMBER_BLOCK"));
+        throw (new Error(ErrorCodes.ADD_MEMBER_BLOCK));
     }
 
     const resultCheckRoles = await UserModel.find(
@@ -168,7 +169,7 @@ const checkMemberIsBlockAndRoles = async (members) => {
     )
 
     if (resultCheckRoles.length > 0) {
-        throw (new Error('NOT_ALLOW_ROLE'));
+        throw (new Error(ErrorCodes.NOT_ALLOW_ROLE));
     }
     return;
 };
@@ -192,7 +193,7 @@ const checkMemberInDeptOrIsBlock = async (members, deptId) => {
     ).lean();
 
     if (result) {
-        throw (new Error("ADD_MEMBER_BLOCK"));
+        throw (new Error(ErrorCodes.ADD_MEMBER_BLOCK));
     }
 
     const resultCheckRoles = await UserModel.findOne(
@@ -204,7 +205,7 @@ const checkMemberInDeptOrIsBlock = async (members, deptId) => {
     ).lean();
 
     if (resultCheckRoles) {
-        throw (new Error('NOT_ALLOW_ROLE'));
+        throw (new Error(ErrorCodes.NOT_ALLOW_ROLE));
     }
 
     const resultIndept = await DeptModel.findOne(
@@ -224,7 +225,7 @@ const checkMemberInDeptOrIsBlock = async (members, deptId) => {
     });
 
     if (inDeptList.length > 0) {
-        throw (new Error("MEMBER_ALREADY_IN_DEPT"))
+        throw (new Error(ErrorCodes.MEMBER_ALREADY_IN_DEPT))
     }
     return;
 }
@@ -267,7 +268,7 @@ const checkMemberInProject = async (memberId) => {
     ).lean();
 
     if (isInDept) {
-        throw new Error("MEMBERS_CANNOT_DELETE");
+        throw new Error(ErrorCodes.MEMBERS_CANNOT_DELETE);
     }
     return;
 };
@@ -286,7 +287,7 @@ const removeMember = async (memberId, deptId) => {
     )
 
     if (result.upsertedCount === 0) {
-        throw new Error("DELETE_UNSUCCESSFUL");
+        throw new Error(ErrorCodes.DELETE_UNSUCCESSFUL);
     }
     return;
 }
@@ -322,7 +323,7 @@ module.exports = {
     // Search dept by name
     searchDept: (inputName) => {
         if (inputName === null) {
-            throw new Error("SEARCH_NAME_NULL")
+            throw new Error(ErrorCodes.SEARCH_NAME_NULL)
         }
         return searchDeptByName(inputName);
     },

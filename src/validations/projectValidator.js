@@ -6,16 +6,19 @@ const schemas = {
         body: Joi.object().keys(
             {
                 projectName: Joi.string()
+                    .trim()
                     .regex(/^[a-zA-Z0-9_ -]{3,50}$/)
                     .messages({
                         "string.pattern.base": "Project name not valid"
                     })
                     .required(),
                 deptId: Joi.string()
+                    .trim()
                     .hex()
                     .length(24)
                     .required(),
                 leaderId: Joi.string()
+                    .trim()
                     .hex()
                     .length(24)
                     .required()

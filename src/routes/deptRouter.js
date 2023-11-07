@@ -5,6 +5,7 @@ const deptController = require('../controller/deptController');
 const JWTMiddleware = require('../middleware/JWTMiddleware');
 const DeptValidator = require('../validations/deptValidator');
 
+const { UserRoles } = require('../constants/usersConstant');
 
 // getDeptPage
 router.get("/list", [JWTMiddleware.verify([])], deptController.listDeptsByRoles)
@@ -13,7 +14,7 @@ router.get("/list", [JWTMiddleware.verify([])], deptController.listDeptsByRoles)
 router.post("/admin/create",
     [
         DeptValidator.validateCreatDept,
-        JWTMiddleware.verify(["Admin"])
+        JWTMiddleware.verify([UserRoles.ADMIN])
     ],
     deptController.createDept
 )
@@ -28,7 +29,7 @@ router.get("/search/name/:deptName", deptController.searchDept)
 router.put("/admin/:deptId/update",
     [
         DeptValidator.validateUpdateDept,
-        JWTMiddleware.verify(["Admin"])
+        JWTMiddleware.verify([UserRoles.ADMIN])
     ],
     deptController.updateById
 )

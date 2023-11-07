@@ -10,10 +10,12 @@ const schemas = {
                     Joi.object().keys(
                         {
                             memberId: Joi.string()
+                                .trim()
                                 .hex()
                                 .length(24)
                                 .required(),
                             position: Joi.string()
+                                .trim()
                                 .alphanum()
                                 .regex(/^[a-zA-Z0-9_ ]{3,50}$/)
                                 .messages({
@@ -29,6 +31,7 @@ const schemas = {
         params: Joi.object().keys(
             {
                 deptId: Joi.string()
+                    .trim()
                     .hex()
                     .length(24)
                     .required()
@@ -41,6 +44,7 @@ const schemas = {
         body: Joi.object().keys(
             {
                 memberId: Joi.string()
+                    .trim()
                     .hex()
                     .length(24)
                     .required()
@@ -50,6 +54,7 @@ const schemas = {
         params: Joi.object().keys(
             {
                 deptId: Joi.string()
+                    .trim()
                     .hex()
                     .length(24)
                     .required()
