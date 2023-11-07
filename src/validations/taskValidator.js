@@ -33,7 +33,6 @@ const schemas = {
                     }),
                 attachments: Joi.any(),
                 point: Joi.number()
-                    .trim()
                     .integer()
                     .min(1)
                     .max(10)
@@ -105,7 +104,6 @@ const schemas = {
                 }),
             attachments: Joi.any(),
             point: Joi.number()
-                .trim()
                 .integer()
                 .min(1)
                 .max(10)

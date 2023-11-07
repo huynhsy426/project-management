@@ -17,7 +17,6 @@ const schemas = {
                     })
                     .required(),
                 age: Joi.number()
-                    .trim()
                     .integer()
                     .min(18)
                     .max(100)
