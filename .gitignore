@@ -1,20 +1,25 @@
+######### Server
 # dependencies
-node_modules
-
+/server/node_modules
 
 # encryption keys
 .env
 
 
 #Testing
-src/test
+/server/src/test
 
 
 #File upload
-uploads/audios
-uploads/images
-uploads/files
+/server/uploads/audios
+/server/uploads/images
+/server/uploads/files
 
 
 #docunment
-docunment
+/server/docunment
+
+
+######## Frontend
+# dependencies
+/frontend/node_modules

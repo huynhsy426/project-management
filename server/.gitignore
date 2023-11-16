@@ -1,0 +1,20 @@
+# dependencies
+node_modules
+
+
+# encryption keys
+.env
+
+
+#Testing
+src/test
+
+
+#File upload
+uploads/audios
+uploads/images
+uploads/files
+
+
+#docunment
+docunment

@@ -1,0 +1,13 @@
+version: '23.0.3'
+
+services:
+  node:
+    container_name: node_server
+    build:
+      context: .
+      dockerfile: Dockerfile
+    port: 
+      - 8082:8082
+    volumes:
+      - .:/app
+    command: npm run dev
