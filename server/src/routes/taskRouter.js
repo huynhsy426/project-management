@@ -5,8 +5,6 @@ const taskValidator = require('../validations/taskValidator');
 const JWTMiddleware = require('../middleware/JWTMiddleware');
 const taskController = require('../controller/taskController');
 
-const multer = require('multer');
-
 const { upload } = require('../middleware/saveFile');
 const { UserRoles } = require('../constants/usersConstant');
 
@@ -26,6 +24,15 @@ router.post('/create',
     ],
     taskController.create
 );
+
+
+router.get('/:taskId',
+    [
+        taskValidator.validateGetTask,
+        JWTMiddleware.verify([])
+    ],
+    taskController.getTaskById
+)
 
 
 router.put('/assign/:taskId',

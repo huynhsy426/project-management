@@ -1,12 +1,17 @@
 import { createRouter, createWebHistory } from 'vue-router';
 const login = () => import('../views/login.vue');
 const task = () => import('../views/task.vue');
-const taskDetail = () => import('../views/taskDetailPopup.vue');
+const taskDetail = () => import('../views/taskDetail.vue');
+const createTask = () => import('../views/addTask.vue')
+const homePage = () => import('../views/homePage.vue');
 
 const routes = [
+    { path: '/', component: homePage, meta: { layout: 'vertical' } },
     { path: '/login', component: login, meta: { layout: 'full' } },
     { path: '/task', component: task, meta: { layout: 'vertical' } },
-    { path: '/task/:id', component: taskDetail, meta: { layout: 'vertical' } }
+    { path: '/task/:id', component: taskDetail, meta: { layout: 'vertical' } },
+    { path: '/task/create', component: createTask, meta: { layout: 'vertical' } }
+
 ]
 
 const router = createRouter({

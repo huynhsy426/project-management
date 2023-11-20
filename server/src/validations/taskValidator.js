@@ -146,6 +146,17 @@ const schemas = {
                     .allow(null)
             }
         )
+    },
+
+
+    getTask: {
+        params: Joi.object().keys({
+            taskId: Joi.string()
+                .trim()
+                .hex()
+                .length(24)
+                .required()
+        })
     }
 }
 
@@ -155,10 +166,11 @@ class taskValidator extends MyValidator {
     async validateCreateTask(req, res, next) {
         try {
             const attachments = req.files;
-            const data = req.body.data;
+            const data = req.body;
+            console.log({ attachments })
 
             let errorMessages = [];
-            const { error } = schemas.createTask.body.validate(req.body, { abortEarly: false });
+            const { error } = schemas.createTask.body.validate(data, { abortEarly: false });
             if (error) {
                 for (let index = 0; index < error.details.length; index++) {
                     const element = error.details[index];
@@ -215,10 +227,21 @@ class taskValidator extends MyValidator {
 
     handlePagination(req, res, next) {
         try {
-            super.handleValidationError(req, schemas.pagination)
+            super.handleValidationError(req, schemas.pagination);
             return next();
         } catch (err) {
             return next(err);
+        }
+    };
+
+    validateGetTask(req, res, next) {
+        console.log(req.params)
+        console.log(req.query)
+        try {
+            super.handleValidationError(req, schemas.getTask);
+            return next();
+        } catch (error) {
+            return next(error);
         }
     }
 }

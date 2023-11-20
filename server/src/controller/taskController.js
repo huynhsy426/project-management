@@ -16,7 +16,8 @@ module.exports = {
         const newAttachments = attachments.map(attach => {
             return {
                 path: attach.path,
-                originalname: attach.originalname
+                originalname: attach.originalname,
+                size: attach.size
             }
         })
 
@@ -41,6 +42,15 @@ module.exports = {
                 await fse.remove(file);
             }
             return next(err);
+        }
+    },
+    getTaskById: async (req, res, next) => {
+        try {
+            const taskId = req.params.taskId;
+            const task = await taskService.getTask(taskId);
+            res.status(StatusCodes.OK).json({ task });
+        } catch (error) {
+            return next(error);
         }
     },
 
@@ -70,6 +80,7 @@ module.exports = {
         const user = req.user;
         const { taskId } = req.params;
 
+        console.log({ user, taskId })
         try {
             await taskService.assignTask(user.userId, taskId);
             res.status(StatusCodes.OK).json();

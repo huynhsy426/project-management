@@ -110,5 +110,9 @@
     "USER_NOT_IN_PROJECT": {
         "message": "User not in project.",
         "statusCode": 400
+    },
+    "USER_CAN_NOT_UPDATE_TASK": {
+        "message": "User can't update task.",
+        "statusCode": 401
     }
 }

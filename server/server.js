@@ -30,7 +30,7 @@ app.use('/reports', reportRouter);
 
 
 app.use((req, res) => {
-    return res.json({
+    return res.status(500).json({
         messageCode: 'DEFAULT_ERROR_404',
         message: 'Something went wrong'
     });

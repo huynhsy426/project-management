@@ -24,6 +24,9 @@ const taskSchema = new mongoose.Schema({
                 originalname: {
                     type: String
                 },
+                size:{
+                    type: Number
+                },
                 _id: false
             }
         ],
@@ -84,6 +87,9 @@ const taskSchema = new mongoose.Schema({
                             originalname: {
                                 type: String
                             },
+                            size:{
+                                type: Number
+                            },
                             _id: false
                         }
                     ],
@@ -124,6 +130,9 @@ const taskSchema = new mongoose.Schema({
                             },
                             originalname: {
                                 type: String
+                            },
+                            size:{
+                                type: Number
                             },
                             _id: false
                         }

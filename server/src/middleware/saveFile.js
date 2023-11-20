@@ -16,7 +16,7 @@ var storage = multer.diskStorage({
             return;
         }
         // word, pdf, excel
-        if ([".DOC", ".DOCM", ".DOCX", ".DOT"].includes(filExtension)) {
+        if ([".DOC", ".DOCM", ".DOCX", ".DOT", ".TXT"].includes(filExtension)) {
             cb(null, 'uploads/files/docs')
             return;
         }
@@ -52,8 +52,8 @@ upload = multer({
         if (![".MP3", ".WMA", ".WAV", ".FLAC"].includes(filExtension)) {
             return cb(null, true);
         }
-        // word, pdf, excel
-        if ([".DOC", ".DOCM", ".DOCX", ".DOT"].includes(filExtension)) {
+        // word, pdf, excel, txt
+        if ([".DOC", ".DOCM", ".DOCX", ".DOT", ".TXT"].includes(filExtension)) {
             return cb(null, true);
         }
         if ([".XLSM", ".XLSX", ".XLT"].includes(filExtension)) {

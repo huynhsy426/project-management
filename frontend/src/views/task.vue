@@ -61,12 +61,12 @@
           <li v-for="task in taskAssign.taskValue?.tasks" :key="task._id">
             <a
               class="block w-full px-4 py-2 border-b border-gray-200 cursor-pointer hover:bg-gray-100 hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:border-gray-600 dark:hover:bg-gray-600 dark:hover:text-white dark:focus:ring-gray-500 dark:focus:text-white"
+              @click="handleDetailTask(task._id)"
             >
               <div class="flex items-center space-x-6 rtl:space-x-reverse">
                 <div class="flex-1 min-w-0">
                   <p
                     class="text-sm font-medium text-gray-900 truncate dark:text-white"
-                    @click="handleItemTask"
                   >
                     {{ task.taskName }}
                   </p>
@@ -130,6 +130,7 @@
               :key="n"
             >
               <a
+                :class="{ 'bg-gray-800 text-gray-700': n === taskAssign.page }"
                 class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
                 @click="pagination($event, n, taskAssign)"
                 >{{ n }}</a
@@ -138,7 +139,6 @@
 
             <li>
               <a
-                href="#"
                 @click="handleNext($event, taskAssign)"
                 :class="{
                   'hover:bg-gray-100 hover:text-gray-700 opacity-100 text-gray-500':
@@ -171,9 +171,16 @@
     </div>
     <div><taskReport /></div>
   </div>
-  <div v-if="false" class="grid grid-cols-1 v w-full mt-3">
-    <h1 class="flex justify-center text-center text-4xl mb-3">
+  <div class="grid grid-cols-1 v w-full mt-3">
+    <h1 class="flex justify-between text-center align-middle text-4xl mb-3">
       <b>PROJECT TASK</b>
+      <button
+        type="button"
+        @click="handleCreateTask"
+        class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 w-98"
+      >
+        Add
+      </button>
     </h1>
     <div
       class="w-98 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
@@ -201,6 +208,7 @@
         <li v-for="task in taskNotAssign.taskValue?.tasks" :key="task._id">
           <a
             class="block w-full px-4 py-2 border-b border-gray-200 cursor-pointer hover:bg-gray-100 hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:border-gray-600 dark:hover:bg-gray-600 dark:hover:text-white dark:focus:ring-gray-500 dark:focus:text-white"
+            @click="handleDetailTask(task._id)"
           >
             <div class="flex items-center space-x-4 rtl:space-x-reverse">
               <div class="flex-1 min-w-0">
@@ -300,14 +308,13 @@
       </nav>
     </div>
   </div>
-  <taskDetail />
 </template>
 
 <script setup>
 import { ref, onMounted } from "vue";
 import axios from "axios";
 import taskReport from "../components/taskReport.vue";
-import taskDetail from "./taskDetailPopup.vue";
+import taskDetail from "./taskDetail.vue";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
@@ -327,32 +334,34 @@ const taskNotAssign = ref({
   taskType: "na",
 });
 
-const handleItemTask = () => {
-  console.log(router);
-  router.push("/task/123");
-};
+const instance = axios.create({
+  headers: {
+    authorization: `Bearer ${localStorage.getItem("token").split('"')[1]}`,
+    "Content-Type": "application/json",
+  },
+});
 
 onMounted(async () => {
   try {
     loading.value = true;
-    const listTaskAssign = await axios.get("http://localhost:8082/tasks/list", {
-      headers: {
-        authorization: `Bearer ${localStorage.getItem("token").split('"')[1]}`,
-      },
-      params: {
-        page: taskAssign.value.page,
-        ITEMS_PER_PAGE: taskAssign.value.ITEMS_PER_PAGE,
-        taskType: taskAssign.value.taskType,
-      },
-    });
-
-    const listTaskNotAssign = await axios.get(
-      `http://localhost:8082/tasks/list?page=${taskAssign.value.page}&ITEMS_PER_PAGE=${taskNotAssign.value.ITEMS_PER_PAGE}&taskType=${taskNotAssign.value.taskType}`,
+    const listTaskAssign = await instance.get(
+      "http://localhost:8082/tasks/list",
       {
-        headers: {
-          authorization: `Bearer ${
-            localStorage.getItem("token").split('"')[1]
-          }`,
+        params: {
+          page: taskAssign.value.page,
+          ITEMS_PER_PAGE: taskAssign.value.ITEMS_PER_PAGE,
+          taskType: taskAssign.value.taskType,
+        },
+      }
+    );
+
+    const listTaskNotAssign = await instance.get(
+      `http://localhost:8082/tasks/list`,
+      {
+        params: {
+          page: taskNotAssign.value.page,
+          ITEMS_PER_PAGE: taskNotAssign.value.ITEMS_PER_PAGE,
+          taskType: taskNotAssign.value.taskType,
         },
       }
     );
@@ -368,7 +377,7 @@ onMounted(async () => {
     console.log({ taskAssign, taskNotAssign });
   } catch (error) {
     console.log({ error });
-    if (error.response.status) {
+    if (error?.response?.status) {
       errMessage.value = error.response.data.messageCode;
     }
   }
@@ -376,20 +385,26 @@ onMounted(async () => {
 
 const pagination = async (e, page, taskList) => {
   e.preventDefault();
-  const listTask = await axios.get(
-    `http://localhost:8082/tasks/list?page=${page}&ITEMS_PER_PAGE=${taskList.ITEMS_PER_PAGE}&taskType=${taskList.taskType}`,
-    {
-      headers: {
-        authorization: `Bearer ${localStorage.getItem("token").split('"')[1]}`,
+  try {
+    const listTask = await instance.get(`http://localhost:8082/tasks/list`, {
+      params: {
+        page: page,
+        ITEMS_PER_PAGE: taskList.ITEMS_PER_PAGE,
+        taskType: taskList.taskType,
       },
-    }
-  );
+    });
 
-  taskList.page = page;
-  taskList.taskValue = {
-    tasks: listTask.data.result.tasks,
-    pagination: listTask.data.result.pagination,
-  };
+    taskList.page = page;
+    taskList.taskValue = {
+      tasks: listTask.data.result.tasks,
+      pagination: listTask.data.result.pagination,
+    };
+  } catch (error) {
+    console.log({ error });
+    if (error?.response?.status) {
+      errMessage.value = error.response.data.messageCode;
+    }
+  }
 };
 
 const handlePrevious = (e, tasks) => {
@@ -404,6 +419,14 @@ const handleNext = (e, tasks) => {
     return tasks.page;
   }
   pagination(e, tasks.page + 1, tasks);
+};
+
+const handleDetailTask = (taskId) => {
+  router.push({ path: `/task/${taskId}` });
+};
+
+const handleCreateTask = () => {
+  router.push({ path: `/task/create` });
 };
 </script>
 

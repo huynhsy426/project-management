@@ -44,12 +44,12 @@ async function login() {
       JSON.stringify(result.data.accessToken)
     );
     console.log(result);
-    this.$router.push({
-      path: "/task",
+    this.$router.push({ path: "/task" }).then(() => {
+      this.$router.go();
     });
   } catch (error) {
     console.log(error);
-    if (error.response.status) {
+    if (error?.response?.status) {
       this.errMessage = error.response.data.messageCode;
     }
   }

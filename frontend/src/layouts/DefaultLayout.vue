@@ -10,7 +10,6 @@ const _router = useRouter();
 const layout = ref(FullLayout);
 
 watch(router.currentRoute, (value) => {
-  console.log(value);
   switch (value.meta.layout) {
     case "vertical":
       layout.value = VerticalLayout;

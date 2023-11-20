@@ -7,7 +7,6 @@ const projectModel = require('../models/projectModel');
 const deptModel = require('../models/deptModel');
 
 
-
 const create = async (task) => {
     const [result] = await taskModel.insertMany(task);
     if (!result) {
@@ -35,6 +34,22 @@ const getTaskById = async (taskId) => {
         _id: taskId
     }
     const result = await taskModel.findOne(query).lean();
+    if (!result) {
+        throw new Error(ErrorCodes.TASK_NOT_EXIST)
+    }
+    return result;
+};
+
+const getTask = async (taskId) => {
+    const query = {
+        _id: taskId
+    }
+    const result = await taskModel.findOne(query,
+        { versions: 0 }
+    ).populate({
+        path: "assignee",
+    }).lean();
+    console.log({ result });
     if (!result) {
         throw new Error(ErrorCodes.TASK_NOT_EXIST)
     }
@@ -112,7 +127,7 @@ const listTasks = async (user, page) => {
     console.log({ count })
     const result = await taskModel.find(
         query,
-        { taskName: 1, assignee: 1, content: 1, attachments: 1, status: 1, point: 1, create: 1, _id: 0, projectId: 1 }
+        { taskName: 1, assignee: 1, content: 1, attachments: 1, status: 1, point: 1, create: 1, _id: 1, projectId: 1 }
     ).limit(page.ITEMS_PER_PAGE).skip(skip);
     const pageCount = count / page.ITEMS_PER_PAGE;
     console.log({ pageCount });
@@ -158,6 +173,24 @@ const assignTask = async (userId, task) => {
 };
 
 
+const checkAssignIsCreaterOrAdmin = async ({ leaderId, task, taskEntity, authorId }) => {
+    const assignee = taskEntity.assignee;
+    const creator = task.createdBy;
+
+    const arrUserInProject = [
+        task.createdBy,
+        task.assignee,
+        leaderId
+    ]
+
+    const isTasker = arrUserInProject.some(item => item === authorId);
+
+    if (!isTasker) {
+        throw new Error(ErrorCodes.USER_CAN_NOT_UPDATE_TASK)
+    }
+}
+
+
 const buildTaskVersion = ({ userId, task, newVersion }) => {
     const version = {
         changeBy: userId,
@@ -179,7 +212,7 @@ const buildTaskVersion = ({ userId, task, newVersion }) => {
 };
 
 
-const checkTaskForUpdate = async (task, taskEntity) => {
+const checkTaskForUpdate = async ({ task, taskEntity, project, authorId }) => {
     const taskUpdate = {};
     for (const key in taskEntity) {
         if (taskEntity[key]) {
@@ -190,6 +223,8 @@ const checkTaskForUpdate = async (task, taskEntity) => {
     if (taskUpdate.status === 'done') {
         taskUpdate.point = 0
     }
+
+    checkAssignIsCreaterOrAdmin({ leaderId: project.leaderId, task, taskEntity, authorId });
     checkStatusOfTask(task);
 
     if (taskUpdate.taskName) {
@@ -251,7 +286,7 @@ const checkUserInProject = async (projectId, userId) => {
     const queryProject = {
         _id: projectId
     }
-    const project = await projectModel.findOne(queryProject, { deptId: 1 }).lean();
+    const project = await projectModel.findOne(queryProject, { deptId: 1, leaderId: 1 }).lean();
 
     const queryDept = {
         _id: project.deptId,
@@ -262,6 +297,7 @@ const checkUserInProject = async (projectId, userId) => {
     if (!listUserParticipate) {
         throw new Error(ErrorCodes.USER_NOT_IN_PROJECT);
     }
+    return project;
 }
 
 
@@ -298,10 +334,14 @@ module.exports = {
     // Update version
     updateTask: async ({ authorId, taskId, taskEntity }) => {
         const task = await getTaskById(taskId);
-        await checkUserInProject(task.projectId, authorId);
-        const taskEntityUpdate = await checkTaskForUpdate(task, taskEntity);
+        const project = await checkUserInProject(task.projectId, authorId);
+        const taskEntityUpdate = await checkTaskForUpdate({ task, taskEntity, project, authorId });
         const version = buildTaskVersion({ userId: authorId, task, newVersion: taskEntityUpdate });
         await taskUpdate({ taskId, newVersion: version, taskEntityUpdate });
+    },
+
+    getTask: async (taskId) => {
+        return getTask(taskId);
     },
 
 

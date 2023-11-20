@@ -19,7 +19,14 @@
 #docunment
 /server/docunment
 
+#package-json
+/server/package-lock.json
+
 
 ######## Frontend
+
 # dependencies
 /frontend/node_modules
+
+#package-json
+/frontend/package-lock.json
