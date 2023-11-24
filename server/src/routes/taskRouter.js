@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const taskValidator = require('../validations/taskValidator');
+const TaskValidator = require('../validations/taskValidator');
 const JWTMiddleware = require('../middleware/JWTMiddleware');
 const taskController = require('../controller/taskController');
 
@@ -10,7 +10,7 @@ const { UserRoles } = require('../constants/usersConstant');
 
 router.get('/list',
     [
-        taskValidator.handlePagination,
+        TaskValidator.handlePagination,
         JWTMiddleware.verify([])
     ],
     taskController.listTaskByUser);
@@ -19,7 +19,7 @@ router.get('/list',
 router.post('/create',
     [
         upload.array('file'),
-        taskValidator.validateCreateTask,
+        TaskValidator.validateCreateTask,
         JWTMiddleware.verify([])
     ],
     taskController.create
@@ -28,7 +28,7 @@ router.post('/create',
 
 router.get('/:taskId',
     [
-        taskValidator.validateGetTask,
+        TaskValidator.validateGetTask,
         JWTMiddleware.verify([])
     ],
     taskController.getTaskById
@@ -37,7 +37,7 @@ router.get('/:taskId',
 
 router.put('/assign/:taskId',
     [
-        taskValidator.validateAssignTask,
+        TaskValidator.validateAssignTask,
         JWTMiddleware.verify([])
     ],
     taskController.assignTask
@@ -46,7 +46,7 @@ router.put('/assign/:taskId',
 
 router.put('/admin/change-assignee/:taskId',
     [
-        taskValidator.validateChangeAssignee,
+        TaskValidator.validateChangeAssignee,
         JWTMiddleware.verify([UserRoles.ADMIN])
     ],
     taskController.changeAssignee
@@ -56,7 +56,7 @@ router.put('/admin/change-assignee/:taskId',
 router.put('/:taskId/update',
     [
         upload.array('file'),
-        taskValidator.validateUpdateTask,
+        TaskValidator.validateUpdateTask,
         JWTMiddleware.verify([])
     ],
     taskController.update
@@ -65,7 +65,7 @@ router.put('/:taskId/update',
 
 router.get('/admin/list',
     [
-        JWTMiddleware.verify(["Admin"])
+        JWTMiddleware.verify([UserRoles.ADMIN])
     ],
     taskController.listTaskByAdmin
 )

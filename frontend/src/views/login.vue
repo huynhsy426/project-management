@@ -1,4 +1,10 @@
 <template>
+  <span
+    v-if="isSignUp"
+    class="flex justify-center text-center w-full text-red-600 text-lg"
+    style="font-weight: 500"
+    >Register success</span
+  >
   <div class="center">
     <h1>Login</h1>
     <span class="errMessage w-100">{{ errMessage }}</span>
@@ -24,7 +30,9 @@
       </div>
       <div class="pass" style="margin-bottom: 5px">Forgot Password?</div>
       <button type="submit" class="button_submit">Login</button>
-      <div class="signup_link">Not a member? <a href="#">Signup</a></div>
+      <div class="signup_link">
+        Not a member? <a @click="handleCreateUser">Signup</a>
+      </div>
     </form>
   </div>
 </template>
@@ -34,22 +42,27 @@ import httpRequest from "../utils/httpRequest";
 
 async function login() {
   try {
+    console.log(this.isSignUp);
     const result = await httpRequest.post("/users/login", this.formLogin);
     console.log(result);
-    this.errMessage = "";
 
     window.localStorage.setItem("token", result.accessToken);
 
     this.errMessage = "";
+
     this.$router.push({ path: "/" }).then(() => {
       this.$router.go();
     });
   } catch (error) {
     console.log(error);
-    if (error?.response?.status) {
-      this.errMessage = error.response.messageCode;
+    if (error?.status) {
+      this.errMessage = error.data.messageCode;
     }
   }
+}
+
+async function handleCreateUser() {
+  this.$router.push({ path: "/users/register" });
 }
 
 export default {
@@ -60,11 +73,13 @@ export default {
         userPassword: "",
       },
       errMessage: "",
+      isSignUp: this.$route.query.signUp ? this.$route.query.signUp : undefined,
     };
   },
 
   methods: {
     login,
+    handleCreateUser,
   },
 };
 </script>

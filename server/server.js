@@ -9,6 +9,7 @@ const deptRouter = require('./src/routes/deptRouter');
 const memberRouter = require('./src/routes/memberRouter');
 const taskRouter = require('./src/routes/taskRouter');
 const reportRouter = require('./src/routes/reportRouter');
+const commentRouter = require('./src/routes/commentRouter');
 
 const connection = require('./src/models/connection');
 const errors = require('./src/error.json');
@@ -32,6 +33,7 @@ app.use('/depts', deptRouter);
 app.use('/members', memberRouter);
 app.use('/tasks', taskRouter);
 app.use('/reports', reportRouter);
+app.use('/comments', commentRouter);
 
 
 app.use((req, res) => {

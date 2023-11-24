@@ -1,7 +1,6 @@
 const ProjectService = require("../services/projectService");
 const { StatusCodes } = require('http-status-codes');
 
-const ITEMS_PER_PAGE = 1;
 
 module.exports = {
     listProjectByRoles: async (req, res, next) => {

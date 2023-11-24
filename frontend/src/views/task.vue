@@ -369,9 +369,9 @@ onMounted(async () => {
 
     errMessage.value = "";
   } catch (error) {
-    console.error({ error });
-    if (error?.response?.status) {
-      errMessage.value = error.response.messageCode;
+    console.log(error);
+    if (error?.status) {
+      errMessage.value = error.data.messageCode;
     }
   }
 });
@@ -393,9 +393,9 @@ const pagination = async (e, page, taskList) => {
       pagination: listTask.result.pagination,
     };
   } catch (error) {
-    console.error({ error });
-    if (error?.response?.status) {
-      errMessage.value = error.response.messageCode;
+    console.log(error);
+    if (error?.status) {
+      errMessage.value = error.data.messageCode;
     }
   }
 };

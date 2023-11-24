@@ -8,11 +8,13 @@ const taskUpdate = () => import('../views/updateTask.vue')
 const notFound = () => import('../views/notFound.vue')
 const projectByAdmin = () => import('../views/admin/project.vue')
 const taskByProject = () => import('../views/admin/task.vue')
+const register = () => import('../views/register.vue')
 
 const routes = [
     { path: '/', component: homePage, meta: { layout: 'vertical' } },
     { path: '/login', component: login, meta: { layout: 'full' } },
     { path: '/tasks', component: task, meta: { layout: 'vertical' } },
+    { path: '/users/register', component: register, meta: { layout: 'full' } },
     { path: '/tasks/:id', component: taskDetail, meta: { layout: 'vertical' } },
     { path: '/tasks/create', component: createTask, meta: { layout: 'vertical' } },
     { path: '/tasks/:id/update', component: taskUpdate, meta: { layout: 'vertical' } },
@@ -36,7 +38,7 @@ router.beforeResolve(async function (to) {
     // redirect to login page if not logged in and trying to access a restricted page
     const authorization = localStorage.getItem("token");
 
-    if (!authorization && to.path !== "/login") {
+    if (!authorization && to.path !== "/login" && to.path !== "/users/register" && to.path !== '/:pathMatch(.*)*') {
         console.log("here authorization");
         return {
             path: "/login",

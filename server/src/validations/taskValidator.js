@@ -174,7 +174,7 @@ const schemas = {
 }
 
 
-class taskValidator extends MyValidator {
+class TaskValidator extends MyValidator {
 
     async validateCreateTask(req, res, next) {
         try {
@@ -289,4 +289,4 @@ class taskValidator extends MyValidator {
     }
 }
 
-module.exports = new taskValidator();
+module.exports = new TaskValidator();

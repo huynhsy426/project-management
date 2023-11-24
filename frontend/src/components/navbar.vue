@@ -55,6 +55,7 @@ import httpRequest from "@/utils/httpRequest";
 import { onMounted, ref, reactive, computed } from "vue";
 
 const user = ref();
+const errMessage = ref("");
 
 onMounted(async () => {
   try {

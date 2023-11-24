@@ -126,9 +126,9 @@ onMounted(async () => {
     console.log("result", result);
     reportUser.value = result;
   } catch (error) {
-    console.log("error 😆", error);
-    if (error.response.status) {
-      errMessage.value = error.response.messageCode;
+    console.log(error);
+    if (error?.status) {
+      errMessage.value = error.data.messageCode;
     }
   }
 });

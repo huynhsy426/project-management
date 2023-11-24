@@ -15,24 +15,22 @@ httpRequest.interceptors.request.use(
         return config;
     },
     (error) => {
-        return Promise.reject(error);
+        throw (error);
     },
 );
 
-const logout = () => {
-    libAuth.clearToken()
-    window.location.replace('/login')
-}
+// const logout = () => {
+//     libAuth.clearToken()
+//     window.location.replace('/users/login')
+// }
 
 httpRequest.interceptors.response.use(
     (response) => {
         if (response.data) return response.data;
     },
     (error) => {
-        if (error?.response?.status === 401) {
-            logout()
-        }
-        if (error.response) return error.response.data;
+
+        if (error.response) throw error.response;
     },
 );
 

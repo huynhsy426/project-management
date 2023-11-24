@@ -175,12 +175,46 @@
         </div>
       </div>
     </div>
+
+    <div
+      class="comment border-2 border-gray-500 rounded-md px-4 py-6"
+      style="width: 500px"
+    >
+      <div class="w-full justify-center flex flex-col text-center text-lg">
+        <form class="w-full mx-auto" @submit.prevent="">
+          <div class="flex justify-end h-14">
+            <textarea
+              id="message"
+              rows="2"
+              class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              placeholder="Leave a comment..."
+            ></textarea>
+            <button
+              type="button"
+              class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 h-full"
+            >
+              Send
+            </button>
+          </div>
+        </form>
+        <div class="h-full px-4 py-6 mt-2">
+          <div
+            class="commentValues"
+            v-for="(comment, index) in comment"
+            :key="index"
+          >
+            <div class="border-2 border-gray-500 rounded-md flex">
+              <div>{{ comment?.userId?.username }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
 import httpRequest from "@/utils/httpRequest";
-import axios from "axios";
 import { onMounted, ref, reactive, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
@@ -193,6 +227,7 @@ let loading = ref(true);
 const taskId = route.params.id;
 let errMessage = ref("");
 const taskInfo = reactive({});
+const comments = ref();
 const timeContent = reactive({
   createdAt: null,
   deadlineAt: null,
@@ -220,7 +255,8 @@ const bgColor = computed(() => {
 onMounted(async () => {
   try {
     loading.value = true;
-    const task = await httpRequest.get(`http://localhost:8082/tasks/${taskId}`);
+    const task = await httpRequest.get(`/tasks/${taskId}`);
+    // const comments = await httpRequest.get("/");
     loading.value = false;
     taskInfo.task = task.task;
     timeContent.createdAt = formatDate(taskInfo.task.createdAt);
@@ -228,8 +264,9 @@ onMounted(async () => {
 
     console.log(taskInfo.task);
   } catch (error) {
-    if (error?.response?.status) {
-      errMessage.value = error.response.messageCode;
+    console.log(error);
+    if (error?.status) {
+      errMessage.value = error.data.messageCode;
     }
   }
 });
@@ -250,10 +287,10 @@ const handleFinishBtn = async () => {
       router.go();
     });
   } catch (error) {
-    if (error?.response?.status) {
-      errMessage.value = error.response.messageCode;
-    }
     console.log(error);
+    if (error?.status) {
+      errMessage.value = error.data.messageCode;
+    }
   }
 };
 
@@ -267,8 +304,8 @@ const assignTask = async () => {
     });
   } catch (error) {
     console.log(error);
-    if (error?.response?.status) {
-      errMessage.value = error.response.messageCode;
+    if (error?.status) {
+      errMessage.value = error.data.messageCode;
     }
   }
 };
@@ -291,6 +328,11 @@ const formatFilePath = function (fileName) {
 const updateTask = (taskId) => {
   router.push({ path: `/tasks/${taskId}/update` });
 };
+
+// --------------------------- Comments ---------------------------
+const inputComment = ref();
+
+const addComment = async () => {};
 </script>
 
 
