@@ -62,7 +62,7 @@ module.exports = {
     },
 
 
-    list: (userId) => {
+    getUser: (userId) => {
         return getUser(userId);
     },
 

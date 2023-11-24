@@ -30,27 +30,24 @@
 </template>
 
 <script>
-import axios from "axios";
+import httpRequest from "../utils/httpRequest";
+
 async function login() {
   try {
-    const result = await axios.post(
-      "http://localhost:8082/users/login",
-      this.formLogin
-    );
+    const result = await httpRequest.post("/users/login", this.formLogin);
+    console.log(result);
     this.errMessage = "";
 
-    window.localStorage.setItem(
-      "token",
-      JSON.stringify(result.data.accessToken)
-    );
-    console.log(result);
-    this.$router.push({ path: "/task" }).then(() => {
+    window.localStorage.setItem("token", result.accessToken);
+
+    this.errMessage = "";
+    this.$router.push({ path: "/" }).then(() => {
       this.$router.go();
     });
   } catch (error) {
     console.log(error);
     if (error?.response?.status) {
-      this.errMessage = error.response.data.messageCode;
+      this.errMessage = error.response.messageCode;
     }
   }
 }

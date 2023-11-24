@@ -15,6 +15,24 @@ router.get('/list',
     projectController.listProjectByRoles
 );
 
+
+router.get('/:projectId',
+    [
+        projectValidator.validateGetProject,
+        JWTMiddleware.verify([])
+    ],
+    projectController.getProjectById
+);
+
+
+router.get('/:projectId/tasks',
+    [
+        projectValidator.validateGetProject,
+        JWTMiddleware.verify([])
+    ],
+    projectController.getTasksByProjectId
+)
+
 router.post(
     '/create/:minExp/project',
     [

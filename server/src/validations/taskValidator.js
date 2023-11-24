@@ -110,7 +110,9 @@ const schemas = {
                     "string.min": "must more than 2 characters.",
                     "string.max": "must less than 1000 characters."
                 }),
-            attachments: Joi.any(),
+            attachments: Joi.any()
+                .meta({ swaggerType: 'file' })
+                .optional(),
             point: Joi.number()
                 .integer()
                 .min(1)
@@ -126,7 +128,18 @@ const schemas = {
                 .allow(null),
             deadlineAt: Joi.date()
                 .greater(Date.now() - 3000)
-                .allow(null)
+                .allow(null),
+            oldAttachments: Joi.any()
+
+
+        }),
+
+        params: Joi.object().keys({
+            taskId: Joi.string()
+                .trim()
+                .hex()
+                .length(24)
+                .required()
         })
     },
 
@@ -215,9 +228,39 @@ class taskValidator extends MyValidator {
     };
 
 
-    validateUpdateTask(req, res, next) {
+    async validateUpdateTask(req, res, next) {
         try {
-            super.handleValidationError(req, schemas.updateTask);
+            const attachments = req.files;
+            const dataBody = req.body;
+            const dataParams = req.params;
+
+            let errorMessages = [];
+            const { error } = schemas.updateTask.body.validate(dataBody, { abortEarly: false });
+            if (error) {
+                for (let index = 0; index < error.details.length; index++) {
+                    const element = error.details[index];
+                    errorMessages.push(element.message);
+                }
+            }
+
+            const { error1 } = schemas.updateTask.params.validate(dataParams, { abortEarly: false });
+            if (error1) {
+                for (let index = 0; index < error.details.length; index++) {
+                    const element = error.details[index];
+                    errorMessages.push(element.message);
+                }
+            }
+
+            if (errorMessages.length > 0) {
+                for (const item of attachments) {
+                    const file = item.path;
+                    await fse.remove(file);
+                }
+                return next({
+                    error: new Error(ErrorCodes.INVALID_INPUT_BY_CLIENT),
+                    args: errorMessages,
+                });
+            }
             return next();
         } catch (error) {
             return next(error);

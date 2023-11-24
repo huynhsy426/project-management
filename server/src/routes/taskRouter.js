@@ -53,14 +53,22 @@ router.put('/admin/change-assignee/:taskId',
 );
 
 
-router.put('/admin/:taskId/update',
+router.put('/:taskId/update',
     [
+        upload.array('file'),
         taskValidator.validateUpdateTask,
-        // upload.array('file'),
-        JWTMiddleware.verify([UserRoles.ADMIN])
+        JWTMiddleware.verify([])
     ],
     taskController.update
 );
+
+
+router.get('/admin/list',
+    [
+        JWTMiddleware.verify(["Admin"])
+    ],
+    taskController.listTaskByAdmin
+)
 
 
 

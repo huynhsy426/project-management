@@ -6,6 +6,9 @@ const { TaskStatus } = require("../constants/taskConstant");
 const projectModel = require('../models/projectModel');
 const deptModel = require('../models/deptModel');
 
+const fse = require('fs-extra');
+
+
 
 const create = async (task) => {
     const [result] = await taskModel.insertMany(task);
@@ -49,13 +52,83 @@ const getTask = async (taskId) => {
     ).populate({
         path: "assignee",
     }).lean();
-    console.log({ result });
+
     if (!result) {
         throw new Error(ErrorCodes.TASK_NOT_EXIST)
     }
     return result;
 };
 
+
+const listTaskByAdmin = async ({ projects, user, page }) => {
+    const queryTasks = {
+        projectId: { $in: projects }
+    }
+
+    // Nếu là leader thì hiển thị tất cả task mà nó tham gia và task trong project mà làm Leader
+    // if (projects.leaders.length > 0) {
+    //     query = {
+    //         $or: [
+    //             {
+    //                 projectId: { $in: projectGroup.leaders }
+    //             },
+    //             {
+    //                 projectId: { $in: projectGroup.listProjectIds },
+    //                 $or: [{ assignee: user.userId }, { assignee: { $exists: false } }]
+    //             }
+    //         ]
+    //     }
+    // }
+
+    if (page.taskType === "a") {
+        query = {
+            projectId: { $in: projects.listProjectIds },
+            assignee: user.userId
+        }
+    }
+    else if (page.taskType === "na") {
+        query = {
+            projectId: { $in: projectGroup.listProjectIds },
+            assignee: { $exists: false }
+        }
+    } else {
+        query = {
+            1: 1
+        }
+    }
+
+
+    const tasks = await taskModel
+        .find(queryTasks, { versions: 0 })
+        .populate({
+            path: "assignee",
+        }).lean();
+
+    const taskFilter = tasks.reduce((acc, task) => {
+        if (task.status === 'done') {
+            acc.taskDone.push(task);
+        }
+        if (task.status === 'rejected') {
+            acc.taskRejected.push(task);
+        }
+        if (task.status === 'doing') {
+            acc.taskPending.push(task);
+        }
+        if (task.status === 'todo') {
+            acc.taskTodo.push(task);
+        }
+
+        return acc;
+    }, {
+        taskDone: [],
+        taskRejected: [],
+        taskPending: [],
+        taskTodo: [],
+    })
+
+    return taskFilter;
+
+}
 
 
 const listTasks = async (user, page) => {
@@ -88,20 +161,11 @@ const listTasks = async (user, page) => {
 
     let query = null;
 
-    // Nếu là leader thì hiển thị tất cả task mà nó tham gia và task trong project mà làm Leader
-    if (projectGroup.leaders.length > 0) {
-        query = {
-            $or: [
-                {
-                    projectId: { $in: projectGroup.leaders }
-                },
-                {
-                    projectId: { $in: projectGroup.listProjectIds },
-                    $or: [{ assignee: user.userId }, { assignee: { $exists: false } }]
-                }
-            ]
-        }
+    if (user.roles === "Admin") {
+
     }
+
+
 
 
     // Hiển thị list 
@@ -130,7 +194,7 @@ const listTasks = async (user, page) => {
         { taskName: 1, assignee: 1, content: 1, attachments: 1, status: 1, point: 1, create: 1, _id: 1, projectId: 1 }
     ).limit(page.ITEMS_PER_PAGE).skip(skip);
     const pageCount = count / page.ITEMS_PER_PAGE;
-    console.log({ pageCount });
+
     return {
         pagination: {
             count,
@@ -173,18 +237,24 @@ const assignTask = async (userId, task) => {
 };
 
 
-const checkAssignIsCreaterOrAdmin = async ({ leaderId, task, taskEntity, authorId }) => {
-    const assignee = taskEntity.assignee;
+const checkAssignIsCreaterOrAdmin = ({ leaderId, task, taskEntity, authorId }) => {
+    // Assuming you have defined task, leaderId, and authorId somewhere in your code
+    const assignee = task.assignee;
     const creator = task.createdBy;
 
+    // Create an array with users involved in the project
     const arrUserInProject = [
-        task.createdBy,
-        task.assignee,
+        creator,
+        assignee,
         leaderId
-    ]
+    ];
 
-    const isTasker = arrUserInProject.some(item => item === authorId);
+    console.log({ arrUserInProject, asas: new mongoose.Types.ObjectId() });
 
+    // Check if authorId is present in arrUserInProject
+    const isTasker = arrUserInProject.some(item => JSON.stringify(item).split('"')[1] === authorId);
+
+    console.log(isTasker)
     if (!isTasker) {
         throw new Error(ErrorCodes.USER_CAN_NOT_UPDATE_TASK)
     }
@@ -212,7 +282,7 @@ const buildTaskVersion = ({ userId, task, newVersion }) => {
 };
 
 
-const checkTaskForUpdate = async ({ task, taskEntity, project, authorId }) => {
+const checkTaskForUpdate = async ({ task, taskEntity, project, authorId, oldAttach }) => {
     const taskUpdate = {};
     for (const key in taskEntity) {
         if (taskEntity[key]) {
@@ -220,14 +290,27 @@ const checkTaskForUpdate = async ({ task, taskEntity, project, authorId }) => {
         }
     }
 
+    console.log({ taskUpdate });
+
     if (taskUpdate.status === 'done') {
         taskUpdate.point = 0
+    }
+
+    if (oldAttach && oldAttach.length < task.attachments.length) {
+        const differentElements = task.attachments.filter(element => !oldAttach.includes(element))
+
+        console.log({ differentElements })
+
+        for (const item of differentElements) {
+            const file = item.path;
+            await fse.remove(file);
+        }
     }
 
     checkAssignIsCreaterOrAdmin({ leaderId: project.leaderId, task, taskEntity, authorId });
     checkStatusOfTask(task);
 
-    if (taskUpdate.taskName) {
+    if (taskUpdate.taskName && taskUpdate.taskName !== task.taskName) {
         await checkTaskName(task.taskName);
     }
 
@@ -292,6 +375,7 @@ const checkUserInProject = async (projectId, userId) => {
         _id: project.deptId,
         "members.memberId": userId
     }
+
     const listUserParticipate = await deptModel.findOne(queryDept, { "members": 1 }).lean();
 
     if (!listUserParticipate) {
@@ -299,6 +383,9 @@ const checkUserInProject = async (projectId, userId) => {
     }
     return project;
 }
+
+
+
 
 
 module.exports = {
@@ -332,10 +419,10 @@ module.exports = {
     // Check Data of taskName 
     // udate field 
     // Update version
-    updateTask: async ({ authorId, taskId, taskEntity }) => {
+    updateTask: async ({ authorId, taskId, taskEntity, oldAttach }) => {
         const task = await getTaskById(taskId);
         const project = await checkUserInProject(task.projectId, authorId);
-        const taskEntityUpdate = await checkTaskForUpdate({ task, taskEntity, project, authorId });
+        const taskEntityUpdate = await checkTaskForUpdate({ task, taskEntity, project, authorId, oldAttach });
         const version = buildTaskVersion({ userId: authorId, task, newVersion: taskEntityUpdate });
         await taskUpdate({ taskId, newVersion: version, taskEntityUpdate });
     },
@@ -343,8 +430,6 @@ module.exports = {
     getTask: async (taskId) => {
         return getTask(taskId);
     },
-
-
 
     changeAssignee: async ({ authorId, assigneeId, taskId }) => {
         const result = await getTaskById(taskId);
@@ -362,5 +447,11 @@ module.exports = {
         const version = buildTaskVersion({ userId: authorId, task: result, newVersion });
 
         await changeTaskAssignee({ assigneeId, taskId, newVersion: version });
+    },
+
+
+    getTaskByAdmin: async (user) => {
+        const tasks = await listTaskByAdmin(user);
+        return tasks;
     }
 }

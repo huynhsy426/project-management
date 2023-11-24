@@ -4,21 +4,33 @@ const task = () => import('../views/task.vue');
 const taskDetail = () => import('../views/taskDetail.vue');
 const createTask = () => import('../views/addTask.vue')
 const homePage = () => import('../views/homePage.vue');
+const taskUpdate = () => import('../views/updateTask.vue')
+const notFound = () => import('../views/notFound.vue')
+const projectByAdmin = () => import('../views/admin/project.vue')
+const taskByProject = () => import('../views/admin/task.vue')
 
 const routes = [
     { path: '/', component: homePage, meta: { layout: 'vertical' } },
     { path: '/login', component: login, meta: { layout: 'full' } },
-    { path: '/task', component: task, meta: { layout: 'vertical' } },
-    { path: '/task/:id', component: taskDetail, meta: { layout: 'vertical' } },
-    { path: '/task/create', component: createTask, meta: { layout: 'vertical' } }
-
+    { path: '/tasks', component: task, meta: { layout: 'vertical' } },
+    { path: '/tasks/:id', component: taskDetail, meta: { layout: 'vertical' } },
+    { path: '/tasks/create', component: createTask, meta: { layout: 'vertical' } },
+    { path: '/tasks/:id/update', component: taskUpdate, meta: { layout: 'vertical' } },
+    { path: '/:pathMatch(.*)*', name: 'not-found', component: notFound, meta: { layout: 'full' } },
+    { path: '/admin/projects', component: projectByAdmin, meta: { layout: 'vertical' } },
+    { path: '/admin/tasks/:projectId', component: taskByProject, meta: { layout: 'vertical' } },
 ]
+
 
 const router = createRouter({
     history: createWebHistory(),
     routes: routes,
 })
 
+router.resolve({
+    name: 'not-found',
+    params: { pathMatch: ['not', 'found'] },
+}).href // '/not/found'
 
 router.beforeResolve(async function (to) {
     // redirect to login page if not logged in and trying to access a restricted page
@@ -31,6 +43,8 @@ router.beforeResolve(async function (to) {
             query: { redirect: 'login' } // Optionally pass the intended redirect path
         };
     }
+
+
 });
 
 

@@ -5,10 +5,10 @@ const { StatusCodes } = require('http-status-codes');
 
 
 module.exports = {
-    listUsers: async (req, res, next) => {
+    getUser: async (req, res, next) => {
         try {
             const user = req.user;
-            const result = await UserService.list(user.userId);
+            const result = await UserService.getUser(user.userId);
             return res.json({ result })
         } catch (err) {
             return next(err);

@@ -20,6 +20,16 @@ module.exports = {
         }
     },
 
+    getProjectById: async (req, res, next) => {
+        try {
+            const projectId = req.params.projectId;
+            const project = await ProjectService.getProjectById(projectId);
+            res.status(StatusCodes.OK).json({ project })
+        } catch (error) {
+            return next(error);
+        }
+    },
+
 
     create: async (req, res, next) => {
 
@@ -47,6 +57,27 @@ module.exports = {
             })
         } catch (err) {
             return next(err);
+        }
+    },
+
+    getTasksByProjectId: async (req, res, next) => {
+        try {
+            const projectId = req.params.projectId;
+            const page = req.query.page || 1;
+            const ITEMS_PER_PAGE = req.query.ITEMS_PER_PAGE || 2;
+            const taskType = req.query.taskType;
+
+            const pageInfor = {
+                page,
+                ITEMS_PER_PAGE,
+                taskType
+            }
+
+            const tasks = await ProjectService.getTasksByProjectId(projectId, pageInfor);
+            console.log({ tasks });
+            res.status(StatusCodes.OK).json({ tasks })
+        } catch (error) {
+            return next(error);
         }
     }
 }

@@ -51,6 +51,21 @@ const schemas = {
                     .allow(null)
             }
         )
+    },
+
+    getProject: {
+        params: Joi.object().keys(
+            {
+                projectId: Joi.string()
+                    .trim()
+                    .hex()
+                    .length(24)
+                    .required()
+                    .messages({
+                        "string.pattern.base": "Project not valid"
+                    })
+            }
+        )
     }
 }
 
@@ -69,11 +84,19 @@ class ProjectValidator extends MyValidator {
 
     handlePagination(req, res, next) {
         try {
-            console.log("here")
             super.handleValidationError(req, schemas.pagination)
             return next();
         } catch (err) {
             return next(err);
+        }
+    };
+
+    validateGetProject(req, res, next) {
+        try {
+            super.handleValidationError(req, schemas.getProject)
+            return next();
+        } catch (error) {
+            return next(error);
         }
     }
 

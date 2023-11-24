@@ -2,6 +2,7 @@ const projectModel = require("../models/projectModel");
 const deptModel = require("../models/deptModel");
 
 const { ErrorCodes } = require("../constants/errorConstant");
+const taskModel = require("../models/taskModel");
 
 
 const listProjectByRoles = async (user, page) => {
@@ -37,9 +38,9 @@ const listProjectByRoles = async (user, page) => {
    return {
       pagination: {
          count,
-         pageCount
+         pageCount: Math.ceil(pageCount)
       },
-      result
+      projects: result
    };
 };
 
@@ -127,6 +128,74 @@ const checkDeptExist = async (deptId) => {
    return;
 }
 
+const getProjectById = async (projectId) => {
+   const query = {
+      _id: projectId
+   }
+   const project = await projectModel.findOne(query).populate(
+      {
+         path: 'leaderId',
+         select: { "_id": 1, username: 1 }
+      }
+   ).populate(
+      {
+         path: 'deptId',
+         select: { "_id": 1, deptName: 1 }
+      }
+   ).lean();
+
+   if (!project) {
+      throw new Error("PROJECT_NOT_FOUND");
+   }
+   return project;
+}
+
+
+const getTasksByProjectId = async (projectId, page) => {
+   console.log({ projectId, page })
+   let count = 0;
+   const skip = (page.page - 1) * page.ITEMS_PER_PAGE;
+   let query = null;
+
+   if (page.taskType === "a") {
+      query = {
+         projectId: projectId,
+         assignee: { $exists: true }
+      }
+   } else if (page.taskType === "na") {
+      query = {
+         projectId: projectId,
+         assignee: { $exists: false }
+      }
+   } else {
+      query = {
+         1: 1
+      }
+   }
+
+   count = await taskModel.countDocuments(query);
+   const tasks = await taskModel.find(
+      query,
+      { taskName: 1, assignee: 1, content: 1, attachments: 1, status: 1, point: 1, create: 1, _id: 1, projectId: 1 }
+   ).populate(
+      {
+         path: 'assignee',
+         select: { "_id": 1, username: 1 }
+      }
+   )
+      .limit(page.ITEMS_PER_PAGE).skip(skip);
+
+   const pageCount = count / page.ITEMS_PER_PAGE;
+
+   return {
+      pagination: {
+         count,
+         pageCount: Math.ceil(pageCount)
+      },
+      tasks: tasks
+   };
+}
+
 module.exports = {
    // List all projects
    listProjectByRoles: (user, page) => {
@@ -146,17 +215,13 @@ module.exports = {
 
 
    // Search project by project_id, project_name, difficulty, dept_id
-   // searchProject: (inputSearch, results) => {
-   //    projectModel.searchProject(
-   //       inputSearch,
-   //       function (err, result) {
-   //          if (err) {
-   //             return results(err, null)
-   //          }
-   //          return results(null, result)
-   //       }
-   //    )
-   // },
+   getProjectById: (projectId) => {
+      return getProjectById(projectId);
+   },
+
+   getTasksByProjectId: (projectId, page) => {
+      return getTasksByProjectId(projectId, page);
+   }
 
 
    // Delete project by Id

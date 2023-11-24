@@ -115,25 +115,20 @@
 </template>
 
 <script setup>
+import httpRequest from "@/utils/httpRequest";
 import axios from "axios";
 import { ref, onMounted } from "vue";
 const reportUser = ref({});
 
 onMounted(async () => {
   try {
-    console.log("here 1");
-    const result = await axios.get("http://localhost:8082/reports/user", {
-      headers: {
-        authorization: `Bearer ${localStorage.getItem("token").split('"')[1]}`,
-      },
-    });
-    console.log({ aa: result });
-    reportUser.value = result.data;
-    console.log(reportUser.value.numDone);
+    const result = await httpRequest.get("/reports/user");
+    console.log("result", result);
+    reportUser.value = result;
   } catch (error) {
-    console.log({ error });
+    console.log("error 😆", error);
     if (error.response.status) {
-      errMessage.value = error.response.data.messageCode;
+      errMessage.value = error.response.messageCode;
     }
   }
 });

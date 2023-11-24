@@ -24,9 +24,9 @@ router.post(
 
 // List all users test
 router.get(
-    '/list',
+    '/',
     [JWTMiddleware.verify([])],
-    userController.listUsers
+    userController.getUser
 )
 
 

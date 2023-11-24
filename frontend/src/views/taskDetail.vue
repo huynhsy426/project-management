@@ -141,7 +141,10 @@
           </table>
         </div>
       </div>
-      <div class="grid grid-cols-4 mt-3">
+      <div
+        class="grid grid-cols-4 mt-3"
+        v-if="taskInfo.task?.status !== 'done'"
+      >
         <div></div>
         <div></div>
         <div></div>
@@ -149,6 +152,12 @@
           v-if="taskInfo.task?.assignee"
           class="flex justify-center align-middle"
         >
+          <button
+            @click="handleFinishBtn"
+            class="px-3 mr-3 rounded-md py-2 bg-green-500 text-white hover:bg-green-600 focus:outline-none focus:ring-2"
+          >
+            Finish
+          </button>
           <button
             @click="updateTask(taskInfo.task._id)"
             class="px-3 rounded-md py-2 bg-blue-500 text-white"
@@ -170,16 +179,10 @@
 </template>
 
 <script setup>
+import httpRequest from "@/utils/httpRequest";
 import axios from "axios";
 import { onMounted, ref, reactive, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
-
-const instance = axios.create({
-  headers: {
-    authorization: `Bearer ${localStorage.getItem("token").split('"')[1]}`,
-    "Content-Type": "application/json",
-  },
-});
 
 const route = useRoute();
 const router = useRouter();
@@ -217,31 +220,55 @@ const bgColor = computed(() => {
 onMounted(async () => {
   try {
     loading.value = true;
-    const task = await instance.get(`http://localhost:8082/tasks/${taskId}`);
+    const task = await httpRequest.get(`http://localhost:8082/tasks/${taskId}`);
     loading.value = false;
-    taskInfo.task = task.data.task;
+    taskInfo.task = task.task;
     timeContent.createdAt = formatDate(taskInfo.task.createdAt);
     timeContent.deadlineAt = formatDate(taskInfo.task.deadlineAt);
+
+    console.log(taskInfo.task);
   } catch (error) {
     if (error?.response?.status) {
-      errMessage.value = error.response.data.messageCode;
+      errMessage.value = error.response.messageCode;
     }
   }
 });
 
+const handleFinishBtn = async () => {
+  try {
+    const formDone = {
+      status: "done",
+      content: `Task done`,
+    };
+    await httpRequest.put(`/tasks/${taskId}/update`, formDone, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    errMessage.value = "";
+    router.push({ path: `/tasks/${taskId}` }).then(() => {
+      router.go();
+    });
+  } catch (error) {
+    if (error?.response?.status) {
+      errMessage.value = error.response.messageCode;
+    }
+    console.log(error);
+  }
+};
+
 const assignTask = async () => {
   try {
-    console.log(taskInfo.task._id);
-    await instance.put(
-      `http://localhost:8082/tasks/assign/${taskInfo.task._id}`
-    );
-    router.push({ path: "/task" }).then(() => {
+    await httpRequest.put(`/tasks/assign/${taskId}`);
+
+    errMessage.value = "";
+    router.push({ path: "/tasks" }).then(() => {
       router.go();
     });
   } catch (error) {
     console.log(error);
     if (error?.response?.status) {
-      errMessage.value = error.response.data.messageCode;
+      errMessage.value = error.response.messageCode;
     }
   }
 };
@@ -262,7 +289,7 @@ const formatFilePath = function (fileName) {
 };
 
 const updateTask = (taskId) => {
-  router.push({ path: `/task/${taskId}/update` });
+  router.push({ path: `/tasks/${taskId}/update` });
 };
 </script>
 

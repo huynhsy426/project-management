@@ -1,5 +1,7 @@
 const express = require('express');
 const session = require('express-session');
+const { createServer } = require('node:http');
+
 
 const projectRouter = require('./src/routes/projectRouter');
 const userRouter = require('./src/routes/userRouter');
@@ -11,8 +13,11 @@ const reportRouter = require('./src/routes/reportRouter');
 const connection = require('./src/models/connection');
 const errors = require('./src/error.json');
 
+require('./src/utils/crisp3');
+
 require('dotenv').config();
 const app = express();
+const server = createServer(app);
 
 const configViewEngine = require('./src/config/viewEngine');
 
@@ -71,7 +76,7 @@ app.use((error, req, res, next) => {
 const start = async () => {
     try {
         await connection();
-        app.listen(8082, () => console.log(`Server started on port 8082`));
+        server.listen(8082, () => console.log(`Server started on port 8082`));
     } catch (error) {
         console.error(error);
         process.exit(1);

@@ -5,7 +5,6 @@
 <script setup>
 import DefaultLayout from "./layouts/DefaultLayout.vue";
 import { ref } from "vue";
-const isHomePage = ref(true);
 </script>
 
 <style scoped>

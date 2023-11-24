@@ -13,7 +13,7 @@ module.exports = {
 
         console.log({ attachments });
 
-        const newAttachments = attachments.map(attach => {
+        const newAttachments = attachments?.map(attach => {
             return {
                 path: attach.path,
                 originalname: attach.originalname,
@@ -44,6 +44,7 @@ module.exports = {
             return next(err);
         }
     },
+
     getTaskById: async (req, res, next) => {
         try {
             const taskId = req.params.taskId;
@@ -92,26 +93,44 @@ module.exports = {
     /** pending */
     update: async (req, res, next) => {
         const user = req.user;
-        const { taskName, content, status, point } = req.body;
+        const { taskName, content, status, point, oldAttachments } = req.body;
         const { taskId } = req.params;
         const attachments = req.files;
 
+
+
+        const newAttachments = attachments?.map(attach => {
+            return {
+                path: attach.path,
+                originalname: attach.originalname,
+                size: attach.size
+            }
+        })
+        let oldAttach = undefined;
+        console.log({ oldAttachments })
+        oldAttach = JSON.parse(oldAttachments);
+        if (oldAttach.length !== 0) {
+            newAttachments.unshift(...oldAttach);
+        }
+        console.log(newAttachments)
+
+
         taskEntity = {
             taskName: taskName,
-            attachments,
+            attachments: newAttachments.length !== 0 ? newAttachments : undefined,
             content: content,
             status,
             point
         }
 
+        console.log({ taskEntity })
         try {
-            await taskService.updateTask({ authorId: user.userId, taskId: taskId, taskEntity })
+            await taskService.updateTask({ authorId: user.userId, taskId: taskId, taskEntity, oldAttach })
             res.status(StatusCodes.OK).json()
         } catch (error) {
             return next(error);
         }
     },
-
 
     changeAssignee: async (req, res, next) => {
         const { userId } = req.body;
@@ -121,6 +140,18 @@ module.exports = {
         try {
             await taskService.changeAssignee({ authorId: user.userId, assigneeId: userId, taskId: taskId });
             res.status(StatusCodes.OK).json();
+        } catch (error) {
+            return next(error);
+        }
+    },
+
+    listTaskByAdmin: async (req, res, next) => {
+        try {
+            const user = req.user;
+            const listTasks = await taskService.getTaskByAdmin(user);
+            res.status(StatusCodes.OK).json({
+                listTasks
+            })
         } catch (error) {
             return next(error);
         }
