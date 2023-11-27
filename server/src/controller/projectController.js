@@ -73,7 +73,6 @@ module.exports = {
             }
 
             const tasks = await ProjectService.getTasksByProjectId(projectId, pageInfor);
-            console.log({ tasks });
             res.status(StatusCodes.OK).json({ tasks })
         } catch (error) {
             return next(error);

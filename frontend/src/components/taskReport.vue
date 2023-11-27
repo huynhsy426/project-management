@@ -123,7 +123,6 @@ const reportUser = ref({});
 onMounted(async () => {
   try {
     const result = await httpRequest.get("/reports/user");
-    console.log("result", result);
     reportUser.value = result;
   } catch (error) {
     console.log(error);

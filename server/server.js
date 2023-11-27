@@ -1,7 +1,10 @@
 const express = require('express');
 const session = require('express-session');
 const { createServer } = require('node:http');
-
+// const { join } = require('node:path');
+// const { Server } = require('socket.io');
+const Websocket = require("ws");
+const cors = require('cors');
 
 const projectRouter = require('./src/routes/projectRouter');
 const userRouter = require('./src/routes/userRouter');
@@ -20,11 +23,22 @@ require('dotenv').config();
 const app = express();
 const server = createServer(app);
 
+
+
+// const io = new Server(server, ({
+//     allowEIO3: true,
+//     cors: {
+//         origin: 'http://localhost:8080',
+//         methods: ['GET', 'POST']
+//     },
+//     transports: ["polling", "websocket"]
+// }));
+
 const configViewEngine = require('./src/config/viewEngine');
 
 // config project
 var dirName = __dirname;
-configViewEngine(app, session, dirName);
+configViewEngine({ cors, app, session, dirName });
 
 // Router
 app.use("/projects", projectRouter);
@@ -34,6 +48,55 @@ app.use('/members', memberRouter);
 app.use('/tasks', taskRouter);
 app.use('/reports', reportRouter);
 app.use('/comments', commentRouter);
+
+
+// ----------------------- Socket.io -----------------------
+// let socketsConnected = new Set();
+
+// io.on('connection', (socket) => {
+//     console.log('a user connected');
+//     // const username = socket.handshake.auth
+//     console.log(socket.id)
+
+//     socketsConnected.add(socket.id);
+
+//     socket.on('disconnect', () => {
+//         console.log("user disconnected");
+//         socketsConnected.delete(socket.id);
+//     })
+
+
+//     socket.on("message", (data, headers) => {
+//         const token = headers.headers.authorization;
+//         console.log(token)
+//         app.post("/comments/create",
+//             [
+//                 CommentValidator.validateCreate,
+//                 JWTMiddleware.verify([])
+//             ],
+//             // commentController.create
+//         )
+
+//         io.emit("chat-message", data);
+//     })
+
+// });
+
+
+
+
+// ------------------------------------------------------
+
+const wss = new Websocket.Server({ server });
+wss.on("connection", (ws) => {
+    console.log("new client connection")
+
+    ws.on("close", () => {
+        console.log("client disconnected")
+    })
+})
+
+// ------------------------------------------------------
 
 
 app.use((req, res) => {

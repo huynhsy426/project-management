@@ -15,7 +15,7 @@ const routes = [
     { path: '/login', component: login, meta: { layout: 'full' } },
     { path: '/tasks', component: task, meta: { layout: 'vertical' } },
     { path: '/users/register', component: register, meta: { layout: 'full' } },
-    { path: '/tasks/:id', component: taskDetail, meta: { layout: 'vertical' } },
+    { path: '/tasks/:id', component: taskDetail, meta: { layout: 'vertical' }, props: true },
     { path: '/tasks/create', component: createTask, meta: { layout: 'vertical' } },
     { path: '/tasks/:id/update', component: taskUpdate, meta: { layout: 'vertical' } },
     { path: '/:pathMatch(.*)*', name: 'not-found', component: notFound, meta: { layout: 'full' } },

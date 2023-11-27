@@ -152,7 +152,6 @@ const getProjectById = async (projectId) => {
 
 
 const getTasksByProjectId = async (projectId, page) => {
-   console.log({ projectId, page })
    let count = 0;
    const skip = (page.page - 1) * page.ITEMS_PER_PAGE;
    let query = null;

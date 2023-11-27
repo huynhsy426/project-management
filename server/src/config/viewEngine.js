@@ -2,9 +2,8 @@ const bodyParser = require('body-parser')
 const express = require('express');
 const path = require('path');
 const cookieParser = require("cookie-parser");
-const cors = require('cors');
 
-const configViewEngine = (app, session, dirName) => {
+const configViewEngine = ({ cors, app, session, dirName }) => {
 
     app.set('view engine', 'ejs');
     app.set('views', 'app/views');

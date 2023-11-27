@@ -16,7 +16,8 @@
     "crisp-sdk-web": "^1.0.21",
     "flowbite": "^2.1.1",
     "vue": "^3.2.13",
-    "vue-router": "^4.2.5"
+    "vue-router": "^4.2.5",
+    "ws": "^8.14.2"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~5.0.0",

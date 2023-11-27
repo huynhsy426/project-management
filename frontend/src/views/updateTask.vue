@@ -329,7 +329,6 @@ const validateData = () => {
 const handleUpdateTask = async () => {
   try {
     const formData = new FormData();
-    console.log({ oldAttachments });
     taskInfo.oldAttachments = JSON.stringify(oldAttachments.value);
 
     // Add task data to the FormData
@@ -339,7 +338,6 @@ const handleUpdateTask = async () => {
 
     // Add attachments to the FormData
     attachmentsPayload.value.forEach((attachment, index) => {
-      console.log({ attachment });
       formData.append(`file`, attachment);
     });
 
@@ -369,7 +367,6 @@ const handleAttachment = (e) => {
       attachmentsPayload.value.push(element[key]);
     }
   }
-  console.log(attachmentsPayload.value);
 };
 
 const handleRangePoint = (e) => {

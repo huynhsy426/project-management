@@ -287,7 +287,6 @@ const handleAttachment = (e) => {
       arrAttachment.value.push(element[key]);
     }
   }
-  console.log(arrAttachment.value);
 };
 
 const handleDeleteAttachment = (index) => {

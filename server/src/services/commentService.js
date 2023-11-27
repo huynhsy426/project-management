@@ -13,7 +13,7 @@ const create = async (comment) => {
 
 const checkUserExist = async (user) => {
     const query = {
-        _id: user._id
+        _id: user.userId
     }
     const isExistUser = await userModel.findOne(
         query,
@@ -49,13 +49,13 @@ const getCommentByTaskId = async (taskId) => {
     const comments = await commentModel.find(query)
         .populate(
             {
-                path: 'users',
+                path: 'userId',
                 select: { "_id": 1, username: 1 }
 
             }
         )
         .populate({
-            path: 'tasks',
+            path: 'taskId',
             select: { "_id": 1, taskName: 1 }
         });
 

@@ -185,10 +185,8 @@ const listTasks = async (user, page) => {
             1: 1
         }
     }
-    console.log({ query }, query.projectId)
 
     count = await taskModel.countDocuments(query);
-    console.log({ count })
     const result = await taskModel.find(
         query,
         { taskName: 1, assignee: 1, content: 1, attachments: 1, status: 1, point: 1, create: 1, _id: 1, projectId: 1 }
@@ -249,12 +247,10 @@ const checkAssignIsCreaterOrAdmin = ({ leaderId, task, taskEntity, authorId }) =
         leaderId
     ];
 
-    console.log({ arrUserInProject, asas: new mongoose.Types.ObjectId() });
 
     // Check if authorId is present in arrUserInProject
     const isTasker = arrUserInProject.some(item => JSON.stringify(item).split('"')[1] === authorId);
 
-    console.log(isTasker)
     if (!isTasker) {
         throw new Error(ErrorCodes.USER_CAN_NOT_UPDATE_TASK)
     }
@@ -290,8 +286,6 @@ const checkTaskForUpdate = async ({ task, taskEntity, project, authorId, oldAtta
         }
     }
 
-    console.log({ taskUpdate });
-
     if (taskUpdate.status === 'done') {
         taskUpdate.point = 0
     }
@@ -299,7 +293,6 @@ const checkTaskForUpdate = async ({ task, taskEntity, project, authorId, oldAtta
     if (oldAttach && oldAttach.length < task.attachments.length) {
         const differentElements = task.attachments.filter(element => !oldAttach.includes(element))
 
-        console.log({ differentElements })
 
         for (const item of differentElements) {
             const file = item.path;

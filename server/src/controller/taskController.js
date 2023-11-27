@@ -11,8 +11,6 @@ module.exports = {
         const user = req.user;
 
 
-        console.log({ attachments });
-
         const newAttachments = attachments?.map(attach => {
             return {
                 path: attach.path,
@@ -70,7 +68,6 @@ module.exports = {
                 taskType
             }
             const result = await taskService.listTasks(user, pageInfor);
-            console.log({ pa: result })
             res.status(200).json({ result });
         } catch (err) {
             return next(err);
@@ -81,7 +78,6 @@ module.exports = {
         const user = req.user;
         const { taskId } = req.params;
 
-        console.log({ user, taskId })
         try {
             await taskService.assignTask(user.userId, taskId);
             res.status(StatusCodes.OK).json();
@@ -107,12 +103,10 @@ module.exports = {
             }
         })
         let oldAttach = undefined;
-        console.log({ oldAttachments })
         oldAttach = JSON.parse(oldAttachments);
         if (oldAttach.length !== 0) {
             newAttachments.unshift(...oldAttach);
         }
-        console.log(newAttachments)
 
 
         taskEntity = {
@@ -123,7 +117,6 @@ module.exports = {
             point
         }
 
-        console.log({ taskEntity })
         try {
             await taskService.updateTask({ authorId: user.userId, taskId: taskId, taskEntity, oldAttach })
             res.status(StatusCodes.OK).json()

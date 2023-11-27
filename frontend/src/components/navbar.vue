@@ -61,7 +61,6 @@ onMounted(async () => {
   try {
     const result = await httpRequest.get("/users");
     user.value = result.result;
-    console.log(user.value);
   } catch (error) {
     console.error({ error });
   }

@@ -180,7 +180,6 @@ class TaskValidator extends MyValidator {
         try {
             const attachments = req.files;
             const data = req.body;
-            console.log({ attachments })
 
             let errorMessages = [];
             const { error } = schemas.createTask.body.validate(data, { abortEarly: false });
@@ -278,8 +277,6 @@ class TaskValidator extends MyValidator {
     };
 
     validateGetTask(req, res, next) {
-        console.log(req.params)
-        console.log(req.query)
         try {
             super.handleValidationError(req, schemas.getTask);
             return next();

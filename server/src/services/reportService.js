@@ -63,10 +63,8 @@ module.exports = {
             timeLongest,
             doneTimes
         } = caculateTimeOfTask(listTasksUserAssign);
-        console.log({ doneTimes })
         const averageTime = numDone === 0 ? 0 : totalDoneTime / numDone;
         const timeShortest = numDone === 0 ? 0 : Math.min(Math.min(...doneTimes));
-        console.log({ timeShortest })
 
         return {
             numDone,

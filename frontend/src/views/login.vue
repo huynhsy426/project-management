@@ -42,10 +42,7 @@ import httpRequest from "../utils/httpRequest";
 
 async function login() {
   try {
-    console.log(this.isSignUp);
     const result = await httpRequest.post("/users/login", this.formLogin);
-    console.log(result);
-
     window.localStorage.setItem("token", result.accessToken);
 
     this.errMessage = "";

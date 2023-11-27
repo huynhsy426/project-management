@@ -95,10 +95,8 @@ app.listen(HOOKS_SERVER.port, () => {
 
 // CrispClient.website.listConversations(websiteID, 1)
 //     .then(function (conversations) {
-//         console.log("Listed conversations:", conversations);
 //     })
 //     .catch(function (error) {
-//         console.error("Error listing conversations:", error);
 //     });
 
 // CrispClient.on("message:send", function (message) {
