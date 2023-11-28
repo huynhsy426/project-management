@@ -6,9 +6,11 @@ const CommentValidator = require('../validations/commentValidator');
 const JWTMiddleware = require('../middleware/JWTMiddleware');
 
 const { UserRoles } = require('../constants/usersConstant');
+const handleWebsocket = require('../utils/webSocket');
 
 router.post('/create',
     [
+        // handleWebsocket,
         CommentValidator.validateCreate,
         JWTMiddleware.verify([])
     ],
@@ -17,6 +19,7 @@ router.post('/create',
 
 router.get("/:taskId/list",
     [
+        // handleWebsocket,
         CommentValidator.validateGetComment,
         JWTMiddleware.verify([])
     ],

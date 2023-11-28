@@ -24,16 +24,6 @@ const app = express();
 const server = createServer(app);
 
 
-
-// const io = new Server(server, ({
-//     allowEIO3: true,
-//     cors: {
-//         origin: 'http://localhost:8080',
-//         methods: ['GET', 'POST']
-//     },
-//     transports: ["polling", "websocket"]
-// }));
-
 const configViewEngine = require('./src/config/viewEngine');
 
 // config project
@@ -88,15 +78,56 @@ app.use('/comments', commentRouter);
 // ------------------------------------------------------
 
 const wss = new Websocket.Server({ server });
-wss.on("connection", (ws) => {
+
+wss.on("connection", async function connection(ws) {
+    // console.log({ asdasd: req.headers })
     console.log("new client connection")
 
     ws.on("close", () => {
         console.log("client disconnected")
     })
-})
 
-// ------------------------------------------------------
+    ws.on("error", (err) => {
+        conosole.log(err)
+    })
+
+    ws.on("message", (event) => {
+        const message = event;
+        console.log("Type of message:", typeof message);
+
+        console.log(message);
+        try {
+            wss.clients.forEach(function each(client) {
+                if (client === ws && client.readyState === Websocket.OPEN) {
+                    if (typeof message === 'object' && message !== null && !Array.isArray(message)) {
+                        // Handle object (if needed)
+                        console.log("received object:", message);
+
+                        const stringMessage = message.toString('utf-8'); // Adjust the encoding if needed
+                        const parsedMessage = JSON.parse(stringMessage);
+                        console.log("received", parsedMessage);
+                        ws.send(JSON.stringify(parsedMessage));
+                        wss.emit(JSON.stringify(parsedMessage));
+                        return;
+                    }
+                    if (Buffer.isBuffer(message)) {
+                        // Handle buffer (if needed)
+                        console.log("received buffer:", message.toString());
+                        ws.send(message);
+                        wss.emit(message);
+                        return;
+                    }
+
+                }
+            })
+
+        } catch (error) {
+            console.error("Error parsing JSON:", error);
+        }
+
+    });
+
+})
 
 
 app.use((req, res) => {

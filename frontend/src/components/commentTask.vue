@@ -59,13 +59,12 @@ import httpRequest from "@/utils/httpRequest";
 import { comment } from "postcss";
 import { onMounted, ref, reactive, computed, onBeforeUnmount } from "vue";
 import { useRoute, useRouter } from "vue-router";
+const ws = new WebSocket("ws://localhost:8082");
 
 // import socket from "../socket";
 
 const messageContainer =
   document.getElementsByClassName("message-container")[0];
-
-console.log(messageContainer, "asdkjasldkjalsdkj");
 
 let props = defineProps(["errMessage"]);
 const route = useRoute();
@@ -82,14 +81,14 @@ const commentList = ref();
 
 onMounted(async () => {
   try {
-    // socket.connect();
+    ws.onopen = () => {
+      console.log("opened");
+    };
     const user = await httpRequest.get("/users/");
     userId.value = user.result._id;
-    console.log(userId.value);
 
     const comments = await httpRequest.get(`/comments/${taskId}/list`);
     commentList.value = [...comments.comments?.reverse()];
-    console.log({ comments });
     console.log(commentList.value);
   } catch (error) {
     console.error(error);
@@ -100,47 +99,52 @@ onMounted(async () => {
 });
 
 onBeforeUnmount(async () => {
-  // socket.disconnect();
+  ws.close(1000, "goodbye");
 });
 
-// socket.on("chat-message", (data) => {
-//   console.log({ qqqqq: data });
-//   commentList.value.unshift(data);
-// });
-
 const handleCreateComment = async () => {
-  // try {
-  //   const comment = commentEntity.value.content;
-  //   if (comment && comment !== "") {
-  //     await httpRequest.post(`/comments/create`, commentEntity.value);
-  //   }
-  //   router.push({ path: `/tasks/${taskId}` }).then(() => {
-  //     router.go();
-  //   });
-  // } catch (error) {
-  //   if (error?.status) {
-  //     props.errMessage = error.data.messageCode;
-  //   }
-  // }
+  try {
+    if (ws.readyState === WebSocket.OPEN) {
+      // Send the comment as a JSON string or in the format expected by your server
+      console.log(commentEntity.value.content);
+      console.log(
+        commentEntity.value.content && commentEntity.value.content !== ""
+      );
+      if (commentEntity.value.content && commentEntity.value.content !== "") {
+        // await httpRequest.post(`/comments/create`, commentEntity.value);
+        const comments = await httpRequest.get(`/comments/${taskId}/list`);
 
-  // socket
-  // .emit("message", commentEntity.value, {
-  //   headers: {
-  //     authorization: `Bearer ${localStorage.getItem("token")}`,
-  //   },
-  // })
-  // .then(() => {});
+        console.log({ comments });
+        console.log(
+          JSON.stringify(comments.comments[comments.comments.length - 1])
+        );
+        ws.send(JSON.stringify(commentEntity.value));
+        ws.onmessage = async (message) => {
+          const message1 = message.data;
+          const text = await new Response(message1).text();
+          const parseComment = JSON.parse(text);
+
+          commentList.value.unshift(parseComment);
+        };
+
+        // router.push({ path: `/tasks/${taskId}` }).then(() => {
+        //   router.go();
+        // });
+      }
+    } else {
+      console.error(
+        "WebSocket is not in the OPEN state. Unable to send message."
+      );
+    }
+  } catch (error) {
+    console.log(error);
+  }
 
   commentEntity.value.content = "";
 };
 
 // --------------------- WebSocket --------------------
 // import WebSocket from "ws";
-const ws = new WebSocket("ws://localhost:8082");
-
-ws.onopen = function (e) {
-  console.log("WebSocket connection opened:", event);
-};
 </script>
 
 <style scoped>
