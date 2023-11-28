@@ -31,8 +31,9 @@ module.exports = {
             isBlocked: false
         }
         try {
-            await UserService.createUser(user);
-            return res.status(StatusCodes.OK).json();
+            const result = await UserService.createUser(user);
+            console.log({ result })
+            return res.status(StatusCodes.OK).json({ result });
         } catch (error) {
             return next(error);
         }

@@ -16,6 +16,7 @@ module.exports = {
         const members = req.body.members;
         const deptId = req.params.deptId;
         try {
+            console.log("herer")
             const result = await DeptService.addMemberToDept(members, deptId);
             if (!result || result.length === 0) {
                 return res.status(StatusCodes.CREATED).json({

@@ -126,6 +126,7 @@
 import { onMounted, ref, reactive, computed } from "vue";
 import httpRequest from "@/utils/httpRequest";
 import { useRouter } from "vue-router";
+import axios from "axios";
 
 const router = useRouter();
 
@@ -171,10 +172,11 @@ const validatePassword = (password) => {
 };
 
 const validateData = () => {
-  delete error.value.taskName;
-  delete error.value.content;
-  delete error.value.point;
-  delete error.value.deadlineAt;
+  delete error.value.username;
+  delete error.value.email;
+  delete error.value.userPassword;
+  delete error.value.age;
+  delete error.value.exp;
 
   if (!validateName(formRegister.value.username)) {
     error.value.username = "Invalid user name";
@@ -204,11 +206,35 @@ const validateData = () => {
 
 async function register() {
   try {
-    console.log(formRegister.value);
-    console.log(!validateData());
     if (validateData()) {
-      await httpRequest.post("/users/register", formRegister.value);
-      // router.push({ path: "/login?signUp=true" });
+      const newUser = await httpRequest.post(
+        "/users/register",
+        formRegister.value
+      );
+      console.log(newUser, "mmmmmm");
+      console.log(newUser.result._id);
+
+      const members = {
+        members: [
+          {
+            memberId: newUser.result._id,
+            position: "none",
+          },
+        ],
+      };
+
+      console.log(members);
+      await axios.post(
+        "http://localhost:8082/members/admin/654b0762060d663ea36e709a/add",
+        members,
+        {
+          headers: {
+            authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NTRiMDUwMDBiMTA4NTRhNTRiZDRmMTMiLCJpYXQiOjE3MDExNTc5MzcsImV4cCI6MTcwMzc0OTkzN30.Ad2SZJ0tvwmn8B7EC0QJie4jYdLIl7YupqFBrXCF-DE`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      router.push({ path: "/login?signUp=true" });
     }
   } catch (error) {
     console.log(error);

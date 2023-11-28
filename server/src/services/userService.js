@@ -21,8 +21,8 @@ const checkUserLogin = async (username, userPassword) => {
 
 // Create a new user
 const createUser = async (user) => {
-    await userModel.insertMany(user);
-    return;
+    const result = await userModel.insertMany(user);
+    return result;
 };
 
 
@@ -69,7 +69,8 @@ module.exports = {
 
     createUser: async (user) => {
         await isUserNameAndGmailExist(user);
-        return createUser(user);
+        const result = await createUser(user);
+        return result[0];
     }
 }
 
