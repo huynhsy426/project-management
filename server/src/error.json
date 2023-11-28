@@ -114,5 +114,9 @@
     "USER_CAN_NOT_UPDATE_TASK": {
         "message": "User can't update task.",
         "statusCode": 401
+    },
+    "COMMENT_NOT_EXISTED": {
+        "message": "Comment not exist.",
+        "statusCode": 400
     }
 }

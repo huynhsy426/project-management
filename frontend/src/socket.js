@@ -1,6 +1,6 @@
-// import Socket from 'socket.io-client';
+import Socket from 'socket.io-client';
 
-// const URL = 'http://localhost:8082';
-// const socket = Socket(URL, { autoConnect: false });
+const URL = 'http://localhost:8082';
+const socket = Socket(URL, { autoConnect: false });
 
-// export default socket;
+export default socket;

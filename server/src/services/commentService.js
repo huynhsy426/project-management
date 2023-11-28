@@ -7,8 +7,8 @@ const taskModel = require("../models/taskModel");
 
 // Create comment 
 const create = async (comment) => {
-    await commentModel.insertMany(comment);
-    return;
+    const result = await commentModel.insertMany(comment);
+    return result;
 }
 
 const checkUserExist = async (user) => {
@@ -62,18 +62,46 @@ const getCommentByTaskId = async (taskId) => {
     return comments;
 }
 
+const getCommentById = async (commentId) => {
+    const query = {
+        _id: commentId
+    }
 
+    const comment = await commentModel.findOne(query)
+        .populate(
+            {
+                path: 'userId',
+                select: { "_id": 1, username: 1 }
+
+            }
+        )
+        .populate({
+            path: 'taskId',
+            select: { "_id": 1, taskName: 1 }
+        })
+        .lean();
+
+    if (!comment) {
+        throw new Error(ErrorCodes.COMMENT_NOT_EXISTED);
+    }
+    return comment;
+}
 
 module.exports = {
     create: async ({ user, taskId, content }) => {
         await checkUserExist(user);
         await checkTaskExist(taskId);
-        await create({ userId: user.userId, taskId, content });
+        const result = await create({ userId: user.userId, taskId, content });
+        return result[0];
     },
 
     getCommentByTaskId: async (taskId) => {
         await checkTaskExist(taskId);
         const comments = await getCommentByTaskId(taskId);
         return comments;
+    },
+
+    getCommentById: async (commentId) => {
+        return getCommentById(commentId);
     }
 }

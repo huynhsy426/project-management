@@ -13,6 +13,9 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { faFile, faFileAudio, faFileImage, faFileVideo } from '@fortawesome/free-regular-svg-icons';
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
 
+// import VueSocketIO from 'vue-3-socket.io'
+// import SocketIO from 'socket.io-client'
+
 
 /* add icons to the library */
 library.add(faFile, faTrash, faFileAudio, faFileImage, faFileVideo)
@@ -28,5 +31,10 @@ const app = createApp(App)
     .component('font-awesome-icon', FontAwesomeIcon)
     .use(router)
 
+
+// app.use(new VueSocketIO)({
+//     debug: true,
+//     connection: SocketIO("http://localhost:8082")
+// })
 
 app.mount('#app')

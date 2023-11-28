@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full pt-20">
+  <div class="w-full pt-2">
     <div
       class="flex justify-center text-center text-2xl mb-5 text-red-500"
       style="font-weight: 600"
@@ -27,7 +27,9 @@
               class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
               placeholder="Nguyen van a"
               required
+              :class="{ 'border-red-500': error.username }"
             />
+            <span class="text-red-500 text-sm ml-2">{{ error.username }}</span>
           </div>
 
           <!-- email -->
@@ -44,7 +46,9 @@
               class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
               placeholder="name@email.com"
               required
+              :class="{ 'border-red-500': error.email }"
             />
+            <span class="text-red-500 text-sm ml-2">{{ error.email }}</span>
           </div>
 
           <!-- password -->
@@ -61,7 +65,11 @@
               placeholder="••••••••"
               class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
               required
+              :class="{ 'border-red-500': error.userPassword }"
             />
+            <span class="text-red-500 text-sm ml-2">{{
+              error.userPassword
+            }}</span>
           </div>
 
           <!-- age, exp -->
@@ -79,7 +87,9 @@
                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                 placeholder="$2999"
                 required=""
+                :class="{ 'border-red-500': error.age }"
               />
+              <span class="text-red-500 text-sm ml-2">{{ error.age }}</span>
             </div>
             <div class="col-span-2 sm:col-span-1">
               <label
@@ -92,9 +102,11 @@
                 id="exp"
                 v-model="formRegister.exp"
                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                placeholder="$2999"
+                placeholder="Years of experience"
                 required=""
+                :class="{ 'border-red-500': error.exp }"
               />
+              <span class="text-red-500 text-sm ml-2">{{ error.exp }}</span>
             </div>
           </div>
           <button
@@ -124,24 +136,30 @@ const formRegister = ref({
   exp: 0,
   age: 0,
 });
-const error = ref();
+const error = ref({});
 const errMessage = ref("");
 
 const validateName = (name) => {
-  const regex = /^[a-zA-Z0-9_ ]{3,100}$/;
+  const regex = /^[^\d\s]{3,50}$/;
   const valid = regex.test(name);
   return valid;
 };
 
 const validateNumber = (age) => {
-  const regex = /^(10|[0-9])$/;
+  const regex = /^(0?[1-9]|[1-9][0-9]|[1][1-9][1-9]|200)$/;
   const valid = regex.test(age);
   return valid;
 };
 
-const validateEmail = (age) => {
-  const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+const validateAge = (age) => {
+  const regex = /^(0?[1-9]|[1-9][0-9]|[1][1-9][1-9]|200)$/;
   const valid = regex.test(age);
+  return valid;
+};
+
+const validateEmail = (email) => {
+  const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  const valid = regex.test(email);
   return valid;
 };
 
@@ -158,10 +176,20 @@ const validateData = () => {
   delete error.value.point;
   delete error.value.deadlineAt;
 
-  if (!validateName(this.formRegister.taskName)) {
-    error.value.taskName = "Invalid task name";
+  if (!validateName(formRegister.value.username)) {
+    error.value.username = "Invalid user name";
   }
-  if (!validateEmail(this.formRegister.email)) {
+  if (!validateEmail(formRegister.value.email)) {
+    error.value.email = "Invalid email";
+  }
+  if (!validatePassword(formRegister.value.userPassword)) {
+    error.value.userPassword = "Invalid password";
+  }
+  if (!validateAge(formRegister.value.age)) {
+    error.value.age = "Invalid age";
+  }
+  if (!validateNumber(formRegister.value.exp)) {
+    error.value.exp = "Invalid experience";
   }
 
   let isValid = true;
@@ -176,9 +204,12 @@ const validateData = () => {
 
 async function register() {
   try {
-    await httpRequest.post("/users/register", formRegister.value);
-
-    router.push({ path: "/login?signUp=true" });
+    console.log(formRegister.value);
+    console.log(!validateData());
+    if (validateData()) {
+      await httpRequest.post("/users/register", formRegister.value);
+      // router.push({ path: "/login?signUp=true" });
+    }
   } catch (error) {
     console.log(error);
     if (error?.status) {

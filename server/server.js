@@ -1,9 +1,8 @@
 const express = require('express');
 const session = require('express-session');
 const { createServer } = require('node:http');
-// const { join } = require('node:path');
-// const { Server } = require('socket.io');
-const Websocket = require("ws");
+const { join } = require('node:path');
+const { Server } = require('socket.io');
 const cors = require('cors');
 
 const projectRouter = require('./src/routes/projectRouter');
@@ -23,6 +22,14 @@ require('dotenv').config();
 const app = express();
 const server = createServer(app);
 
+const io = new Server(server, ({
+    allowEIO3: true,
+    cors: {
+        origin: 'http://localhost:8080',
+        methods: ['GET', 'POST']
+    },
+    transports: ["polling", "websocket"]
+}));
 
 const configViewEngine = require('./src/config/viewEngine');
 
@@ -41,93 +48,34 @@ app.use('/comments', commentRouter);
 
 
 // ----------------------- Socket.io -----------------------
-// let socketsConnected = new Set();
 
-// io.on('connection', (socket) => {
-//     console.log('a user connected');
-//     // const username = socket.handshake.auth
-//     console.log(socket.id)
+let socketsConnected = new Set();
 
-//     socketsConnected.add(socket.id);
+io.on('connection', (socket) => {
+    console.log('a user connected');
+    console.log(socket.id)
 
-//     socket.on('disconnect', () => {
-//         console.log("user disconnected");
-//         socketsConnected.delete(socket.id);
-//     })
+    socketsConnected.add(socket.id);
+
+    socket.on('disconnect', () => {
+        console.log("user disconnected");
+        socketsConnected.delete(socket.id);
+    })
 
 
-//     socket.on("message", (data, headers) => {
-//         const token = headers.headers.authorization;
-//         console.log(token)
-//         app.post("/comments/create",
-//             [
-//                 CommentValidator.validateCreate,
-//                 JWTMiddleware.verify([])
-//             ],
-//             // commentController.create
-//         )
+    socket.on("message", (data) => {
+        console.log(data)
+        io.emit("chat-message", data);
+    })
 
-//         io.emit("chat-message", data);
-//     })
-
-// });
+});
 
 
 
 
 // ------------------------------------------------------
 
-const wss = new Websocket.Server({ server });
 
-wss.on("connection", async function connection(ws) {
-    // console.log({ asdasd: req.headers })
-    console.log("new client connection")
-
-    ws.on("close", () => {
-        console.log("client disconnected")
-    })
-
-    ws.on("error", (err) => {
-        conosole.log(err)
-    })
-
-    ws.on("message", (event) => {
-        const message = event;
-        console.log("Type of message:", typeof message);
-
-        console.log(message);
-        try {
-            wss.clients.forEach(function each(client) {
-                if (client === ws && client.readyState === Websocket.OPEN) {
-                    if (typeof message === 'object' && message !== null && !Array.isArray(message)) {
-                        // Handle object (if needed)
-                        console.log("received object:", message);
-
-                        const stringMessage = message.toString('utf-8'); // Adjust the encoding if needed
-                        const parsedMessage = JSON.parse(stringMessage);
-                        console.log("received", parsedMessage);
-                        ws.send(JSON.stringify(parsedMessage));
-                        wss.emit(JSON.stringify(parsedMessage));
-                        return;
-                    }
-                    if (Buffer.isBuffer(message)) {
-                        // Handle buffer (if needed)
-                        console.log("received buffer:", message.toString());
-                        ws.send(message);
-                        wss.emit(message);
-                        return;
-                    }
-
-                }
-            })
-
-        } catch (error) {
-            console.error("Error parsing JSON:", error);
-        }
-
-    });
-
-})
 
 
 app.use((req, res) => {

@@ -28,12 +28,23 @@ const schemas = {
                     .required()
             }
         )
+    },
+
+    getCommentsByCommentId: {
+        params: Joi.object().keys(
+            {
+                commentId: Joi.string()
+                    .trim()
+                    .hex()
+                    .length(24)
+                    .required()
+            }
+        )
     }
 }
 
 class CommentValidator extends MyValidator {
     async validateCreate(req, res, next) {
-        console.log("here")
         try {
             super.handleValidationError(req, schemas.create);
             return next();
@@ -45,6 +56,15 @@ class CommentValidator extends MyValidator {
     async validateGetComment(req, res, next) {
         try {
             super.handleValidationError(req, schemas.getCommentsByTaskId);
+            return next();
+        } catch (error) {
+            return next(error);
+        }
+    };
+
+    async validateGetCommentById(req, res, next) {
+        try {
+            super.handleValidationError(req, schemas.getCommentsByCommentId);
             return next();
         } catch (error) {
             return next(error);

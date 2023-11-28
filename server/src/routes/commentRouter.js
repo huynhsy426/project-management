@@ -6,7 +6,6 @@ const CommentValidator = require('../validations/commentValidator');
 const JWTMiddleware = require('../middleware/JWTMiddleware');
 
 const { UserRoles } = require('../constants/usersConstant');
-const handleWebsocket = require('../utils/webSocket');
 
 router.post('/create',
     [
@@ -17,13 +16,21 @@ router.post('/create',
     commentController.create
 )
 
-router.get("/:taskId/list",
+router.get("/:taskId/task",
     [
         // handleWebsocket,
         CommentValidator.validateGetComment,
         JWTMiddleware.verify([])
     ],
     commentController.getCommentByTaskId
+)
+
+router.get("/:commentId",
+    [
+        CommentValidator.validateGetCommentById,
+        JWTMiddleware.verify([])
+    ],
+    commentController.getCommentById
 )
 
 module.exports = router;
