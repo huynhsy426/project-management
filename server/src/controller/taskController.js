@@ -102,10 +102,14 @@ module.exports = {
                 size: attach.size
             }
         })
+
+        console.log(oldAttachments)
         let oldAttach = undefined;
-        oldAttach = JSON.parse(oldAttachments);
-        if (oldAttach.length !== 0) {
-            newAttachments.unshift(...oldAttach);
+        if (oldAttachments) {
+            oldAttach = JSON.parse(oldAttachments);
+            if (oldAttach.length !== 0) {
+                newAttachments.unshift(...oldAttach);
+            }
         }
 
 
@@ -116,6 +120,8 @@ module.exports = {
             status,
             point
         }
+
+        console.log({ taskEntity })
 
         try {
             await taskService.updateTask({ authorId: user.userId, taskId: taskId, taskEntity, oldAttach })

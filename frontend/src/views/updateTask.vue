@@ -231,6 +231,12 @@
 
           <div class="mt-3 flex justify-center">
             <button
+              @click="handleRejectTask"
+              class="rounded-lg bg-yellow-400 px-3 py-2 text-white mr-2"
+            >
+              Reject
+            </button>
+            <button
               type="submit"
               class="rounded-lg bg-green-500 px-3 py-2 text-white"
             >
@@ -375,6 +381,29 @@ const handleRangePoint = (e) => {
 
 const handleDeleteAttachment = (index, arr) => {
   arr.splice(index, 1);
+};
+
+const handleRejectTask = async () => {
+  try {
+    const formDone = {
+      status: "rejected",
+      content: `Task rejected`,
+    };
+    await httpRequest.put(`/tasks/${taskId}/update`, formDone, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    errMessage.value = "";
+    router.push({ path: `/tasks/${taskId}` }).then(() => {
+      router.go();
+    });
+  } catch (error) {
+    console.log(error);
+    if (error?.status) {
+      errMessage.value = error.data.messageCode;
+    }
+  }
 };
 </script>
 

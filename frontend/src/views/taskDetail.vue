@@ -48,7 +48,7 @@
       <div class="status mt-2">
         <div
           v-if="taskInfo.task?.status === 'done'"
-          class="border-2 border-green-400 bg-green-400 rounded-lg px-1 py-1 text-center w-16"
+          class="border-2 border-green-400 bg-green-400 text-white rounded-lg px-1 py-1 text-center w-16"
         >
           {{ taskInfo.task?.status }}
         </div>
@@ -60,7 +60,7 @@
         </div>
         <div
           v-if="taskInfo.task?.status === 'rejected'"
-          class="border-2 border-red-600 bg-red-600 rounded-lg px-1 py-1 text-center w-20"
+          class="border-2 border-red-600 bg-red-600 text-white rounded-lg px-1 py-1 text-center w-20"
         >
           {{ taskInfo.task?.status }}
         </div>
@@ -143,7 +143,7 @@
       </div>
       <div
         class="grid grid-cols-4 mt-3"
-        v-if="taskInfo.task?.status !== 'done'"
+        v-if="taskInfo.task?.status === 'doing'"
       >
         <div></div>
         <div></div>
@@ -230,6 +230,7 @@ onMounted(async () => {
   try {
     loading.value = true;
     const task = await httpRequest.get(`/tasks/${taskId}`);
+    console.log(task);
     loading.value = false;
     taskInfo.task = task.task;
     timeContent.createdAt = formatDate(taskInfo.task.createdAt);
