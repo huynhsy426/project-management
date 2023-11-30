@@ -1,8 +1,8 @@
 const path = require('path');
-var multer = require('multer');
+let multer = require('multer');
 const JwtService = require("../services/JWTService");
 
-var storage = multer.diskStorage({
+let storage = multer.diskStorage({
     destination: function (req, file, cb) {
 
         const filExtension = path.extname(file.originalname).toUpperCase();
@@ -34,7 +34,7 @@ var storage = multer.diskStorage({
     }
 });
 
-var sendData = multer();
+let sendData = multer();
 
 upload = multer({
     limits: {

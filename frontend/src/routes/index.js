@@ -1,26 +1,28 @@
 import { createRouter, createWebHistory } from 'vue-router';
-const login = () => import('../views/login.vue');
-const task = () => import('../views/task.vue');
-const taskDetail = () => import('../views/taskDetail.vue');
-const createTask = () => import('../views/addTask.vue')
-const homePage = () => import('../views/homePage.vue');
-const taskUpdate = () => import('../views/updateTask.vue')
-const notFound = () => import('../views/notFound.vue')
-const projectByAdmin = () => import('../views/admin/project.vue')
-const taskByProject = () => import('../views/admin/task.vue')
-const register = () => import('../views/register.vue')
+const Login = () => import('../views/Login.vue');
+const Task = () => import('../views/Task.vue');
+const TaskDetail = () => import('../views/TaskDetail.vue');
+const CreateTask = () => import('../views/AddTask.vue')
+const HomePage = () => import('../views/HomePage.vue');
+const TaskUpdate = () => import('../views/UpdateTask.vue')
+const NotFound = () => import('../views/NotFound.vue')
+const ProjectByAdmin = () => import('../views/admin/Project.vue')
+const TaskByProject = () => import('../views/admin/Task.vue')
+const Register = () => import('../views/Register.vue')
+const unauthorized = () => import('../views/UnauthorizedUser.vue')
 
 const routes = [
-    { path: '/', component: homePage, meta: { layout: 'vertical' } },
-    { path: '/login', component: login, meta: { layout: 'full' } },
-    { path: '/tasks', component: task, meta: { layout: 'vertical' } },
-    { path: '/users/register', component: register, meta: { layout: 'vertical-Assign' } },
-    { path: '/tasks/:id', component: taskDetail, meta: { layout: 'vertical' }, props: true },
-    { path: '/tasks/create', component: createTask, meta: { layout: 'vertical' } },
-    { path: '/tasks/:id/update', component: taskUpdate, meta: { layout: 'vertical' } },
-    { path: '/:pathMatch(.*)*', name: 'not-found', component: notFound, meta: { layout: 'full' } },
-    { path: '/admin/projects', component: projectByAdmin, meta: { layout: 'vertical' } },
-    { path: '/admin/tasks/:projectId', component: taskByProject, meta: { layout: 'vertical' } },
+    { path: '/', component: HomePage, meta: { layout: 'vertical' } },
+    { path: '/login', component: Login, meta: { layout: 'full' } },
+    { path: '/tasks', component: Task, meta: { layout: 'vertical' } },
+    { path: '/users/register', component: Register, meta: { layout: 'vertical-Assign' } },
+    { path: '/tasks/:id', component: TaskDetail, meta: { layout: 'vertical' }, props: true },
+    { path: '/tasks/create', component: CreateTask, meta: { layout: 'vertical' } },
+    { path: '/tasks/:id/update', component: TaskUpdate, meta: { layout: 'vertical' } },
+    { path: '/:pathMatch(.*)*', name: 'not-found', component: NotFound, meta: { layout: 'full' } },
+    { path: '/admin/projects', component: ProjectByAdmin, meta: { layout: 'vertical' } },
+    { path: '/admin/tasks/:projectId', component: TaskByProject, meta: { layout: 'vertical' } },
+    { path: '/unauthorized', component: unauthorized, meta: { layout: 'full' } },
 ]
 
 

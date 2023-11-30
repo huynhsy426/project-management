@@ -7,13 +7,13 @@
   >
   <div class="center">
     <h1>Login</h1>
-    <span class="errMessage w-100">{{ errMessage }}</span>
+    <span class="errMessage w-100">{{ authStore.errMessage }}</span>
     <form @submit.prevent="login">
       <div class="txt_field">
         <input
           type="text"
           id="UserName"
-          v-model="formLogin.username"
+          v-model="authStore.username"
           required
         />
         <label for="">Username</label>
@@ -23,7 +23,7 @@
         <input
           type="password"
           id="Password"
-          v-model="formLogin.userPassword"
+          v-model="authStore.userPassword"
           required
         />
         <label for="">Password</label>
@@ -38,25 +38,11 @@
 </template>
 
 <script>
-import httpRequest from "../utils/httpRequest";
+// import { storeToRefs } from "pinia";
+import { useAuthStore } from "../stores/useAuthStore";
 
-async function login() {
-  try {
-    const result = await httpRequest.post("/users/login", this.formLogin);
-    window.localStorage.setItem("token", result.accessToken);
-
-    this.errMessage = "";
-
-    this.$router.push({ path: "/" }).then(() => {
-      this.$router.go();
-    });
-  } catch (error) {
-    console.log(error);
-    if (error?.status) {
-      this.errMessage = error.data.messageCode;
-    }
-  }
-}
+const authStore = useAuthStore();
+const { login } = authStore;
 
 async function handleCreateUser() {
   this.$router.push({ path: "/users/register" });
@@ -65,11 +51,7 @@ async function handleCreateUser() {
 export default {
   data() {
     return {
-      formLogin: {
-        username: "",
-        userPassword: "",
-      },
-      errMessage: "",
+      authStore,
       isSignUp: this.$route.query.signUp ? this.$route.query.signUp : undefined,
     };
   },

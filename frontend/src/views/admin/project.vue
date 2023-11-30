@@ -24,49 +24,56 @@
     <span class="sr-only">Loading...</span>
   </div>
 
-  <div
-    v-if="errMessage"
-    class="text-center w-full text-2xl text-red-500 pb-3"
-    style="font-weight: 500"
-  >
-    {{ errMessage }}
-  </div>
+  <div v-if="!loading" class="w-full">
+    <div
+      v-if="errMessage"
+      class="text-center w-full text-2xl text-red-500 pb-3"
+      style="font-weight: 500"
+    >
+      {{ errMessage }}
+    </div>
 
-  <div class="flex text-center justify-center w-full">Projects</div>
-  <div class="flex justify-center align-middle w-full">
-    <div class="relative overflow-x-auto shadow-md sm:rounded-lg w-full">
-      <table
-        class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400"
-      >
-        <thead
-          class="text-xs text-white bg-blue-700 uppercase dark:bg-gray-700 dark:text-gray-400"
+    <div
+      class="flex text-center mb-2 text-2xl justify-center w-full"
+      style="font-weight: 500"
+    >
+      Projects
+    </div>
+    <div class="flex justify-center align-middle w-full">
+      <div class="relative overflow-x-auto shadow-md sm:rounded-lg w-full">
+        <table
+          class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400"
         >
-          <tr>
-            <th scope="col" class="px-6 py-3">Name</th>
-            <th scope="col" class="px-6 py-3">Leader</th>
-            <th scope="col" class="px-6 py-3">dept</th>
-            <th scope="col" class="px-6 py-3">Min exp</th>
-            <th scope="col" class="px-6 py-3">Complete At</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            @click="handleTaskOfProject(projectList?._id)"
-            class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600"
+          <thead
+            class="text-xs text-white bg-blue-700 uppercase dark:bg-gray-700 dark:text-gray-400"
           >
-            <th
-              scope="row"
-              class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+            <tr>
+              <th scope="col" class="px-6 py-3">Name</th>
+              <th scope="col" class="px-6 py-3">Leader</th>
+              <th scope="col" class="px-6 py-3">dept</th>
+              <th scope="col" class="px-6 py-3">Min exp</th>
+              <th scope="col" class="px-6 py-3">Complete At</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              @click="handleTaskOfProject(projectList?._id)"
+              class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600"
             >
-              {{ projectList?.projectName }}
-            </th>
-            <td class="px-6 py-4">{{ projectList?.leaderId?.username }}</td>
-            <td class="px-6 py-4">{{ projectList?.deptId?.deptName }}</td>
-            <td class="px-6 py-4">{{ projectList?.minExp }}</td>
-            <td class="px-6 py-4">{{ projectList?.completedAt }}</td>
-          </tr>
-        </tbody>
-      </table>
+              <th
+                scope="row"
+                class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+              >
+                {{ projectList?.projectName }}
+              </th>
+              <td class="px-6 py-4">{{ projectList?.leaderId?.username }}</td>
+              <td class="px-6 py-4">{{ projectList?.deptId?.deptName }}</td>
+              <td class="px-6 py-4">{{ projectList?.minExp }}</td>
+              <td class="px-6 py-4">{{ projectList?.completedAt }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </template>

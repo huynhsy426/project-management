@@ -31,7 +31,7 @@ const caculateTimeOfTask = (tasks) => {
         }
 
         task.status === TaskStatus.DOING && taskCheck.numPending++;
-        task.status === TaskStatus.REJECTED && taskCheck.numDone++;
+        task.status === TaskStatus.REJECTED && taskCheck.numRejected++;
 
         return taskCheck;
     }, {

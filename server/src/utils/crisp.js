@@ -33,7 +33,7 @@ const HOOKS_SERVER = {
 console.info("Authenticating...");
 
 // Create the Crisp client (it lets you access both the REST API and RTM events)
-var CrispClient = new Crisp();
+let CrispClient = new Crisp();
 
 // Authenticate to API with your plugin token (identifier, key)
 CrispClient.authenticateTier("plugin", TOKEN.identifier, TOKEN.key);
@@ -56,7 +56,7 @@ app.post("/", (request, response) => {
     // -- (you may want to verify the Web Hook signature before accepting it) --
 
     // Receive Web Hook payload
-    var error = CrispClient.receiveHook(request.body);
+    let error = CrispClient.receiveHook(request.body);
 
     if (error !== null) {
         console.error("Web Hook processing error", error);
@@ -152,12 +152,12 @@ app.listen(HOOKS_SERVER.port, () => {
 //         console.error("[Web Hooks] Failed listening to sent messages:", error);
 //     });
 
-// var error = CrispClient.receiveHook(req.body);
+// let error = CrispClient.receiveHook(req.body);
 
 
-// var _handleIncomingRequest = function (request, response, body) {
+// let _handleIncomingRequest = function (request, response, body) {
 //     // Handle request?
-//     var responseStatus = 404,
+//     let responseStatus = 404,
 //         requestURL = url.parse(request.url);
 
 //     if (requestURL && requestURL.pathname === HOOKS_SERVER.path) {
@@ -199,7 +199,7 @@ app.listen(HOOKS_SERVER.port, () => {
 //             "[Web Hooks] Received HTTP req: " + req.method + " " + req.url
 //         );
 
-//         var bodyBuffer = "";
+//         let bodyBuffer = "";
 
 //         req
 //             .on("data", function (chunk) {
@@ -207,7 +207,7 @@ app.listen(HOOKS_SERVER.port, () => {
 //             })
 //             .on("end", function () {
 //                 // Attempt to parse body to JSON
-//                 var body = null;
+//                 let body = null;
 
 //                 try {
 //                     if (bodyBuffer) {

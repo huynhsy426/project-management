@@ -199,7 +199,6 @@
 <script setup>
 import httpRequest from "@/utils/httpRequest";
 import { counter } from "@fortawesome/fontawesome-svg-core";
-import axios from "axios";
 import { computed, reactive, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 

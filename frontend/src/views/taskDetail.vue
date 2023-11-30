@@ -23,171 +23,174 @@
     </svg>
     <span class="sr-only">Loading...</span>
   </div>
-  <div
-    v-if="props.errMessage"
-    class="text-center w-full text-2xl text-red-500 pb-3"
-    style="font-weight: 500"
-  >
-    {{ props.errMessage }}
-  </div>
 
-  <div class="flex justify-center w-full">
+  <div v-if="!loading" class="w-full">
     <div
-      class="info border-2 border-gray-500 rounded-lg px-4 py-6"
-      style="width: 700px"
+      v-if="props.errMessage"
+      class="text-center w-full text-2xl text-red-500 pb-3"
+      style="font-weight: 500"
     >
-      <div class="taskName flex justify-between">
-        <p class="taskName text-3xl" style="font-weight: 600">
-          {{ taskInfo.task?.taskName }}
-        </p>
-        <div v-if="taskInfo.task?.assignee" class="flex flex-row">
-          <p class="text-base" style="font-weight: 600">Assignee:&nbsp;</p>
-          <p>{{ taskInfo.task?.assignee?.username }}</p>
+      {{ props.errMessage }}
+    </div>
+
+    <div class="flex justify-center w-full">
+      <div
+        class="info border-2 border-gray-500 rounded-lg px-4 py-6"
+        style="width: 700px"
+      >
+        <div class="taskName flex justify-between">
+          <p class="taskName text-3xl" style="font-weight: 600">
+            {{ taskInfo.task?.taskName }}
+          </p>
+          <div v-if="taskInfo.task?.assignee" class="flex flex-row">
+            <p class="text-base" style="font-weight: 600">Assignee:&nbsp;</p>
+            <p>{{ taskInfo.task?.assignee?.username }}</p>
+          </div>
         </div>
-      </div>
-      <div class="status mt-2">
-        <div
-          v-if="taskInfo.task?.status === 'done'"
-          class="border-2 border-green-400 bg-green-400 text-white rounded-lg px-1 py-1 text-center w-16"
-        >
-          {{ taskInfo.task?.status }}
-        </div>
-        <div
-          v-if="taskInfo.task?.status === 'doing'"
-          class="border-2 border-blue-400 bg-blue-400 rounded-lg px-1 py-1 text-center w-16"
-        >
-          {{ taskInfo.task?.status }}
-        </div>
-        <div
-          v-if="taskInfo.task?.status === 'rejected'"
-          class="border-2 border-red-600 bg-red-600 text-white rounded-lg px-1 py-1 text-center w-20"
-        >
-          {{ taskInfo.task?.status }}
-        </div>
-      </div>
-      <div class="content text-lg mt-2" style="font-weight: 500">
-        <p>{{ taskInfo.task?.content }}</p>
-      </div>
-      <div class="point">
-        <div class="text-lg mt-2" style="font-weight: 500">
-          POINT:
-          <span
-            class="font-medium text-gray-600 dark:text-gray-400 text-base"
-            style="font-weight: 500"
-            >{{ taskInfo.task?.point }}</span
+        <div class="status mt-2">
+          <div
+            v-if="taskInfo.task?.status === 'done'"
+            class="border-2 border-green-400 bg-green-400 text-white rounded-lg px-1 py-1 text-center w-16"
           >
+            {{ taskInfo.task?.status }}
+          </div>
+          <div
+            v-if="taskInfo.task?.status === 'doing'"
+            class="border-2 border-blue-400 bg-blue-400 rounded-lg px-1 py-1 text-center w-16"
+          >
+            {{ taskInfo.task?.status }}
+          </div>
+          <div
+            v-if="taskInfo.task?.status === 'rejected'"
+            class="border-2 border-red-600 bg-red-600 text-white rounded-lg px-1 py-1 text-center w-20"
+          >
+            {{ taskInfo.task?.status }}
+          </div>
         </div>
-        <div class="flex items-center">
-          <div class="w-2/4 h-5 mr-3 bg-gray-200 rounded dark:bg-gray-700">
-            <div
-              class="h-5 rounded"
-              :style="{ width: `${pointPercent}%` }"
-              :class="bgColor"
-            ></div>
+        <div class="content text-lg mt-2" style="font-weight: 500">
+          <p>{{ taskInfo.task?.content }}</p>
+        </div>
+        <div class="point">
+          <div class="text-lg mt-2" style="font-weight: 500">
+            POINT:
+            <span
+              class="font-medium text-gray-600 dark:text-gray-400 text-base"
+              style="font-weight: 500"
+              >{{ taskInfo.task?.point }}</span
+            >
+          </div>
+          <div class="flex items-center">
+            <div class="w-2/4 h-5 mr-3 bg-gray-200 rounded dark:bg-gray-700">
+              <div
+                class="h-5 rounded"
+                :style="{ width: `${pointPercent}%` }"
+                :class="bgColor"
+              ></div>
+            </div>
+          </div>
+        </div>
+        <div class="timeContent mt-2 grid grid-cols-2">
+          <div class="createAt">
+            <p class="text-xl" style="font-weight: 600">Create at:</p>
+            <p class="text-base" style="font-weight: 500">
+              {{ timeContent.createdAt }}
+            </p>
+          </div>
+          <div class="deadlineAt">
+            <p class="text-xl" style="font-weight: 600">Deadline at:</p>
+            <p class="text-base text-red-500" style="font-weight: 500">
+              {{ timeContent.deadlineAt }}
+            </p>
+          </div>
+        </div>
+        <div class="attachment mt-2">
+          <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+            <table
+              class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400"
+            >
+              <thead
+                class="text-xs text-gray-700 uppercase bg-gray-300 dark:bg-gray-700 dark:text-gray-400"
+              >
+                <tr>
+                  <th scope="col" class="px-6 py-3">File</th>
+                  <th scope="col" class="px-6 py-3">Name</th>
+                  <th scope="col" class="px-6 py-3">size</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600"
+                  v-for="(attach, index) in taskInfo.task?.attachments"
+                  :key="index + attach.originalname"
+                >
+                  <th
+                    scope="row"
+                    class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                  >
+                    <a
+                      :href="`http://localhost:8082/${attach.path}`"
+                      target="_blank"
+                    >
+                      {{ formatFilePath(attach.path) }}
+                    </a>
+                  </th>
+                  <td class="px-6 py-4">{{ attach.originalname }}</td>
+                  <td class="px-6 py-4">
+                    {{ !attach.size ? "none" : formatFileSize(+attach.size) }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div
+          class="grid grid-cols-4 mt-3"
+          v-if="taskInfo.task?.status === 'doing'"
+        >
+          <div></div>
+          <div></div>
+          <div></div>
+          <div
+            v-if="taskInfo.task?.assignee"
+            class="flex justify-center align-middle"
+          >
+            <button
+              @click="handleFinishBtn"
+              class="px-3 mr-3 rounded-md py-2 bg-green-500 text-white hover:bg-green-600 focus:outline-none focus:ring-2"
+            >
+              Finish
+            </button>
+            <button
+              @click="updateTask(taskInfo.task._id)"
+              class="px-3 rounded-md py-2 bg-blue-500 text-white"
+            >
+              Update
+            </button>
+          </div>
+          <div v-else class="flex justify-center align-middle">
+            <button
+              class="px-3 rounded-md py-2 bg-green-500 text-white"
+              @click="assignTask"
+            >
+              Assign
+            </button>
           </div>
         </div>
       </div>
-      <div class="timeContent mt-2 grid grid-cols-2">
-        <div class="createAt">
-          <p class="text-xl" style="font-weight: 600">Create at:</p>
-          <p class="text-base" style="font-weight: 500">
-            {{ timeContent.createdAt }}
-          </p>
-        </div>
-        <div class="deadlineAt">
-          <p class="text-xl" style="font-weight: 600">Deadline at:</p>
-          <p class="text-base text-red-500" style="font-weight: 500">
-            {{ timeContent.deadlineAt }}
-          </p>
-        </div>
-      </div>
-      <div class="attachment mt-2">
-        <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-          <table
-            class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400"
-          >
-            <thead
-              class="text-xs text-gray-700 uppercase bg-gray-300 dark:bg-gray-700 dark:text-gray-400"
-            >
-              <tr>
-                <th scope="col" class="px-6 py-3">File</th>
-                <th scope="col" class="px-6 py-3">Name</th>
-                <th scope="col" class="px-6 py-3">size</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600"
-                v-for="(attach, index) in taskInfo.task?.attachments"
-                :key="index + attach.originalname"
-              >
-                <th
-                  scope="row"
-                  class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-                >
-                  <a
-                    :href="`http://localhost:8082/${attach.path}`"
-                    target="_blank"
-                  >
-                    {{ formatFilePath(attach.path) }}
-                  </a>
-                </th>
-                <td class="px-6 py-4">{{ attach.originalname }}</td>
-                <td class="px-6 py-4">
-                  {{ !attach.size ? "none" : formatFileSize(+attach.size) }}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-      <div
-        class="grid grid-cols-4 mt-3"
-        v-if="taskInfo.task?.status === 'doing'"
-      >
-        <div></div>
-        <div></div>
-        <div></div>
-        <div
-          v-if="taskInfo.task?.assignee"
-          class="flex justify-center align-middle"
-        >
-          <button
-            @click="handleFinishBtn"
-            class="px-3 mr-3 rounded-md py-2 bg-green-500 text-white hover:bg-green-600 focus:outline-none focus:ring-2"
-          >
-            Finish
-          </button>
-          <button
-            @click="updateTask(taskInfo.task._id)"
-            class="px-3 rounded-md py-2 bg-blue-500 text-white"
-          >
-            Update
-          </button>
-        </div>
-        <div v-else class="flex justify-center align-middle">
-          <button
-            class="px-3 rounded-md py-2 bg-green-500 text-white"
-            @click="assignTask"
-          >
-            Assign
-          </button>
-        </div>
-      </div>
-    </div>
 
-    <!-- Conmment -->
-    <div
-      class="comment border-2 border-gray-500 rounded-md px-4 py-6"
-      style="width: 500px"
-    >
-      <commentsCompoment />
+      <!-- Conmment -->
+      <div
+        class="comment border-2 border-gray-500 rounded-md px-4 py-6"
+        style="width: 500px"
+      >
+        <commentsCompoment />
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import commentsCompoment from "../components/commentTask.vue";
+import commentsCompoment from "../components/CommentTask.vue";
 import httpRequest from "@/utils/httpRequest";
 import { onMounted, ref, reactive, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
@@ -294,7 +297,29 @@ const formatFileSize = function (bytes) {
 };
 
 const formatFilePath = function (fileName) {
-  return fileName.split(`uploads\\images\\`)[1];
+  const filExtension = handleFilExtension(fileName).toUpperCase();
+
+  if ([".JPG", ".JPEG", ".PNG", ".GIF"].includes(filExtension)) {
+    return fileName.split(`uploads\\images\\`)[1];
+  }
+  if ([".MP3", ".WMA", ".WAV", ".FLAC"].includes(filExtension)) {
+    return fileName.split(`uploads\\audio\\`)[1];
+  }
+  // word, pdf, excel
+  if ([".DOC", ".DOCM", ".DOCX", ".DOT", ".TXT"].includes(filExtension)) {
+    return fileName.split(`uploads\\files\\`)[1];
+  }
+  if ([".XLSM", ".XLSX", ".XLT"].includes(filExtension)) {
+    return fileName.split(`uploads\\files\\`)[1];
+  }
+};
+
+const handleFilExtension = (string) => {
+  const parts = string.split(".");
+
+  const fileExtension = parts[parts.length - 1];
+
+  return `.${fileExtension}`;
 };
 
 const updateTask = (taskId) => {

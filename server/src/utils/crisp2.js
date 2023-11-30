@@ -15,7 +15,7 @@ const HOOKS_SERVER = {
 const websiteID = "10f1498a-de68-4d4f-af8d-b9af89f3a764";
 
 const Crisp = require("crisp-api");
-var CrispClient = new Crisp();
+let CrispClient = new Crisp();
 
 
 console.info("Authenticating...");
@@ -53,8 +53,8 @@ console.info(
     ("http://localhost:" + HOOKS_SERVER.port + "/")
 );
 
-var _processWebhooksEvent = function (request, body) {
-    var secret = TOKEN.signSecret,
+let _processWebhooksEvent = function (request, body) {
+    let secret = TOKEN.signSecret,
         timestamp = request.headers["x-crisp-request-timestamp"],
         signature = request.headers["x-crisp-signature"];
 
@@ -70,7 +70,7 @@ var _processWebhooksEvent = function (request, body) {
     }
 
     // Receive Web Hook payload
-    var error = CrispClient.receiveHook(body);
+    let error = CrispClient.receiveHook(body);
 
     if (error !== null) {
         console.error(
@@ -87,9 +87,9 @@ var _processWebhooksEvent = function (request, body) {
     return 200;
 };
 
-var _handleIncomingRequest = function (request, response, body) {
+let _handleIncomingRequest = function (request, response, body) {
     // Handle request?
-    var responseStatus = 404,
+    let responseStatus = 404,
         requestURL = url.parse(request.url);
 
     if (requestURL && requestURL.pathname === HOOKS_SERVER.path) {
@@ -132,7 +132,7 @@ http
         console.debug(
             "[Web Hooks] Received HTTP request: " + request.method + " " + request.url
         );
-        var bodyBuffer = "";
+        let bodyBuffer = "";
 
         request
             .on("data", function (chunk) {
@@ -140,7 +140,7 @@ http
             })
             .on("end", function () {
                 // Attempt to parse body to JSON
-                var body = null;
+                let body = null;
 
                 try {
                     if (bodyBuffer) {

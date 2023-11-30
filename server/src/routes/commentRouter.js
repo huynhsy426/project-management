@@ -9,7 +9,6 @@ const { UserRoles } = require('../constants/usersConstant');
 
 router.post('/create',
     [
-        // handleWebsocket,
         CommentValidator.validateCreate,
         JWTMiddleware.verify([])
     ],
@@ -18,7 +17,6 @@ router.post('/create',
 
 router.get("/:taskId/task",
     [
-        // handleWebsocket,
         CommentValidator.validateGetComment,
         JWTMiddleware.verify([])
     ],

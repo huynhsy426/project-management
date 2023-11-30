@@ -2,6 +2,7 @@ import { createApp } from 'vue';
 import App from './App.vue';
 import router from './routes/index';
 import { Crisp } from "crisp-sdk-web";
+import { createPinia } from 'pinia'
 
 /* import the fontawesome core */
 import { library } from '@fortawesome/fontawesome-svg-core';
@@ -17,6 +18,8 @@ import { faTrash } from '@fortawesome/free-solid-svg-icons';
 // import SocketIO from 'socket.io-client'
 
 
+const pinia = createPinia()
+
 /* add icons to the library */
 library.add(faFile, faTrash, faFileAudio, faFileImage, faFileVideo)
 
@@ -30,6 +33,7 @@ Crisp.configure(websiteId, {
 const app = createApp(App)
     .component('font-awesome-icon', FontAwesomeIcon)
     .use(router)
+    .use(pinia)
 
 
 // app.use(new VueSocketIO)({

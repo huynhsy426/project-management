@@ -38,7 +38,9 @@
         >
           <span class="name">{{ comment?.userId?.username }}</span>
           <p class="message">{{ comment.content }}</p>
-          <span class="createdAt">{{ comment?.createdAt }}</span>
+          <span class="createdAt">{{
+            formatDatetime(comment?.createdAt)
+          }}</span>
         </li>
         <li
           v-if="comment?.userId?._id === userId"
@@ -47,7 +49,9 @@
         >
           <span class="name">{{ comment?.userId?.username }}</span>
           <p class="message">{{ comment.content }}</p>
-          <span class="createdAt">{{ comment?.createdAt }}</span>
+          <span class="createdAt">{{
+            formatDatetime(comment?.createdAt)
+          }}</span>
         </li>
       </ul>
     </div>
@@ -59,12 +63,9 @@ import httpRequest from "@/utils/httpRequest";
 import { comment } from "postcss";
 import { onMounted, ref, reactive, computed, onBeforeUnmount } from "vue";
 import { useRoute, useRouter } from "vue-router";
-const ws = new WebSocket("ws://localhost:8082");
+import Socket from "socket.io-client";
 
-import socket from "../socket";
-
-const messageContainer =
-  document.getElementsByClassName("message-container")[0];
+const URL = "http://localhost:8082";
 
 let props = defineProps(["errMessage"]);
 const route = useRoute();
@@ -80,20 +81,30 @@ const commentEntity = ref({
 const commentList = ref();
 const authToken = `Bearer ${localStorage.getItem("token")}`;
 
+const socket = Socket.io(URL, {
+  autoConnect: false,
+  auth: {
+    authorization: authToken,
+  },
+});
+
 onMounted(async () => {
   try {
     socket.open();
     // ws.onopen = () => {
-    //   console.log("opened");
     //   ws.send("message heheh");
     //   ws.send({ authorization: authToken });
     // };
+    socket.emit("room", taskId);
+
+    await socket.on("connect_error", (data) => {
+      router.push("/unauthorized");
+    });
     const user = await httpRequest.get("/users/");
     userId.value = user.result._id;
 
     const comments = await httpRequest.get(`/comments/${taskId}/task`);
     commentList.value = [...comments.comments?.reverse()];
-    console.log(commentList.value);
   } catch (error) {
     console.error(error);
     if (error?.status) {
@@ -107,7 +118,7 @@ onBeforeUnmount(async () => {
 });
 
 socket.on("chat-message", (data) => {
-  console.log({ qqqqq: data });
+  console.log(data);
   commentList.value.unshift(data);
 });
 
@@ -123,7 +134,7 @@ const handleCreateComment = async () => {
         `/comments/${addComment.result._id}`
       );
 
-      socket.emit("message", result.comment);
+      socket.emit("message", { room: taskId, comment: result.comment });
     }
     router.push({ path: `/tasks/${taskId}` }).then(() => {
       // router.go();
@@ -135,6 +146,14 @@ const handleCreateComment = async () => {
   }
 
   commentEntity.value.content = "";
+};
+
+const formatDatetime = (datetime) => {
+  const createdDate = new Date(datetime);
+  let date = createdDate.toLocaleDateString();
+  let time = createdDate.toLocaleTimeString().replace(/(.*)\D\d+/, "$1");
+  const formatDateTime = `${date + " " + time}`;
+  return formatDateTime;
 };
 
 // --------------------- WebSocket --------------------

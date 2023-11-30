@@ -30,7 +30,7 @@ const HOOKS_SERVER = {
 console.info("Authenticating...");
 
 // Create the Crisp client (it lets you access both the REST API and RTM events)
-var CrispClient = new Crisp();
+let CrispClient = new Crisp();
 
 // // Authenticate to API with your plugin token (identifier, key)
 // CrispClient.authenticateTier("plugin", TOKEN.identifier, TOKEN.key);
