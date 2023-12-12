@@ -22,7 +22,7 @@ router.post(
 )
 
 
-// List all users test
+// Get users
 router.get(
     '/',
     [JWTMiddleware.verify([])],

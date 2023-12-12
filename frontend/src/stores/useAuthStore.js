@@ -1,4 +1,4 @@
-import AuthService from '@/services/AuthService';
+import authService from '@/services/authService';
 import { defineStore } from 'pinia';
 import { useRoute, useRouter } from "vue-router";
 
@@ -10,7 +10,8 @@ export const useAuthStore = defineStore('auth', {
         return {
             username: '',
             userPassword: '',
-            errMessage: ''
+            errMessage: '',
+            user: null
         }
     },
     // could also be defined as
@@ -18,9 +19,18 @@ export const useAuthStore = defineStore('auth', {
     actions: {
         async login() {
             try {
-                const result = await AuthService.login({ username: this.username, userPassword: this.userPassword });
+                const result = await authService.login(
+                    {
+                        username: this.username,
+                        userPassword: this.userPassword
+                    }
+                );
                 window.localStorage.setItem("token", result.accessToken);
 
+                const user = await authService.getUser();
+                this.user = user.result;
+
+                console.log(this.user)
                 this.errMessage = "";
 
                 window.location.replace("http://localhost:8080/");

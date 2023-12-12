@@ -3,6 +3,7 @@ const UserModel = require("../models/userModel");
 const ProjectModel = require("../models/projectModel");
 
 const { ErrorCodes } = require("../constants/errorConstant");
+const { UserRoles } = require('../constants/usersConstant');
 
 
 // Create Dept
@@ -34,7 +35,7 @@ const createDept = async (dept) => {
 // Can sua
 const listDeptsByRoles = async (userId, roles) => {
     let result = null;
-    if (roles === "Admin") {
+    if (roles === UserRoles.ADMIN) {
         result = await DeptModel.find(
             {},
             { deptName: 1, members: 1, _id: 0 }
@@ -163,7 +164,7 @@ const checkMemberIsBlockAndRoles = async (members) => {
     const resultCheckRoles = await UserModel.find(
         {
             _id: { $in: listMemberId },
-            roles: "Admin"
+            roles: UserRoles.ADMIN
         },
         { roles: 1, _id: 0 }
     )
@@ -199,7 +200,7 @@ const checkMemberInDeptOrIsBlock = async (members, deptId) => {
     const resultCheckRoles = await UserModel.findOne(
         {
             _id: { $in: listMemberId },
-            roles: "Admin"
+            roles: UserRoles.ADMIN
         },
         { roles: 1, _id: 0 }
     ).lean();

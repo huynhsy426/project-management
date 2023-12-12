@@ -2,7 +2,7 @@ const UserService = require('../services/userService')
 const JwtService = require('../services/JWTService')
 
 const { StatusCodes } = require('http-status-codes');
-
+const { UserRoles } = require('../constants/usersConstant');
 
 module.exports = {
     getUser: async (req, res, next) => {
@@ -24,7 +24,7 @@ module.exports = {
         const user = {
             username: req.body.username,
             age: req.body.age,
-            roles: 'User',
+            roles: UserRoles.USER,
             userPassword: req.body.userPassword,
             email: req.body.email,
             exp: req.body.exp,

@@ -137,7 +137,8 @@
               >
                 <a
                   :class="{
-                    'bg-gray-800 text-gray-700': n === taskAssign.page,
+                    'bg-gray-800 text-gray-700 text-base':
+                      n === taskAssign.page,
                   }"
                   class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
                   @click="pagination($event, n, taskAssign)"
@@ -285,6 +286,10 @@
               :key="n"
             >
               <a
+                :class="{
+                  'bg-gray-800 text-gray-700 text-base':
+                    n === taskNotAssign.page,
+                }"
                 class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
                 @click="pagination($event, n, taskNotAssign)"
                 >{{ n }}</a
@@ -330,7 +335,7 @@
 import { ref, onMounted } from "vue";
 import taskReport from "../components/TaskReport.vue";
 import { useRouter } from "vue-router";
-import httpRequest from "@/utils/httpRequest";
+import taskService from "@/services/taskService";
 
 const router = useRouter();
 
@@ -352,21 +357,9 @@ const taskNotAssign = ref({
 onMounted(async () => {
   try {
     loading.value = true;
-    const listTaskAssign = await httpRequest.get("/tasks/list", {
-      params: {
-        page: taskAssign.value.page,
-        ITEMS_PER_PAGE: taskAssign.value.ITEMS_PER_PAGE,
-        taskType: taskAssign.value.taskType,
-      },
-    });
+    const listTaskAssign = await taskService.getTasks(taskAssign);
+    const listTaskNotAssign = await taskService.getTasks(taskNotAssign);
 
-    const listTaskNotAssign = await httpRequest.get(`/tasks/list`, {
-      params: {
-        page: taskNotAssign.value.page,
-        ITEMS_PER_PAGE: taskNotAssign.value.ITEMS_PER_PAGE,
-        taskType: taskNotAssign.value.taskType,
-      },
-    });
     loading.value = false;
     taskAssign.value.taskValue = {
       tasks: listTaskAssign.result.tasks,
@@ -389,8 +382,8 @@ onMounted(async () => {
 const pagination = async (e, page, taskList) => {
   e.preventDefault();
   try {
-    const listTask = await httpRequest.get(`/tasks/list`, {
-      params: {
+    const listTask = await taskService.getTasks({
+      value: {
         page: page,
         ITEMS_PER_PAGE: taskList.ITEMS_PER_PAGE,
         taskType: taskList.taskType,

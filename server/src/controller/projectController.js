@@ -77,5 +77,18 @@ module.exports = {
         } catch (error) {
             return next(error);
         }
+    },
+
+
+    getMemberOfProject: async (req, res, next) => {
+        try {
+            const projectId = req.params.projectId;
+
+            const members = await ProjectService.getMemberOfProject(projectId);
+            console.log({ members })
+            return res.status(StatusCodes.OK).json(members);
+        } catch (error) {
+            return next(error);
+        }
     }
 }

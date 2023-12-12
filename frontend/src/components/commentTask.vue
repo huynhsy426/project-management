@@ -65,6 +65,8 @@ import { onMounted, ref, reactive, computed, onBeforeUnmount } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import Socket from "socket.io-client";
 
+import auhtService from "@/services/authService";
+
 const URL = "http://localhost:8082";
 
 let props = defineProps(["errMessage"]);
@@ -100,7 +102,7 @@ onMounted(async () => {
     await socket.on("connect_error", (data) => {
       router.push("/unauthorized");
     });
-    const user = await httpRequest.get("/users/");
+    const user = await auhtService.getUser();
     userId.value = user.result._id;
 
     const comments = await httpRequest.get(`/comments/${taskId}/task`);

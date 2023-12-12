@@ -38,7 +38,6 @@
 </template>
 
 <script>
-// import { storeToRefs } from "pinia";
 import { useAuthStore } from "../stores/useAuthStore";
 
 const authStore = useAuthStore();

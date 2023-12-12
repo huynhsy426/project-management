@@ -43,4 +43,14 @@ router.post(
 );
 
 
+router.get(
+    '/:projectId/members',
+    [
+        projectValidator.validateListMembers,
+        JWTMiddleware.verify([])
+    ],
+    projectController.getMemberOfProject
+)
+
+
 module.exports = router

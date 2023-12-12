@@ -98,6 +98,15 @@ class ProjectValidator extends MyValidator {
         } catch (error) {
             return next(error);
         }
+    };
+
+    validateListMembers(req, res, next) {
+        try {
+            super.handleValidationError(req, schemas.getProject)
+            return next();
+        } catch (error) {
+            return next(error);
+        }
     }
 
 

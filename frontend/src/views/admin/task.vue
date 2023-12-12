@@ -165,7 +165,8 @@
               >
                 <a
                   :class="{
-                    'bg-gray-800 text-gray-700': n === taskAssign.page,
+                    'bg-gray-800 text-gray-700 text-base':
+                      n === taskAssign.page,
                   }"
                   class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
                   @click="pagination($event, n, taskAssign)"
@@ -317,8 +318,12 @@
                 :key="n"
               >
                 <a
-                  href="#"
+                  :class="{
+                    'bg-gray-800 text-gray-700 text-base':
+                      n === taskNotAssign.page,
+                  }"
                   class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+                  @click="pagination($event, n, taskNotAssign)"
                   >{{ n }}</a
                 >
               </li>
@@ -360,7 +365,7 @@
 </template>
 
 <script setup>
-import httpRequest from "@/utils/httpRequest";
+import projectService from "@/services/projectService";
 import { ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
@@ -384,26 +389,14 @@ const taskNotAssign = ref({
 
 onMounted(async () => {
   try {
-    const getProjectTaskAssign = await httpRequest.get(
-      `/projects/${projectId}/tasks`,
-      {
-        params: {
-          page: taskAssign.value.page,
-          ITEMS_PER_PAGE: taskAssign.value.ITEMS_PER_PAGE,
-          taskType: taskAssign.value.taskType,
-        },
-      }
+    const getProjectTaskAssign = await projectService.getTasks(
+      projectId,
+      taskAssign
     );
 
-    const getProjectTaskNotAssign = await httpRequest.get(
-      `/projects/${projectId}/tasks`,
-      {
-        params: {
-          page: taskNotAssign.value.page,
-          ITEMS_PER_PAGE: taskNotAssign.value.ITEMS_PER_PAGE,
-          taskType: taskNotAssign.value.taskType,
-        },
-      }
+    const getProjectTaskNotAssign = await projectService.getTasks(
+      projectId,
+      taskNotAssign
     );
 
     loading.value = false;
@@ -428,8 +421,8 @@ onMounted(async () => {
 const pagination = async (e, page, taskList) => {
   e.preventDefault();
   try {
-    const listTask = await httpRequest.get(`/projects/${projectId}/tasks`, {
-      params: {
+    const listTask = await projectService.getTasks(projectId, {
+      value: {
         page: page,
         ITEMS_PER_PAGE: taskList.ITEMS_PER_PAGE,
         taskType: taskList.taskType,

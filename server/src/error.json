@@ -43,6 +43,10 @@
         "message": "Project name is exists",
         "statusCode": 400
     },
+    "PROJECT_NOT_EXIST": {
+        "message": "Project not exists",
+        "statusCode": 400
+    },
     "INVALID_SELECT_DEPT_BY_MIN_EXP": {
         "message": "Dept cannot select because memeber exp not valid",
         "statusCode": 400

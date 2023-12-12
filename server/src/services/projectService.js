@@ -1,15 +1,17 @@
 const projectModel = require("../models/projectModel");
 const deptModel = require("../models/deptModel");
+const taskModel = require("../models/taskModel");
 
 const { ErrorCodes } = require("../constants/errorConstant");
-const taskModel = require("../models/taskModel");
+const { UserRoles } = require('../constants/usersConstant');
+const deptService = require("./deptService");
 
 
 const listProjectByRoles = async (user, page) => {
    let result = null;
    let count = 0;
    const skip = (page.page - 1) * page.ITEMS_PER_PAGE;
-   if (user.roles === "Admin") {
+   if (user.roles === UserRoles.ADMIN) {
       count = await projectModel.estimatedDocumentCount({});
       result = await projectModel.find(
          {},
@@ -193,12 +195,54 @@ const getTasksByProjectId = async (projectId, page) => {
       },
       tasks: tasks
    };
+};
+
+const checkProjectIsExist = async (projectId) => {
+   const query = {
+      _id: projectId,
+   }
+
+   const project = await projectModel.findOne(query).lean();
+
+   if (!project) {
+      throw new Error(ErrorCodes.PROJECT_NOT_EXIST);
+   }
+   return project;
+}
+
+
+const membersOfPorject = async (deptId) => {
+   const query = {
+      _id: deptId,
+   }
+
+   const members = await deptModel.findOne(
+      query,
+      { members: 1 }
+   )
+      .populate(
+         {
+            path: 'members.memberId',
+            select: { "_id": 1, username: 1 }
+         }
+      )
+      .lean()
+
+   return members;
 }
 
 module.exports = {
    // List all projects
    listProjectByRoles: (user, page) => {
       return listProjectByRoles(user, page);
+   },
+
+
+   // Get members in project
+   getMemberOfProject: async (projectId) => {
+      const project = await checkProjectIsExist(projectId);
+      const members = await membersOfPorject(project.deptId);
+      return members;
    },
 
 

@@ -197,10 +197,11 @@
 </template>
 
 <script setup>
-import httpRequest from "@/utils/httpRequest";
 import { counter } from "@fortawesome/fontawesome-svg-core";
 import { computed, reactive, ref, watch } from "vue";
 import { useRouter } from "vue-router";
+
+import taskService from "@/services/taskService";
 
 const router = useRouter();
 
@@ -308,11 +309,7 @@ const handleCreateTask = async () => {
     });
 
     if (validateData()) {
-      await httpRequest.post("/tasks/create", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      await taskService.createTask(formData);
 
       errMessage.value = "";
       router.push({ path: "/tasks" }).then(() => {

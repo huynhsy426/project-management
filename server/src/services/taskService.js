@@ -1,13 +1,13 @@
 const mongoose = require('mongoose');
 const taskModel = require('../models/taskModel');
-
-const { ErrorCodes } = require("../constants/errorConstant");
-const { TaskStatus } = require("../constants/taskConstant");
 const projectModel = require('../models/projectModel');
 const deptModel = require('../models/deptModel');
 
-const fse = require('fs-extra');
+const { ErrorCodes } = require("../constants/errorConstant");
+const { TaskStatus } = require("../constants/taskConstant");
+const { UserRoles } = require('../constants/usersConstant');
 
+const fse = require('fs-extra');
 
 
 const create = async (task) => {
@@ -134,6 +134,7 @@ const listTaskByAdmin = async ({ projects, user, page }) => {
 const listTasks = async (user, page) => {
     let count = 0;
     const skip = (page.page - 1) * page.ITEMS_PER_PAGE;
+    console.log({skip})
     const queryDepts = {
         "members.memberId": user.userId
     }
@@ -160,13 +161,6 @@ const listTasks = async (user, page) => {
         })
 
     let query = null;
-
-    if (user.roles === "Admin") {
-
-    }
-
-
-
 
     // Hiển thị list 
     if (page.taskType === "a") {

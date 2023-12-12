@@ -124,9 +124,11 @@
 
 <script setup>
 import { onMounted, ref, reactive, computed } from "vue";
-import httpRequest from "@/utils/httpRequest";
 import { useRouter } from "vue-router";
 import axios from "axios";
+
+import authService from "@/services/authService";
+import deptSerice from "@/services/deptService";
 
 const router = useRouter();
 
@@ -207,12 +209,9 @@ const validateData = () => {
 async function register() {
   try {
     if (validateData()) {
-      const newUser = await httpRequest.post(
-        "/users/register",
-        formRegister.value
-      );
-      console.log(newUser, "mmmmmm");
-      console.log(newUser.result._id);
+      const newUser = await authService.register(formRegister.value);
+
+      console.log(newUser);
 
       const members = {
         members: [
@@ -223,17 +222,7 @@ async function register() {
         ],
       };
 
-      console.log(members);
-      await axios.post(
-        "http://localhost:8082/members/admin/654b0762060d663ea36e709a/add",
-        members,
-        {
-          headers: {
-            authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NTRiMDUwMDBiMTA4NTRhNTRiZDRmMTMiLCJpYXQiOjE3MDExNTc5MzcsImV4cCI6MTcwMzc0OTkzN30.Ad2SZJ0tvwmn8B7EC0QJie4jYdLIl7YupqFBrXCF-DE`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      await deptSerice.addMembers(members);
       router.push({ path: "/login?signUp=true" });
     }
   } catch (error) {

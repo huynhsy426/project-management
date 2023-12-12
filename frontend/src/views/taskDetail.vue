@@ -147,8 +147,48 @@
           class="grid grid-cols-4 mt-3"
           v-if="taskInfo.task?.status === 'doing'"
         >
-          <div></div>
-          <div></div>
+          <div>
+            <button
+              v-if="userInfo.roles === 'Admin' && isChange"
+              class="px-3 mr-3 rounded-md py-2 bg-yellow-400 text-white hover:bg-green-600 focus:outline-none focus:ring-2"
+              @click.prevent="handleIsChange"
+            >
+              Change Assignee
+            </button>
+            <div v-if="!isChange">
+              <select
+                id="countries"
+                v-bind="assignChange"
+                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              >
+                <option disabled>Choose user ...</option>
+                <option
+                  v-for="(user, index) in MembersOfProject"
+                  :key="index"
+                  :value="user.memberId?.username"
+                >
+                  {{ user.memberId?.username }}
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <button
+              @click.prevent="handleChangeAssignee"
+              v-if="!isChange"
+              class="px-3 mr-1 rounded-md py-2 bg-green-500 text-white hover:bg-green-600 focus:outline-none focus:ring-2"
+            >
+              change
+            </button>
+            <button
+              v-if="!isChange"
+              @click.prevent="handleIsChange"
+              class="px-3 mr-3 rounded-md py-2 bg-blue-500 text-white hover:bg-green-600 focus:outline-none focus:ring-2"
+            >
+              Back
+            </button>
+          </div>
           <div></div>
           <div
             v-if="taskInfo.task?.assignee"
@@ -190,16 +230,19 @@
 </template>
 
 <script setup>
-import commentsCompoment from "../components/CommentTask.vue";
-import httpRequest from "@/utils/httpRequest";
+import commentsCompoment from "@/components/CommentTask.vue";
 import { onMounted, ref, reactive, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import taskService from "@/services/taskService";
+import authService from "@/services/authService";
 
 const route = useRoute();
 const router = useRouter();
 
 // const test = query
 let loading = ref(true);
+let isChange = ref(true);
+let assignChange = ref();
 
 const taskId = route.params.id;
 let props = defineProps(["errMessage"]);
@@ -209,6 +252,9 @@ const timeContent = reactive({
   createdAt: null,
   deadlineAt: null,
 });
+
+const userInfo = ref();
+const MembersOfProject = ref();
 
 const pointPercent = computed(() => {
   return (taskInfo.task?.point * 1000) / 100;
@@ -232,10 +278,17 @@ const bgColor = computed(() => {
 onMounted(async () => {
   try {
     loading.value = true;
-    const task = await httpRequest.get(`/tasks/${taskId}`);
-    console.log(task);
+    const task = await taskService.getTaskById(taskId);
+    const user = await authService.getUser();
+    const listUserInproject = await authService.getListUserInProject(
+      task.task.projectId
+    );
+    userInfo.value = user.result;
+
     loading.value = false;
     taskInfo.task = task.task;
+    MembersOfProject.value = listUserInproject.members;
+    console.log({ asdasd: MembersOfProject.value });
     timeContent.createdAt = formatDate(taskInfo.task.createdAt);
     timeContent.deadlineAt = formatDate(taskInfo.task.deadlineAt);
   } catch (error) {
@@ -252,11 +305,7 @@ const handleFinishBtn = async () => {
       status: "done",
       content: `Task done`,
     };
-    await httpRequest.put(`/tasks/${taskId}/update`, formDone, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
+    await taskService.updateTask(formDone, taskId);
     props.errMessage = "";
     router.push({ path: `/tasks/${taskId}` }).then(() => {
       router.go();
@@ -271,7 +320,7 @@ const handleFinishBtn = async () => {
 
 const assignTask = async () => {
   try {
-    await httpRequest.put(`/tasks/assign/${taskId}`);
+    await taskService.assignTask(taskId);
 
     props.errMessage = "";
     router.push({ path: "/tasks" }).then(() => {
@@ -324,6 +373,15 @@ const handleFilExtension = (string) => {
 
 const updateTask = (taskId) => {
   router.push({ path: `/tasks/${taskId}/update` });
+};
+
+const handleIsChange = () => {
+  isChange.value = !isChange.value;
+  console.log(isChange.value);
+};
+
+const handleChangeAssignee = () => {
+  console.log(assignChange.value)
 };
 </script>
 

@@ -79,9 +79,10 @@
 </template>
 
 <script setup>
-import httpRequest from "@/utils/httpRequest";
 import { onMounted, ref, reactive, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
+
+import projectService from "@/services/projectService";
 
 const route = useRoute();
 const router = useRouter();
@@ -93,9 +94,7 @@ const projectList = ref([]);
 
 onMounted(async () => {
   try {
-    const projects = await httpRequest.get(
-      "/projects/654b07d0060d663ea36e70a2"
-    );
+    const projects = await projectService.getProject();
     projectList.value = projects.project;
     loading.value = false;
   } catch (error) {

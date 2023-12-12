@@ -19,10 +19,6 @@ httpRequest.interceptors.request.use(
     },
 );
 
-// const logout = () => {
-//     libAuth.clearToken()
-//     window.location.replace('/users/login')
-// }
 
 httpRequest.interceptors.response.use(
     (response) => {

@@ -275,9 +275,9 @@
 </template>
 
 <script setup>
-import httpRequest from "@/utils/httpRequest";
 import { computed, onMounted, reactive, ref, watch, watchEffect } from "vue";
 import { useRouter, useRoute } from "vue-router";
+import taskService from "@/services/taskService";
 
 const router = useRouter();
 const route = useRoute();
@@ -295,7 +295,7 @@ const taskInfo = reactive({});
 onMounted(async () => {
   try {
     loading.value = true;
-    const task = await httpRequest.get(`/tasks/${taskId}`);
+    const task = await taskService.getTaskById(taskId);
     taskInfo.taskName = task.task.taskName;
     taskInfo.content = task.task.content;
     taskInfo.point = task.task.point;
@@ -374,11 +374,7 @@ const handleUpdateTask = async () => {
 
     errMessage.value = "";
     if (validateData()) {
-      await httpRequest.put(`/tasks/${taskId}/update`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      await taskService.updateTask(formData, taskId);
       router.push({ path: "/tasks" }).then(() => {
         router.go();
       });
@@ -410,15 +406,11 @@ const handleDeleteAttachment = (index, arr) => {
 
 const handleRejectTask = async () => {
   try {
-    const formDone = {
+    const formRejected = {
       status: "rejected",
       content: `Task rejected`,
     };
-    await httpRequest.put(`/tasks/${taskId}/update`, formDone, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
+    await taskService.updateTask(formRejected, taskId);
     errMessage.value = "";
     router.push({ path: `/tasks/${taskId}` }).then(() => {
       router.go();
